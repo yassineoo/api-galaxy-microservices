@@ -9,8 +9,8 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       url: 'localhost:5000', // Replace with the appropriate host and port
-      package: 'hello',
-      protoPath: './src/hello.proto', // Path to your .proto file
+      package: 'sms',
+      protoPath: './src/proto/sms.proto', // Path to your .proto file
     },
   });
 

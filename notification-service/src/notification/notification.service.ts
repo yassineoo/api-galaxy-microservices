@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { GrpcMethod } from '@nestjs/microservices';
+//import { HelloRequest, HelloResponse } from 'src/proto/hello';
+import { Metadata, ServerUnaryCall } from '@grpc/grpc-js';
 
 @Injectable()
 export class NotificationService {
