@@ -6,30 +6,37 @@ import { Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 
 export namespace sms {
+    export interface HeroesService {
+        findOne(
+            data: HeroById,
+            metadata?: Metadata,
+            ...rest: any[]
+        ): Observable<Hero>;
+    }
+    export interface HeroById {
+        id?: number;
+    }
+    export interface Hero {
+        id?: number;
+        name?: string;
+    }
     export interface SmsService {
-        initPhoneNumberVerification(
-            data: PhoneNumberRequest,
+        hello(
+            data: HelloRequest,
             metadata?: Metadata,
             ...rest: any[]
-        ): Observable<VerificationResponse>;
-        verifyPhoneNumber(
-            data: PhoneNumberVerificationRequest,
+        ): Observable<HelloResponse>;
+        findOne(
+            data: HeroById,
             metadata?: Metadata,
             ...rest: any[]
-        ): Observable<VerifyResponse>;
+        ): Observable<Hero>;
     }
-    export interface PhoneNumberRequest {
-        phoneNumber?: string;
+    export interface HelloRequest {
+        name?: string;
     }
-    export interface PhoneNumberVerificationRequest {
-        phoneNumber?: string;
-        otp?: string;
-    }
-    export interface VerificationResponse {
-        status?: string;
-    }
-    export interface VerifyResponse {
-        status?: boolean;
+    export interface HelloResponse {
+        message?: string;
     }
 }
 
