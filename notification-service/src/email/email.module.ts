@@ -4,7 +4,7 @@ import { EmailController } from './email.controller';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
-
+console.log('dir: ', join(__dirname, 'templates').replace('dist', 'src'));
 @Module({
   imports: [
     MailerModule.forRoot({
@@ -26,7 +26,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         from: '"No Reply" <noreply@example.com>',
       },
       template: {
-        dir: join(__dirname, 'templates'),
+        dir: join(__dirname, 'templates').replace('dist', 'src'),
         adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
         options: {
           strict: true,
@@ -34,6 +34,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       },
     }),
   ],
+
   controllers: [EmailController],
   providers: [EmailService],
 })

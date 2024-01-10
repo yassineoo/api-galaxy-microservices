@@ -6,37 +6,50 @@ import { Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 
 export namespace sms {
-    export interface HeroesService {
-        findOne(
-            data: HeroById,
-            metadata?: Metadata,
-            ...rest: any[]
-        ): Observable<Hero>;
-    }
-    export interface HeroById {
-        id?: number;
-    }
-    export interface Hero {
-        id?: number;
-        name?: string;
-    }
     export interface SmsService {
-        hello(
-            data: HelloRequest,
+        initPhoneNumberVerification(
+            data: PhoneNumberRequest,
             metadata?: Metadata,
             ...rest: any[]
-        ): Observable<HelloResponse>;
-        findOne(
-            data: HeroById,
+        ): Observable<VerificationResponse>;
+        verifyPhoneNumber(
+            data: PhoneNumberVerificationRequest,
             metadata?: Metadata,
             ...rest: any[]
-        ): Observable<Hero>;
+        ): Observable<VerifyResponse>;
     }
-    export interface HelloRequest {
+    export interface PhoneNumberRequest {
+        phoneNumber?: string;
+    }
+    export interface PhoneNumberVerificationRequest {
+        phoneNumber?: string;
+        otp?: string;
+    }
+    export interface VerificationResponse {
+        status?: string;
+    }
+    export interface VerifyResponse {
+        status?: boolean;
+    }
+    export interface EmailService {
+        sendResetPasswordEmail(
+            data: VerificationRequest,
+            metadata?: Metadata,
+            ...rest: any[]
+        ): Observable<EmailResponse>;
+        sendVerificationEmail(
+            data: VerificationRequest,
+            metadata?: Metadata,
+            ...rest: any[]
+        ): Observable<EmailResponse>;
+    }
+    export interface VerificationRequest {
+        email?: string;
         name?: string;
+        token?: string;
     }
-    export interface HelloResponse {
-        message?: string;
+    export interface EmailResponse {
+        status?: boolean;
     }
 }
 

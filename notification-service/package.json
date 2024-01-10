@@ -6,10 +6,11 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && npm run copy-templates",
+    "copy-templates": "ncp src/email/templates dist/email/templates",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "nest start ",
+    "start:dev": "nest start --watch ",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -17,7 +18,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "gen:proto": "grpc_tools_node_protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src --ts_out=service=grpc-node,mode=grpc-js:./src -I ./src/proto ./src/proto/*.proto"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.13",
@@ -29,6 +31,7 @@
     "@nestjs/microservices": "^10.3.0",
     "@nestjs/platform-express": "^10.0.0",
     "dotenv": "^16.3.1",
+    "ncp": "^2.0.0",
     "nestjs-proto-gen-ts": "^1.0.21",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
@@ -45,9 +48,11 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "grpc-tools": "^1.12.4",
     "jest": "^29.5.0",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
@@ -55,6 +60,7 @@
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
+    "ts-protoc-gen": "^0.15.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
   },

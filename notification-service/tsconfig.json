@@ -1,4 +1,10 @@
 {
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.proto",
+    "src/**/*.hbs",
+    "src/email/templates/confirmation.hbs"
+  ],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
