@@ -1,4 +1,4 @@
-package models
+package apiService
 
 import (
 	"gorm.io/gorm"
