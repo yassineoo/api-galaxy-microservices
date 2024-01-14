@@ -17,6 +17,7 @@ import (
 
 import (
     "apiService/apiService"
+    "models/models"
 )
 
 func main() {
@@ -26,17 +27,23 @@ func main() {
         log.Println("No .env file found")
     }
 
-    // Load configuration from environment variables or a config file
-    dbURL := os.Getenv("DATABASE_URL")
+    
+   // Establish a connection to the database
+dbpool, err := pgxpool.Connect(context.Background(), dbURL)
+if err != nil {
+    fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+    os.Exit(1)
+}
+defer dbpool.Close()
+log.Println("Connected to database")
 
-    // Establish a connection to the database
-    dbpool, err := pgxpool.Connect(context.Background(), dbURL)
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-        os.Exit(1)
-    }
-    defer dbpool.Close()
-	log.Println("Connected to database")
+// Perform database migration
+err = migrateDatabase(dbpool)
+if err != nil {
+    fmt.Fprintf(os.Stderr, "Database migration failed: %v\n", err)
+    os.Exit(1)
+}
+log.Println("Database migration completed")
 
     ctx := context.Background()
 
@@ -59,4 +66,15 @@ func setupSwagger() {
     http.Handle("/swagger/", http.StripPrefix("/swagger/", httpSwagger.Handler(
         httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL to access the Swagger JSON documentation.
     )))
+}
+
+
+func migrateDatabase(db *gorm.DB) error {
+    // Define your GORM migration code here
+    // For example:
+    err := db.AutoMigrate(&models.YourModel{})
+    if err != nil {
+        return err
+    }
+    return nil
 }
