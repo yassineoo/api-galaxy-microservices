@@ -1,23 +1,24 @@
-package apiService
+package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // CategoryEntity represents the Categories table
 type CategoryEntity struct {
 	gorm.Model
-	CategoryID   int             `gorm:"primaryKey;autoIncrement"`
+//	CategoryID   int             `gorm:"primaryKey;autoIncrement"`
 	CategoryName string          `gorm:"size:255;not null"`
 	Description  string
-	Apis         []ApiEntity
+	Apis         []ApiEntity     `gorm:"foreignKey:ID"`
 }
 
 // ApiEntity represents the Apis table
 type ApiEntity struct {
 	gorm.Model
-	ApiID        int              `gorm:"primaryKey;autoIncrement"`
+	//ApiID        int              `gorm:"primaryKey;autoIncrement"`
 	ProviderID   int              `gorm:"not null"`
 	Name         string           `gorm:"size:255;not null"`
 	ImagePath    string
@@ -26,15 +27,15 @@ type ApiEntity struct {
 	DateCreated  time.Time        `gorm:"default:CURRENT_TIMESTAMP"`
 	LastUpdated  time.Time
 	IsActive     bool             `gorm:"default:true"`
-	ApiVersions  []ApiVersionEntity
-	ApiRatings   []ApiRatingEntity
-	Subscriptions []SubscriptionEntity
+	ApiVersions    []ApiVersionEntity   `gorm:"foreignKey:ApiID"`
+    ApiRatings     []ApiRatingEntity    `gorm:"foreignKey:ApiID"`
+    Subscriptions  []SubscriptionEntity `gorm:"foreignKey:ID"`
 }
 
 // ApiVersionEntity represents the ApiVersions table
 type ApiVersionEntity struct {
 	gorm.Model
-	VersionID     int            `gorm:"primaryKey;autoIncrement"`
+//	VersionID     int            `gorm:"primaryKey;autoIncrement"`
 	ApiID         int            `gorm:"not null"`
 	VersionNumber string         `gorm:"size:255;not null"`
 	ReleaseDate   time.Time
@@ -44,7 +45,7 @@ type ApiVersionEntity struct {
 // ApiRatingEntity represents the ApiRatings table
 type ApiRatingEntity struct {
 	gorm.Model
-	RatingID   int              `gorm:"primaryKey;autoIncrement"`
+//	RatingID   int              `gorm:"primaryKey;autoIncrement"`
 	ApiID      int              `gorm:"not null"`
 	UserID     int              `gorm:"not null"`
 	Rating     int              `gorm:"not null"`
@@ -55,32 +56,32 @@ type ApiRatingEntity struct {
 // PlanEntity represents the Plans table
 type PlanEntity struct {
 	gorm.Model
-	PlanID      int               `gorm:"primaryKey;autoIncrement"`
+//	PlanID      int               `gorm:"primaryKey;autoIncrement"`
 	PlanName    string            `gorm:"size:255;not null"`
 	Description string
 	Price       float64           `gorm:"type:decimal(10,2)"`
 	Features    string            `gorm:"type:json"`
-	Subscriptions []SubscriptionEntity
+	Subscriptions []SubscriptionEntity   `gorm:"foreignKey:ID"`
 }
 
 // SubscriptionEntity represents the Subscriptions table
 type SubscriptionEntity struct {
 	gorm.Model
-	SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
+//	SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
 	UserID         int            `gorm:"not null"`
 	ApiID          int            `gorm:"not null"`
 	PlanID         int            `gorm:"not null"`
 	StartDate      time.Time
 	EndDate        time.Time
 	Status         string         `gorm:"size:50"`
-	ApiKeys        []ApiKeyEntity
-	UsageLogs      []UsageLogEntity
+	ApiKeys        []ApiKeyEntity       `gorm:"foreignKey:ID"`
+    UsageLogs      []UsageLogEntity     `gorm:"foreignKey:ID"`
 }
 
 // ApiKeyEntity represents the ApiKeys table
 type ApiKeyEntity struct {
 	gorm.Model
-	ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
+	//ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID int            `gorm:"not null"`
 	ApiKey         string         `gorm:"size:255;unique;not null"`
 	CreationDate   time.Time      `gorm:"default:CURRENT_TIMESTAMP"`
@@ -90,7 +91,7 @@ type ApiKeyEntity struct {
 // UsageLogEntity represents the UsageLogs table
 type UsageLogEntity struct {
 	gorm.Model
-	LogID          int            `gorm:"primaryKey;autoIncrement"`
+	//LogID          int            `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID int            `gorm:"not null"`
 	Timestamp      time.Time      `gorm:"default:CURRENT_TIMESTAMP"`
 	Endpoint       string
