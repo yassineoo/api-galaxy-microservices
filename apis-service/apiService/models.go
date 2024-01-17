@@ -1,14 +1,12 @@
-package models
+package apiService
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // CategoryEntity represents the Categories table
 type CategoryEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	CategoryName string          `gorm:"size:255;not null"`
 	Description  string
 	Apis         []ApiEntity     `gorm:"foreignKey:CategoryID"` // Define the foreign key constraint
@@ -16,7 +14,7 @@ type CategoryEntity struct {
 
 // ApiEntity represents the Apis table
 type ApiEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	ProviderID   int              `gorm:"not null"`
 	Name         string           `gorm:"size:255;not null"`
 	ImagePath    string
@@ -32,7 +30,7 @@ type ApiEntity struct {
 
 // ApiVersionEntity represents the ApiVersions table
 type ApiVersionEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//VersionID     int            `gorm:"primaryKey;autoIncrement"`
 	ApiID         int            `gorm:"not null"`
 	VersionNumber string         `gorm:"size:255;not null"`
@@ -42,7 +40,7 @@ type ApiVersionEntity struct {
 
 // ApiRatingEntity represents the ApiRatings table
 type ApiRatingEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//RatingID   int              `gorm:"primaryKey;autoIncrement"`
 	ApiID      int              `gorm:"not null"`
 	UserID     int              `gorm:"not null"`
@@ -53,7 +51,7 @@ type ApiRatingEntity struct {
 
 // PlanEntity represents the Plans table
 type PlanEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//PlanID      int               `gorm:"primaryKey;autoIncrement"`
 	PlanName    string            `gorm:"size:255;not null"`
 	Description string
@@ -64,7 +62,7 @@ type PlanEntity struct {
 
 // SubscriptionEntity represents the Subscriptions table
 type SubscriptionEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
 	UserID         int            `gorm:"not null"`
 	ApiID          int            `gorm:"not null"`
@@ -78,7 +76,7 @@ type SubscriptionEntity struct {
 
 // ApiKeyEntity represents the ApiKeys table
 type ApiKeyEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID int            `gorm:"not null"`
 	ApiKey         string         `gorm:"size:255;unique;not null"`
@@ -88,7 +86,7 @@ type ApiKeyEntity struct {
 
 // UsageLogEntity represents the UsageLogs table
 type UsageLogEntity struct {
-	gorm.Model
+	ID           uint `gorm:"primaryKey;autoIncrement"`
 	//LogID          int            `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID int            `gorm:"not null"`
 	Timestamp      time.Time      `gorm:"default:CURRENT_TIMESTAMP"`

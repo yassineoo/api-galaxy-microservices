@@ -36,7 +36,8 @@ func makeGetOneEndpoint(s ApiService) endpoint.Endpoint {
 
 func makeGetAllEndpoint(s ApiService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		items, err := s.GetAll(ctx)
+		req := request.(GetAllRequest)
+		items, err := s.GetAll(ctx , req.Query)
 		return GetAllResponse{Items: items, Err: err}, err
 	}
 }
@@ -73,14 +74,16 @@ ID string
 }
 
 type GetOneResponse struct {
-Item *ApiDto
+Item *ApiEntity
 Err  error
 }
 
-type GetAllRequest struct{}
+type GetAllRequest struct{
+Query QueryPagination
+}
 
 type GetAllResponse struct {
-Items []ApiDto
+Items ApiResponse
 Err   error
 }
 
@@ -89,7 +92,7 @@ Item CreateApiDto
 }
 
 type CreateResponse struct {
-Item *ApiDto
+Item *ApiEntity
 Err  error
 }
 
@@ -99,7 +102,7 @@ Item EditApiDto
 }
 
 type EditResponse struct {
-Item *ApiDto
+Item *ApiEntity
 Err  error
 }
 

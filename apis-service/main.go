@@ -18,8 +18,45 @@ import (
 )
 
 func main() {
-    // Load environment variables from a .env file
-    if err := godotenv.Load(); err != nil {
+    var dbpool *pgxpool.Pool 
+	var gormDB *gorm.DB ;
+	dbpool, gormDB =  Bdd()
+
+    ctx := context.Background()
+
+    // Assuming you have an instance of ApiService implementation
+    apiServiceInstance := apiService.NewService(dbpool ,gormDB) // Update this line based on your actual implementation
+
+    // MakeEndpoints initializes all Go Kit endpoints for the ApiService.
+    endpoints := apiService.MakeEndpoints(apiServiceInstance)
+    // Initialize Swagger UI for development
+    setupSwagger()
+
+    httpHandler := apiService.NewHTTPServer(ctx, endpoints)
+    log.Fatal(http.ListenAndServe(":8080", httpHandler))
+}
+
+// setupSwagger initializes Swagger UI
+func setupSwagger() {
+    http.Handle("/swagger/", http.StripPrefix("/swagger/", httpSwagger.Handler(
+        httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL to access the Swagger JSON documentation.
+    )))
+}
+
+func migrateDatabase(db *gorm.DB) error {
+    // Define your GORM migration code here
+    err := db.AutoMigrate(&models.CategoryEntity{},&models.ApiEntity{},&models.UsageLogEntity{}, &models.ApiKeyEntity{}, &models.ApiRatingEntity{},
+        &models.ApiVersionEntity{},  &models.PlanEntity{}, &models.SubscriptionEntity{})
+
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func Bdd() (*pgxpool.Pool, *gorm.DB) {
+	 // Load environment variables from a .env file
+	 if err := godotenv.Load(); err != nil {
         log.Println("No .env file found")
     }
 
@@ -50,34 +87,5 @@ func main() {
     }
     log.Println("Database migration completed")
 
-    ctx := context.Background()
-
-    // Assuming you have an instance of ApiService implementation
-    apiServiceInstance := apiService.NewService(dbpool) // Update this line based on your actual implementation
-
-    // MakeEndpoints initializes all Go Kit endpoints for the ApiService.
-    endpoints := apiService.MakeEndpoints(apiServiceInstance)
-    // Initialize Swagger UI for development
-    setupSwagger()
-
-    httpHandler := apiService.NewHTTPServer(ctx, endpoints)
-    log.Fatal(http.ListenAndServe(":8080", httpHandler))
-}
-
-// setupSwagger initializes Swagger UI
-func setupSwagger() {
-    http.Handle("/swagger/", http.StripPrefix("/swagger/", httpSwagger.Handler(
-        httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL to access the Swagger JSON documentation.
-    )))
-}
-
-func migrateDatabase(db *gorm.DB) error {
-    // Define your GORM migration code here
-    err := db.AutoMigrate(&models.CategoryEntity{},&models.ApiEntity{},&models.UsageLogEntity{}, &models.ApiKeyEntity{}, &models.ApiRatingEntity{},
-        &models.ApiVersionEntity{},  &models.PlanEntity{}, &models.SubscriptionEntity{})
-
-    if err != nil {
-        return err
-    }
-    return nil
+	return dbpool,gormDB;
 }
