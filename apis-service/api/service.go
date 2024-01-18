@@ -4,6 +4,7 @@ import (
 	//"auth/security"
 	"context"
 	"errors"
+	"fmt"
 	"local_packages/models"
 	"local_packages/types"
 
@@ -161,13 +162,20 @@ func (s *Service) Update(ctx context.Context, id int, item UpdateApiDto) (*model
 }
 
 func (s *Service) Delete(ctx context.Context, id int) error {
-	// Implement the logic to delete an item by ID from the database.
-	// You can use s.db and s.gormDB to interact with the database.
-	// Replace the placeholder logic with your actual database deletion.
-	if err := s.gormDB.Delete(&models.ApiEntity{}, "id = ?", id).Error; err != nil {
-		return err
-	}
-	return nil
+   // Check if the item exists before attempting to delete it
+   var apiEntity models.ApiEntity
+   if err := s.gormDB.First(&models.ApiEntity{}, id).Error; err != nil {
+	   if errors.Is(err, gorm.ErrRecordNotFound) {
+		   return fmt.Errorf("Item with ID %d not found", id)
+	   }
+	   return err
+   }
+
+   // Delete the item from the database
+   if err := s.gormDB.Delete(&apiEntity).Error; err != nil {
+	   return err
+   }
+   return nil
 }
 
 
@@ -226,8 +234,21 @@ func (s *Service) UpdateCategory(ctx context.Context, id int, category CategoryD
 
 
 func (s *Service) DeleteCategory(ctx context.Context, id int) error {
-    if err := s.gormDB.Delete(&models.CategoryEntity{}, id).Error; err != nil {
-        return err
-    }
-    return nil
+
+
+	
+	   // Check if the item exists before attempting to delete it
+	   var category models.ApiEntity
+	   if err := s.gormDB.First(&models.CategoryEntity{}, id).Error; err != nil {
+		   if errors.Is(err, gorm.ErrRecordNotFound) {
+			   return fmt.Errorf("category with id %d not found", id)
+		   }
+		   return err
+	   }
+   
+	   // Delete the item from the database
+	   if err := s.gormDB.Delete(&category).Error; err != nil {
+		   return err
+	   }
+	   return nil
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,7 +55,7 @@ func (h *MyHandler) CreateCategory(c *gin.Context) {
 
 	result, err := h.service.CreateCategory(c,category )
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Catgory"})
 		return
 	}
 
@@ -78,7 +79,7 @@ func (h *MyHandler) UpdateCategory(c *gin.Context) {
 
 	updatedApi, err := h.service.UpdateCategory(c, id, category)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API Category"})
 		return
 	}
 
@@ -91,12 +92,16 @@ func (h *MyHandler) DeleteCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-
 	err = h.service.DeleteCategory(c, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
-		return
-	}
+		// Check if the error message indicates "not found"
+		if strings.Contains(err.Error(), "not found") {
+		 c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	 } else {
+		 c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API Category"})
+	 }
+	 return
+ }
 
 	c.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
 }

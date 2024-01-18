@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -114,8 +115,13 @@ func (h *MyHandler) DeleteApi(c *gin.Context) {
 
 	err = h.service.Delete(c, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
-		return
+		   // Check if the error message indicates "not found"
+		   if strings.Contains(err.Error(), "not found") {
+            c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
+        }
+        return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "API deleted successfully"})
