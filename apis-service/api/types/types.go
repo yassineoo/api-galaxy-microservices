@@ -26,7 +26,16 @@ type CreatePlanDto struct {
 	Name        string
 	ApiID  int
 	Price int
+	Type string
 	Peroid string
+}
+type  CreateEndpointsDto struct {
+	ApiID  int
+	Methode string
+	Group string
+	Url string
+	Description string
+	// Add other fields as needed...
 }
 
 type CreateSubscriptionDto struct {

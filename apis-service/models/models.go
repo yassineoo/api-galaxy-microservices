@@ -31,6 +31,17 @@ type ApiEntity struct {
 	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID"`
 	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID"`
 	Subscriptions []SubscriptionEntity `gorm:"foreignKey:ApiID"`
+	Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
+}
+
+type EndpointsEntity struct {
+	ID          int    `gorm:"primaryKey;autoIncrement"`
+	ApiID       int    `gorm:"not null"`
+	Methode     string `gorm:"size:255;not null"`
+	Group       string `gorm:"size:255;not null"`
+	Url         string `gorm:"size:255;not null"`
+	Description string
+	// Add other fields as needed...
 }
 
 // ApiVersionEntity represents the ApiVersions table
@@ -53,6 +64,8 @@ type ApiRatingEntity struct {
 	Comment   string
 	DateRated time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
+
+
 
 // PlanEntity represents the Plans table
 type PlanEntity struct {

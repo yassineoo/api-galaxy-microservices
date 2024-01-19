@@ -316,9 +316,6 @@ func (s *Service) DeleteApiPlan(ctx context.Context, planID int) error {
     return nil
 }
 
-// ----------------------------- API Subscription CRUD -----------------------------
-
-
 
 // ----------------------------- API Subscription CRUD -----------------------------
 
@@ -376,6 +373,80 @@ func (s *Service) DeleteApiSubscription(ctx context.Context, subscriptionID int)
 
     // Delete the item from the database
     if err := s.gormDB.Delete(&subscription).Error; err != nil {
+        return err
+    }
+    return nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------------------------- API Endpoints CRUD -----------------------------
+
+func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.CreateEndpointsDto) (*models.EndpointsEntity, error) {
+    newEndpoints := models.EndpointsEntity{
+        // Populate with fields from endpoints
+        // Example: EndpointsName: endpoints.EndpointsName
+    }
+
+    if err := s.gormDB.Create(&newEndpoints).Error; err != nil {
+        return nil, err
+    }
+    return &newEndpoints, nil
+}
+
+func (s *Service) GetApiEndpointss(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
+    var endpointss []models.EndpointsEntity
+
+    if err := s.gormDB.Where("api_id = ?", apiID).Find(&endpointss).Error; err != nil {
+        return nil, err
+    }
+
+    return endpointss, nil
+}
+
+func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpointsDto types.CreateEndpointsDto) (*models.EndpointsEntity, error) {
+    var existingEndpoints models.EndpointsEntity
+    if err := s.gormDB.First(&existingEndpoints, endpointsID).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("api endpoints not found")
+        }
+        return nil, err
+    }
+
+    // Update fields from endpointsDto
+	if endpointsDto.Url != "" {
+    existingEndpoints.Url = endpointsDto.Url
+}
+    // Add other fields as needed
+
+    if err := s.gormDB.Save(&existingEndpoints).Error; err != nil {
+        return nil, err
+    }
+
+    return &existingEndpoints, nil
+}
+
+func (s *Service) DeleteApiEndpoints(ctx context.Context, endpointsID int) error {
+    // Check if the item exists before attempting to delete it
+    var endpoints models.EndpointsEntity
+    if err := s.gormDB.First(&endpoints, endpointsID).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return fmt.Errorf("api endpoints with id %d not found", endpointsID)
+        }
+        return err
+    }
+
+    // Delete the item from the database
+    if err := s.gormDB.Delete(&endpoints).Error; err != nil {
         return err
     }
     return nil
