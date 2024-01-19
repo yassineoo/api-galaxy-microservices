@@ -1,4 +1,500 @@
+basePath: /
+definitions:
+  api.ApiResponse:
+    properties:
+      apis:
+        items:
+          $ref: '#/definitions/models.ApiEntity'
+        type: array
+      meta:
+        $ref: '#/definitions/api.PaginationMeta'
+    type: object
+  api.CategoryDto:
+    properties:
+      categoryName:
+        type: string
+      description:
+        type: string
+    type: object
+  api.CreateApiDto:
+    properties:
+      categoryID:
+        type: integer
+      description:
+        type: string
+      imagePath:
+        type: string
+      name:
+        type: string
+      providerID:
+        type: integer
+    type: object
+  api.PaginationMeta:
+    properties:
+      currentPage:
+        type: integer
+      itemCount:
+        type: integer
+      itemsPerPage:
+        type: integer
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  api.UpdateApiDto:
+    properties:
+      description:
+        type: string
+      imagePath:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+    type: object
+  models.ApiEntity:
+    properties:
+      apiRatings:
+        items:
+          $ref: '#/definitions/models.ApiRatingEntity'
+        type: array
+      apiVersions:
+        items:
+          $ref: '#/definitions/models.ApiVersionEntity'
+        type: array
+      categoryID:
+        type: integer
+      dateCreated:
+        type: string
+      dateDeleted:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      imagePath:
+        type: string
+      lastUpdated:
+        type: string
+      name:
+        type: string
+      providerID:
+        type: integer
+      status:
+        $ref: '#/definitions/types.ApiStatus'
+      subscriptions:
+        items:
+          $ref: '#/definitions/models.SubscriptionEntity'
+        type: array
+    type: object
+  models.ApiKeyEntity:
+    properties:
+      apiKey:
+        type: string
+      creationDate:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      subscriptionID:
+        description: ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
+        type: integer
+    type: object
+  models.ApiRatingEntity:
+    properties:
+      apiID:
+        description: RatingID   int              `gorm:"primaryKey;autoIncrement"`
+        type: integer
+      comment:
+        type: string
+      dateRated:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+      userID:
+        type: integer
+    type: object
+  models.ApiVersionEntity:
+    properties:
+      apiID:
+        description: VersionID     int            `gorm:"primaryKey;autoIncrement"`
+        type: integer
+      id:
+        type: integer
+      releaseDate:
+        type: string
+      versionNumber:
+        type: string
+      whatsNew:
+        type: string
+    type: object
+  models.SubscriptionEntity:
+    properties:
+      apiID:
+        type: integer
+      apiKeys:
+        items:
+          $ref: '#/definitions/models.ApiKeyEntity'
+        type: array
+      endDate:
+        type: string
+      id:
+        type: integer
+      planID:
+        type: integer
+      startDate:
+        type: string
+      status:
+        type: string
+      usageLogs:
+        items:
+          $ref: '#/definitions/models.UsageLogEntity'
+        type: array
+      userID:
+        description: SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
+        type: integer
+    type: object
+  models.UsageLogEntity:
+    properties:
+      dataVolume:
+        type: integer
+      endpoint:
+        type: string
+      id:
+        type: integer
+      responseTime:
+        type: integer
+      subscriptionID:
+        description: LogID          int            `gorm:"primaryKey;autoIncrement"`
+        type: integer
+      timestamp:
+        type: string
+    type: object
+  types.ApiStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - StatusActive
+    - StatusInactive
+host: localhost:5000
 info:
   contact: {}
-paths: {}
+  description: This is a sample server for a pet store.
+  termsOfService: http://terms-of-service-url.com
+  title: API Title
+  version: "1.0"
+paths:
+  /apis:
+    get:
+      description: Retrieves a paginated list of APIs
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Results per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all APIs
+      tags:
+      - Apis Operations
+    post:
+      consumes:
+      - application/json
+      description: Creates a new API from the provided data
+      parameters:
+      - description: API Data
+        in: body
+        name: api
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateApiDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create API
+      tags:
+      - Apis Operations
+  /apis/{id}:
+    delete:
+      description: Deletes the API with the provided ID
+      parameters:
+      - description: API ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete API by ID
+      tags:
+      - Apis Operations
+    get:
+      description: Retrieve API details based on the provided ID.
+      operationId: get-api-by-id
+      parameters:
+      - description: API ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ApiResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get API by ID
+      tags:
+      - Apis Operations
+    put:
+      consumes:
+      - application/json
+      description: Updates the API with the given ID
+      parameters:
+      - description: API ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: API Data
+        in: body
+        name: api
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateApiDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update API by ID
+      tags:
+      - Apis Operations
+  /categories:
+    get:
+      description: Retrieves a paginated list of categories
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Results per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all categories
+      tags:
+      - Category Operations
+    post:
+      consumes:
+      - application/json
+      description: Creates a new category from the provided data
+      parameters:
+      - description: Category Data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.CategoryDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new category
+      tags:
+      - Category Operations
+  /categories/{id}:
+    delete:
+      description: Deletes the category with the provided ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a category
+      tags:
+      - Category Operations
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing category with the given ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category Data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.CategoryDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a category
+      tags:
+      - Category Operations
+schemes:
+- http
+- https
 swagger: "2.0"

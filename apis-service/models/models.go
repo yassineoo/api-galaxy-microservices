@@ -1,7 +1,8 @@
 package models
 
 import (
-	"local_packages/types"
+	//"local_packages/types"
+	"local_packages/typesglobale"
 	"time"
 )
 
@@ -21,7 +22,7 @@ type ApiEntity struct {
 	ImagePath   string
 	Description string
 	CategoryID  int             `gorm:"null"`
-	Status      types.ApiStatus `gorm:"type:varchar(20);default:'active'"`
+	Status      typesglobale.ApiStatus `gorm:"type:varchar(20);default:'active'"`
 
 	DateCreated time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	LastUpdated time.Time

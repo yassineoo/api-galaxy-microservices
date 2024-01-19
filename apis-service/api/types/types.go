@@ -1,4 +1,4 @@
-package api
+package types
 
 // replace with your actual models' package path
 import (
@@ -21,6 +21,19 @@ type CategoryDto struct {
 	Description string
 	// Add other fields as needed...
 }
+
+type CreatePlanDto struct {
+	Name        string
+	ApiID  int
+	Price int
+	Peroid string
+}
+
+type CreateSubscriptionDto struct {
+	ApiID  int
+	PlanId int
+}
+
 
 // EditApiDto represents the data needed to edit an existing Api.
 type UpdateApiDto struct {
@@ -47,3 +60,6 @@ type QueryPagination struct {
 	Page  int `json:"page"`
 	Limit int `json:"limit"`
 }
+
+
+

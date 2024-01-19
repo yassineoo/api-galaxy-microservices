@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"log"
@@ -6,23 +6,36 @@ import (
 	"strconv"
 	"strings"
 
+	"local_packages/api/services"
+	"local_packages/api/types"
+
 	"github.com/gin-gonic/gin"
 )
 
-type MyHandler struct {
-	service *Service
+type ApiHandler struct {
+	service *services.Service
 }
 
-func NewMyHandler(s *Service) *MyHandler {
-	return &MyHandler{service: s}
+func NewApiHandler(s *services.Service) *ApiHandler {
+	return &ApiHandler{service: s}
 }
 
-func (h *MyHandler) HandleRequest(c *gin.Context) {
+func (h *ApiHandler) HandleRequest(c *gin.Context) {
 	result := "h.myservice.Hello()"
 	c.JSON(200, gin.H{"message": result})
 }
 
-func (h *MyHandler) GetAllApis(c *gin.Context) {
+
+// @Summary Get all APIs
+// @Description Retrieves a paginated list of APIs
+// @Produce json
+// @Tags Apis Operations
+// @Param page query int false "Page number"
+// @Param limit query int false "Results per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /apis [get]
+func (h *ApiHandler) GetAllApis(c *gin.Context) {
 	// Default values for pagination
 	defaultPage := 1
 	defaultLimit := 10
@@ -50,8 +63,19 @@ func (h *MyHandler) GetAllApis(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
 
-func (h *MyHandler) CreateApi(c *gin.Context) {
-	var api CreateApiDto // Replace with your actual model
+
+// @Summary Create API
+// @Description Creates a new API from the provided data
+// @Accept json
+// @Produce json
+// @Tags Apis Operations
+// @Param api body CreateApiDto true "API Data"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /apis [post]
+func (h *ApiHandler) CreateApi(c *gin.Context) {
+	var api types.CreateApiDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&api); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -66,7 +90,16 @@ func (h *MyHandler) CreateApi(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func (h *MyHandler) GetApi(c *gin.Context) {
+// @Summary Get API by ID
+// @Description Retrieve API details based on the provided ID.
+// @ID get-api-by-id
+// @Produce json
+// @Tags Apis Operations
+// @Param id path int true "API ID"
+// @Success 200 {object} ApiResponse
+// @Failure 400 {object} error
+// @Router /apis/{id} [get]
+func (h *ApiHandler) GetApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -82,14 +115,25 @@ func (h *MyHandler) GetApi(c *gin.Context) {
 	c.JSON(http.StatusOK, api)
 }
 
-func (h *MyHandler) UpdateApi(c *gin.Context) {
+// @Summary Update API by ID
+// @Description Updates the API with the given ID
+// @Accept json
+// @Produce json
+// @Tags Apis Operations
+// @Param id path int true "API ID"
+// @Param api body UpdateApiDto true "API Data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /apis/{id} [put]
+func (h *ApiHandler) UpdateApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	var api UpdateApiDto // Replace with your actual model
+	var api types.UpdateApiDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&api); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -106,7 +150,17 @@ func (h *MyHandler) UpdateApi(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedApi)
 }
 
-func (h *MyHandler) DeleteApi(c *gin.Context) {
+// @Summary Delete API by ID
+// @Description Deletes the API with the provided ID
+// @Produce json
+// @Tags Apis Operations
+// @Param id path int true "API ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /apis/{id} [delete]
+func (h *ApiHandler) DeleteApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})

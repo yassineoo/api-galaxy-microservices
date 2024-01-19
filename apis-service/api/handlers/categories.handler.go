@@ -1,24 +1,36 @@
-package api
+package handlers
 
 import (
 	"net/http"
 	"strconv"
 	"strings"
 
+	"local_packages/api/services"
+	"local_packages/api/types"
+
 	"github.com/gin-gonic/gin"
 )
 
-type CategoriesHnadler struct {
-	service *Service
+type CategoryHandler struct {
+	service *services.Service
+
 }
 
-func NewCategoriesHandler(s *Service) *MyHandler {
-	return &MyHandler{service: s}
+func NewCategoryHandler(s *services.Service) *CategoryHandler {
+	return &CategoryHandler{service: s}
 }
 
 
-
-func (h *MyHandler) GetAllCategories(c *gin.Context) {
+// @Summary Get all categories
+// @Description Retrieves a paginated list of categories
+// @Produce json
+// @Tags Category Operations
+// @Param page query int false "Page number"
+// @Param limit query int false "Results per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /categories [get]
+func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 	// Default values for pagination
 	defaultPage := 1
 	defaultLimit := 10
@@ -46,8 +58,18 @@ func (h *MyHandler) GetAllCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
 
-func (h *MyHandler) CreateCategory(c *gin.Context) {
-	var category CategoryDto // Replace with your actual model
+// @Summary Create a new category
+// @Description Creates a new category from the provided data
+// @Accept json
+// @Produce json
+// @Tags Category Operations
+// @Param category body CategoryDto true "Category Data"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /categories [post]
+func (h *CategoryHandler) CreateCategory(c *gin.Context) {
+	var category types.CategoryDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -63,14 +85,26 @@ func (h *MyHandler) CreateCategory(c *gin.Context) {
 }
 
 
-func (h *MyHandler) UpdateCategory(c *gin.Context) {
+
+// @Summary Update a category
+// @Description Updates an existing category with the given ID
+// @Accept json
+// @Produce json
+// @Tags Category Operations
+// @Param id path int true "Category ID"
+// @Param category body CategoryDto true "Category Data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /categories/{id} [put]
+func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	var category CategoryDto // Replace with your actual model
+	var category types.CategoryDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -86,7 +120,18 @@ func (h *MyHandler) UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedApi)
 }
 
-func (h *MyHandler) DeleteCategory(c *gin.Context) {
+
+// @Summary Delete a category
+// @Description Deletes the category with the provided ID
+// @Produce json
+// @Tags Category Operations
+// @Param id path int true "Category ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /categories/{id} [delete]
+func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})

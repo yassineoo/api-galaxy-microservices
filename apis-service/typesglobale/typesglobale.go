@@ -1,4 +1,4 @@
-package types
+package typesglobale
 
 type ApiStatus string
 
