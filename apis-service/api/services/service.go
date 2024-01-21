@@ -181,6 +181,17 @@ func (s *Service) Delete(ctx context.Context, id int) error {
 
 
 // ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+// ----------------------------- category crud -----------------------------
+
+
 func (s *Service) CreateCategory(ctx context.Context, category types.CategoryDto) (*models.CategoryEntity, error) {
     newCategory := models.CategoryEntity{ 
 		CategoryName: category.CategoryName ,
@@ -256,6 +267,16 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 
 
 // ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
+// ----------------------------- API Plan CRUD -----------------------------
 
 func (s *Service) CreateApiPlan(ctx context.Context, plan types.CreatePlanDto) (*models.PlanEntity, error) {
     newPlan := models.PlanEntity{
@@ -272,7 +293,7 @@ func (s *Service) CreateApiPlan(ctx context.Context, plan types.CreatePlanDto) (
 func (s *Service) GetApiPlans(ctx context.Context, apiID int) ([]models.PlanEntity, error) {
     var plans []models.PlanEntity
 
-    if err := s.gormDB.Where("api_id = ?", apiID).Find(&plans).Error; err != nil {
+    if err := s.gormDB.Where("id = ?", apiID).Find(&plans).Error; err != nil {
         return nil, err
     }
 
@@ -288,6 +309,22 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.C
         return nil, err
     }
 
+
+     // Update fields
+	if (planDto.Name  != "") {
+        existingPlan.PlanName = planDto.Name 
+        }
+        if (planDto.Type != "") {
+    
+        existingPlan.Type = planDto.Type
+        }
+        if (planDto.LimiteType != "") {
+    
+            existingPlan.LimiteType = planDto.LimiteType
+            }
+        // Add other fields as needed
+
+        
     // Update fields from planDto
     // Example: existingPlan.PlanName = planDto.PlanName if planDto.PlanName != ""
     // Add other fields as needed
@@ -334,7 +371,7 @@ func (s *Service) CreateApiSubscription(ctx context.Context, subscription types.
 func (s *Service) GetApiSubscriptions(ctx context.Context, apiID int) ([]models.SubscriptionEntity, error) {
     var subscriptions []models.SubscriptionEntity
 
-    if err := s.gormDB.Where("api_id = ?", apiID).Find(&subscriptions).Error; err != nil {
+    if err := s.gormDB.Where("id = ?", apiID).Find(&subscriptions).Error; err != nil {
         return nil, err
     }
 
@@ -406,7 +443,7 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Create
 func (s *Service) GetApiEndpointss(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
     var endpointss []models.EndpointsEntity
 
-    if err := s.gormDB.Where("api_id = ?", apiID).Find(&endpointss).Error; err != nil {
+    if err := s.gormDB.Where("id = ?", apiID).Find(&endpointss).Error; err != nil {
         return nil, err
     }
 

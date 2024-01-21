@@ -73,6 +73,8 @@ type PlanEntity struct {
 	//PlanID      int               `gorm:"primaryKey;autoIncrement"`
 	PlanName      string `gorm:"size:255;not null"`
 	Description   string
+	Type 		  string
+	LimiteType 	  string
 	Price         float64              `gorm:"type:decimal(10,2)"`
 	Features      string               `gorm:"type:json"`
 	Subscriptions []SubscriptionEntity `gorm:"foreignKey:PlanID"`

@@ -69,7 +69,7 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags Apis Operations
-// @Param api body CreateApiDto true "API Data"
+// @Param api body types.CreateApiDto true "API Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

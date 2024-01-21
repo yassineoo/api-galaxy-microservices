@@ -27,6 +27,7 @@ type CreatePlanDto struct {
 	ApiID  int
 	Price int
 	Type string
+	LimiteType string
 	Peroid string
 }
 type  CreateEndpointsDto struct {

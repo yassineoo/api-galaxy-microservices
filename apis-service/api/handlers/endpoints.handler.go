@@ -29,13 +29,13 @@ func NewEndpointsHandler(s *services.Service) *EndpointsHandler {
 // @Failure 400 {object} map[string]string
 // @Router /plan [post]
 func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
-    var plan types.CreateEndpointsDto
-    if err := c.ShouldBindJSON(&plan); err != nil {
+    var endpoint types.CreateEndpointsDto
+    if err := c.ShouldBindJSON(&endpoint); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    result, err := h.service.CreateApiEndpoints(c, plan)
+    result, err := h.service.CreateApiEndpoints(c, endpoint)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Endpoints"})
         return
@@ -129,4 +129,4 @@ func (h *EndpointsHandler) DeleteApiEndpoints(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, gin.H{"message": "API Endpoints deleted successfully"})
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
