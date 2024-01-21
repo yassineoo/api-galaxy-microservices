@@ -75,7 +75,7 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /apis [post]
 func (h *ApiHandler) CreateApi(c *gin.Context) {
-	var api types.CreateApiDto // Replace with your actual model
+	var api types.ApiDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&api); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -133,7 +133,7 @@ func (h *ApiHandler) UpdateApi(c *gin.Context) {
 		return
 	}
 
-	var api types.UpdateApiDto // Replace with your actual model
+	var api types.ApiDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&api); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

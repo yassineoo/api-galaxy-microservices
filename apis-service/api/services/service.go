@@ -101,7 +101,7 @@ func (s *Service) GetAll(ctx context.Context, page int, limit int) (types.ApiRes
 	return response, nil
 }
 
-func (s *Service) Create(ctx context.Context, item types.CreateApiDto) (*models.ApiEntity, error) {
+func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEntity, error) {
 	// Implement the logic to create a new item in the database.
 	// You can use s.db and s.gormDB to interact with the database.
 	// Replace the placeholder logic with your actual database insertion.
@@ -119,7 +119,7 @@ func (s *Service) Create(ctx context.Context, item types.CreateApiDto) (*models.
 	return &newApi, nil
 }
 
-func (s *Service) Update(ctx context.Context, id int, item types.UpdateApiDto) (*models.ApiEntity, error) {
+func (s *Service) Update(ctx context.Context, id int, item types.ApiDto) (*models.ApiEntity, error) {
 	// Implement the logic to edit an existing item in the database.
 	// You can use s.db and s.gormDB to interact with the database.
 	// Replace the placeholder logic with your actual database update.
@@ -278,8 +278,18 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 // ----------------------------- API Plan CRUD -----------------------------
 // ----------------------------- API Plan CRUD -----------------------------
 
-func (s *Service) CreateApiPlan(ctx context.Context, plan types.CreatePlanDto) (*models.PlanEntity, error) {
+func (s *Service) CreateApiPlan(ctx context.Context, plan types.PlanDto) (*models.PlanEntity, error) {
     newPlan := models.PlanEntity{
+        ApiID: plan.ApiID,
+        PlanName: plan.Name,
+        Price: plan.Price,
+        Type: plan.Type,
+        LimiteType: plan.LimiteType,
+        LimiteAmount: plan.LimiteAmount,
+        Description: plan.Description,
+        Recomonded: plan.Recomonded,
+        LimiteTimeUnit: plan.LimiteTimeUnit,
+        Features: plan.Features,
         // Populate with fields from plan
         // Example: PlanName: plan.PlanName
     }
@@ -293,14 +303,14 @@ func (s *Service) CreateApiPlan(ctx context.Context, plan types.CreatePlanDto) (
 func (s *Service) GetApiPlans(ctx context.Context, apiID int) ([]models.PlanEntity, error) {
     var plans []models.PlanEntity
 
-    if err := s.gormDB.Where("id = ?", apiID).Find(&plans).Error; err != nil {
+    if err := s.gormDB.Where("api_id = ?", apiID).Find(&plans).Error; err != nil {
         return nil, err
     }
 
     return plans, nil
 }
 
-func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.CreatePlanDto) (*models.PlanEntity, error) {
+func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.PlanDto) (*models.PlanEntity, error) {
     var existingPlan models.PlanEntity
     if err := s.gormDB.First(&existingPlan, planID).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -320,17 +330,40 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.C
         }
         if (planDto.LimiteType != "") {
     
+        existingPlan.LimiteType = planDto.LimiteType
+        }
+        if (planDto.LimiteAmount != 0) {
+        existingPlan.LimiteAmount = planDto.LimiteAmount
+        }
+        if (planDto.LimiteTimeUnit != "") {
+        existingPlan.LimiteTimeUnit = planDto.LimiteTimeUnit
+        }
+        if (planDto.Features != "") {
+        existingPlan.Features = planDto.Features
+                        }
+        if (planDto.Description != "") {
+        existingPlan.Description = planDto.Description
+        }
+        if (! planDto.Recomonded ) {
+        existingPlan.Recomonded = planDto.Recomonded
+        }
+        if (planDto.Price != 0) {
+        existingPlan.Price = planDto.Price
+        }
+        if (planDto.Visibility != "") {
+        existingPlan.Visibility = planDto.Visibility
+        }
+        if (planDto.LimiteType != "") {
             existingPlan.LimiteType = planDto.LimiteType
-            }
-        // Add other fields as needed
-
+        }
+        //  other fields as needed
         
-    // Update fields from planDto
-    // Example: existingPlan.PlanName = planDto.PlanName if planDto.PlanName != ""
+    // Updae fields from planDto
+    // ExampleexistingPlan.PlanName = planDto.PlanName if planDto.PlanName != ""
     // Add other fields as needed
 
     if err := s.gormDB.Save(&existingPlan).Error; err != nil {
-        return nil, err
+     return nil, err
     }
 
     return &existingPlan, nil
@@ -356,8 +389,12 @@ func (s *Service) DeleteApiPlan(ctx context.Context, planID int) error {
 
 // ----------------------------- API Subscription CRUD -----------------------------
 
-func (s *Service) CreateApiSubscription(ctx context.Context, subscription types.CreateSubscriptionDto) (*models.SubscriptionEntity, error) {
+func (s *Service) CreateApiSubscription(ctx context.Context, subscription types.SubscriptionDto) (*models.SubscriptionEntity, error) {
     newSubscription := models.SubscriptionEntity{
+        UserID: 1,
+        PlanID: subscription.PlanId,
+        ApiID: subscription.ApiID,
+
         // Populate with fields from subscription
         // Example: SubscriptionName: subscription.SubscriptionName
     }
@@ -378,7 +415,7 @@ func (s *Service) GetApiSubscriptions(ctx context.Context, apiID int) ([]models.
     return subscriptions, nil
 }
 
-func (s *Service) UpdateApiSubscription(ctx context.Context, subscriptionID int, subscriptionDto types.CreateSubscriptionDto) (*models.SubscriptionEntity, error) {
+func (s *Service) UpdateApiSubscription(ctx context.Context, subscriptionID int, subscriptionDto types.SubscriptionDto) (*models.SubscriptionEntity, error) {
     var existingSubscription models.SubscriptionEntity
     if err := s.gormDB.First(&existingSubscription, subscriptionID).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -425,66 +462,3 @@ func (s *Service) DeleteApiSubscription(ctx context.Context, subscriptionID int)
 
 
 
-
-// ----------------------------- API Endpoints CRUD -----------------------------
-
-func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.CreateEndpointsDto) (*models.EndpointsEntity, error) {
-    newEndpoints := models.EndpointsEntity{
-        // Populate with fields from endpoints
-        // Example: EndpointsName: endpoints.EndpointsName
-    }
-
-    if err := s.gormDB.Create(&newEndpoints).Error; err != nil {
-        return nil, err
-    }
-    return &newEndpoints, nil
-}
-
-func (s *Service) GetApiEndpointss(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
-    var endpointss []models.EndpointsEntity
-
-    if err := s.gormDB.Where("id = ?", apiID).Find(&endpointss).Error; err != nil {
-        return nil, err
-    }
-
-    return endpointss, nil
-}
-
-func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpointsDto types.CreateEndpointsDto) (*models.EndpointsEntity, error) {
-    var existingEndpoints models.EndpointsEntity
-    if err := s.gormDB.First(&existingEndpoints, endpointsID).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("api endpoints not found")
-        }
-        return nil, err
-    }
-
-    // Update fields from endpointsDto
-	if endpointsDto.Url != "" {
-    existingEndpoints.Url = endpointsDto.Url
-}
-    // Add other fields as needed
-
-    if err := s.gormDB.Save(&existingEndpoints).Error; err != nil {
-        return nil, err
-    }
-
-    return &existingEndpoints, nil
-}
-
-func (s *Service) DeleteApiEndpoints(ctx context.Context, endpointsID int) error {
-    // Check if the item exists before attempting to delete it
-    var endpoints models.EndpointsEntity
-    if err := s.gormDB.First(&endpoints, endpointsID).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return fmt.Errorf("api endpoints with id %d not found", endpointsID)
-        }
-        return err
-    }
-
-    // Delete the item from the database
-    if err := s.gormDB.Delete(&endpoints).Error; err != nil {
-        return err
-    }
-    return nil
-}

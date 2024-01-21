@@ -29,7 +29,7 @@ func NewSubscriptionHandler(s *services.Service) *SubscriptionHandler {
 // @Failure 400 {object} map[string]string
 // @Router /Subscription [post]
 func (h *SubscriptionHandler) CreateApiSubscription(c *gin.Context) {
-    var Subscription types.CreateSubscriptionDto
+    var Subscription types.SubscriptionDto
     if err := c.ShouldBindJSON(&Subscription); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
@@ -74,7 +74,7 @@ func (h *SubscriptionHandler) GetApiSubscriptions(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Subscription ID"
-// @Param Subscription body types.CreateSubscriptionDto true "API Subscription Data"
+// @Param Subscription body types.SubscriptionDto true "API Subscription Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -86,7 +86,7 @@ func (h *SubscriptionHandler) UpdateApiSubscription(c *gin.Context) {
         return
     }
 
-    var Subscription types.CreateSubscriptionDto
+    var Subscription types.SubscriptionDto
     if err := c.ShouldBindJSON(&Subscription); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return

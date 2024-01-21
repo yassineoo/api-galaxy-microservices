@@ -30,13 +30,23 @@ type ApiEntity struct {
 
 	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID"`
 	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID"`
-	Subscriptions []SubscriptionEntity `gorm:"foreignKey:ApiID"`
-	Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
+	//Subscriptions []SubscriptionEntity `gorm:"foreignKey:ApiID"`
+	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
+	Plans         []PlanEntity         `gorm:"foreignKey:ApiID"`
+	Gpoups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
 }
+
+type EndpointsGroupEntity struct {
+	ID          int    `gorm:"primaryKey;autoIncrement"`
+	APiID       int    `gorm:"not null"`
+	Group string
+	Endpoints []EndpointsEntity `gorm:"foreignKey:GroupID"`
+}
+
 
 type EndpointsEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
-	ApiID       int    `gorm:"not null"`
+	GroupID       int    `gorm:"not null"`
 	Methode     string `gorm:"size:255;not null"`
 	Group       string `gorm:"size:255;not null"`
 	Url         string `gorm:"size:255;not null"`
@@ -71,10 +81,15 @@ type ApiRatingEntity struct {
 type PlanEntity struct {
 	ID int `gorm:"primaryKey;autoIncrement"`
 	//PlanID      int               `gorm:"primaryKey;autoIncrement"`
+	ApiID		 int    `gorm:"not null"`
 	PlanName      string `gorm:"size:255;not null"`
 	Description   string
-	Type 		  string
+	Visibility	  string
+	Type 		  string  // free or paid
 	LimiteType 	  string
+	LimiteAmount           int
+    LimiteTimeUnit         string
+	Recomonded  	bool
 	Price         float64              `gorm:"type:decimal(10,2)"`
 	Features      string               `gorm:"type:json"`
 	Subscriptions []SubscriptionEntity `gorm:"foreignKey:PlanID"`

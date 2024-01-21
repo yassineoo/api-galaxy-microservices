@@ -41,7 +41,7 @@ func InitDB() (*pgxpool.Pool, *gorm.DB) {
 	}
 
 	// Perform database migration
-	//err = MigrateDatabase(gormDB)
+	err = MigrateDatabase(gormDB)
 	
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Database migration failed: %v\n", err)

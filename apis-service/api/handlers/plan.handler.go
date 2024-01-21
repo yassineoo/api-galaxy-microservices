@@ -29,7 +29,7 @@ func NewPlanHandler(s *services.Service) *PlanHandler {
 // @Failure 400 {object} map[string]string
 // @Router /plan [post]
 func (h *PlanHandler) CreateApiPlan(c *gin.Context) {
-    var plan types.CreatePlanDto
+    var plan types.PlanDto
     if err := c.ShouldBindJSON(&plan); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
@@ -86,7 +86,7 @@ func (h *PlanHandler) UpdateApiPlan(c *gin.Context) {
         return
     }
 
-    var plan types.CreatePlanDto
+    var plan types.PlanDto
     if err := c.ShouldBindJSON(&plan); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return

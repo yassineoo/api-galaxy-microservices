@@ -11,6 +11,7 @@ import (
 func SetupRoutes(router *gin.Engine, service *services.Service) {
 	ApiHandler := handlers.NewApiHandler(service)
 	CategoryHandler := handlers.NewCategoryHandler(service)
+	EndpointsHandler := handlers.NewEndpointsHandler(service)
 	PlanHandler := handlers.NewPlanHandler(service)
 	SubscriptionHandler := handlers.NewSubscriptionHandler(service)
 
@@ -31,7 +32,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	apisGroup.DELETE("/:id", ApiHandler.DeleteApi)
 
 	// CRUD routes for categories under "/apis/"
-	categoriesGroup := apisGroup.Group("/categories")
+	categoriesGroup := router.Group("/categories")
 	categoriesGroup.POST("/", CategoryHandler.CreateCategory)
 	categoriesGroup.GET("/", CategoryHandler.GetAllCategories)
 	//categoriesGroup.GET("/get-one/:id", CategoryHandler.GetApi) // Uncomment if needed
@@ -39,12 +40,22 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory)
 
 
-	//
+
+	// CRUD routes for endpoints under "/apis/"
+	endpointsGroup := router.Group("/endpoints")
+	endpointsGroup.POST("/", EndpointsHandler.CreateApiEndpoints)
+	endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointss)
+	endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints)
+	endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
+
+
+
+	// Grouping under "/subscriptions/"
 
 	subscriptionsGroup := router.Group("/subscriptions")
 
 	// Api plan for an Api 
-	plan := subscriptionsGroup.Group("/plan")
+	plan := router.Group("/plans")
 	plan.POST("/", PlanHandler.CreateApiPlan)
 	plan.GET("/:api-id", PlanHandler.GetApiPlans)
 	plan.PATCH("/:id", PlanHandler.UpdateApiPlan)

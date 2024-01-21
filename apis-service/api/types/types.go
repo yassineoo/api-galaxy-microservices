@@ -6,14 +6,14 @@ import (
 	"local_packages/models"
 )
 
-// CreateApiDto represents the data needed to create a new Api.
-type CreateApiDto struct {
+// ApiDto represents the data needed to create a new Api.
+type ApiDto struct {
 	Name        string
 	ProviderID  int
 	ImagePath   string
 	Description string
 	CategoryID  int
-	// Add other fields as needed...
+	Status		string	// Add other fields as needed...
 }
 
 type CategoryDto struct {
@@ -22,16 +22,22 @@ type CategoryDto struct {
 	// Add other fields as needed...
 }
 
-type CreatePlanDto struct {
+type PlanDto struct {
 	Name        string
-	ApiID  int
-	Price int
-	Type string
-	LimiteType string
-	Peroid string
+	ApiID       int
+	Price       float64
+	Visibility  string
+	Type        string
+	Description string 
+	Recomonded  bool   
+	LimiteType  string
+	LimiteAmount      int
+	LimiteTimeUnit   string
+	Features    string 
 }
-type  CreateEndpointsDto struct {
-	ApiID  int
+
+type  EndpointsDto struct {
+	GroupID  int
 	Methode string
 	Group string
 	Url string
@@ -39,7 +45,14 @@ type  CreateEndpointsDto struct {
 	// Add other fields as needed...
 }
 
-type CreateSubscriptionDto struct {
+
+type EndpointsGroupDto struct {
+	Group string
+	ApiID  int
+}
+
+
+type SubscriptionDto struct {
 	ApiID  int
 	PlanId int
 }
@@ -50,7 +63,7 @@ type UpdateApiDto struct {
 	Name        string
 	ImagePath   string
 	Description string
-	Status		string
+	
 	// Add other fields as needed...
 }
 

@@ -24,12 +24,12 @@ func NewEndpointsHandler(s *services.Service) *EndpointsHandler {
 // @Tags API Endpoints Operations
 // @Accept json
 // @Produce json
-// @Param plan body types.createEndpointsDto true "API Endpoints Data"
+// @Param endpoints body types.createEndpointsDto true "API Endpoints Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
-// @Router /plan [post]
+// @Router /endpoints [post]
 func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
-    var endpoint types.CreateEndpointsDto
+    var endpoint types.EndpointsDto
     if err := c.ShouldBindJSON(&endpoint); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
@@ -45,13 +45,13 @@ func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
 }
 
 // @Summary Get API Endpointss by API ID
-// @Description Retrieves plans for a specific API
+// @Description Retrieves endpointss for a specific API
 // @Tags API Endpoints Operations
 // @Produce json
 // @Param api-id path int true "API ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
-// @Router /plan/:api-id [get]
+// @Router /endpoints/:api-id [get]
 func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
     apiID, err := strconv.Atoi(c.Param("api-id"))
     if err != nil {
@@ -59,13 +59,13 @@ func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
         return
     }
 
-    plans, err := h.service.GetApiEndpointss(c, apiID)
+    endpointss, err := h.service.GetApiEndpointss(c, apiID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching API Endpointss"})
         return
     }
 
-    c.JSON(http.StatusOK, plans)
+    c.JSON(http.StatusOK, endpointss)
 }
 
 // @Summary Update an API Endpoints
@@ -74,25 +74,25 @@ func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Endpoints ID"
-// @Param plan body types.CreateEndpointsDto true "API Endpoints Data"
+// @Param endpoints body types.CreateEndpointsDto true "API Endpoints Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /plan/:id [patch]
+// @Router /endpoints/:id [patch]
 func (h *EndpointsHandler) UpdateApiEndpoints(c *gin.Context) {
-    planID, err := strconv.Atoi(c.Param("id"))
+    endpointsID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints ID"})
         return
     }
 
-    var plan types.CreateEndpointsDto
-    if err := c.ShouldBindJSON(&plan); err != nil {
+    var endpoints types.EndpointsDto
+    if err := c.ShouldBindJSON(&endpoints); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    updatedEndpoints, err := h.service.UpdateApiEndpoints(c, planID, plan)
+    updatedEndpoints, err := h.service.UpdateApiEndpoints(c, endpointsID, endpoints)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API Endpoints"})
         return
@@ -110,15 +110,15 @@ func (h *EndpointsHandler) UpdateApiEndpoints(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /plan/:id [delete]
+// @Router /endpoints/:id [delete]
 func (h *EndpointsHandler) DeleteApiEndpoints(c *gin.Context) {
-    planID, err := strconv.Atoi(c.Param("id"))
+    endpointsID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints ID"})
         return
     }
 
-    err = h.service.DeleteApiEndpoints(c, planID)
+    err = h.service.DeleteApiEndpoints(c, endpointsID)
     if err != nil {
         if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
