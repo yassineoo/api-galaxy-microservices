@@ -25,7 +25,8 @@ import (
 func (s *Service) CreateEndpointsGroup(ctx context.Context, endpointsGroup types.EndpointsGroupDto) (*models.EndpointsGroupEntity, error) {
     newEndpointsGroup := models.EndpointsGroupEntity{ 
 		Group:  endpointsGroup.Group,
-		APiID: endpointsGroup.ApiID,
+		ApiID: endpointsGroup.ApiID,
+		Description : endpointsGroup.Description,
 		//Endpoints: endpointsGroup.Endpoints,
 	}
 
@@ -36,18 +37,19 @@ func (s *Service) CreateEndpointsGroup(ctx context.Context, endpointsGroup types
     return &newEndpointsGroup, nil
 }
 
-func (s *Service) GetAllGroups(ctx context.Context, page int, limit int) ([]models.EndpointsGroupEntity, error) {
+func (s *Service) GetApiGroups(ctx context.Context, apiID int) ([]models.EndpointsGroupEntity, error) {
     var categories []models.EndpointsGroupEntity
 
   
 
-    offset := (page - 1) * limit
-
-    if err := s.gormDB.Offset(offset).Limit(limit).Find(&categories).Error; err != nil {
+    if err := s.gormDB.Where("api_id = ?", apiID).Find(&categories).Error; err != nil {
         return nil, err
     }
 
     return categories, nil
+
+
+
 }
 
 
@@ -64,6 +66,10 @@ func (s *Service) UpdateEndpointsGroup(ctx context.Context, id int, endpointsGro
 	if (endpointsGroup.Group  != "") {
     existingEndpointsGroup.Group = endpointsGroup.Group 
 	}
+	if (endpointsGroup.Description  != "") {
+		existingEndpointsGroup.Description = endpointsGroup.Description
+		}
+
 
     if err := s.gormDB.Save(&existingEndpointsGroup).Error; err != nil {
         return nil, err
@@ -112,22 +118,42 @@ func (s *Service) DeleteEndpointsGroup(ctx context.Context, id int) error {
 
 func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.EndpointsDto) (*models.EndpointsEntity, error) {
    
-    
-    newEndpoints := models.EndpointsEntity{
-        GroupID: endpoints.GroupID,
-        Methode: endpoints.Methode,
-        Group: endpoints.Group,
-        Url: endpoints.Url,
-        Description: endpoints.Description,
 
-        // Populate with fields from endpoints
-        // Example: EndpointsName: endpoints.EndpointsName
+		newEndpoints := models.EndpointsEntity{
+			Methode: endpoints.Methode,
+			Group: endpoints.Group,
+			Url: endpoints.Url,
+			Description: endpoints.Description,
+		}
+
+	  // If GroupID is not provided, fetch the default GroupID based on ApiID
+	  if endpoints.GroupID == 0 {
+        defaultGroup, err := s.getDefaultGroupByApiID(ctx, endpoints.ApiID)
+        if err != nil {
+            return nil, err
+        }
+		newEndpoints.GroupID = defaultGroup.ID
+        //endpoints.GroupID = defaultGroup.ID
     }
+
 
     if err := s.gormDB.Create(&newEndpoints).Error; err != nil {
         return nil, err
     }
     return &newEndpoints, nil
+}
+
+
+// getDefaultGroupByApiID fetches the default group by ApiID
+func (s *Service) getDefaultGroupByApiID(ctx context.Context, apiID int) (*models.EndpointsGroupEntity, error) {
+    var defaultGroup models.EndpointsGroupEntity
+
+    // Adjust the logic based on how you define the default group (e.g., where conditions)
+    if err := s.gormDB.Where("api_id = ? AND is_default = true", apiID).First(&defaultGroup).Error; err != nil {
+        return nil, err
+    }
+
+    return &defaultGroup, nil
 }
 
 func (s *Service) GetApiEndpointss(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
@@ -190,3 +216,26 @@ func (s *Service) DeleteApiEndpoints(ctx context.Context, endpointsID int) error
     }
     return nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

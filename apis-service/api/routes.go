@@ -48,6 +48,15 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints)
 	endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
 
+	
+
+	// CRUD routes for endpoints groups under "/endpoints-group"
+	endpointsGroupGroup := router.Group("/endpoints-group")
+	endpointsGroupGroup.POST("/", EndpointsHandler.CreateEndpointsGroup)
+	endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
+	endpointsGroupGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup)
+	endpointsGroupGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
+
 
 
 	// Grouping under "/subscriptions/"

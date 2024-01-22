@@ -33,13 +33,14 @@ type ApiEntity struct {
 	//Subscriptions []SubscriptionEntity `gorm:"foreignKey:ApiID"`
 	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
 	Plans         []PlanEntity         `gorm:"foreignKey:ApiID"`
-	Gpoups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
+	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
 }
 
 type EndpointsGroupEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
-	APiID       int    `gorm:"not null"`
+	ApiID       int    `gorm:"not null"`
 	Group string
+	Description string
 	Endpoints []EndpointsEntity `gorm:"foreignKey:GroupID"`
 }
 
@@ -51,8 +52,55 @@ type EndpointsEntity struct {
 	Group       string `gorm:"size:255;not null"`
 	Url         string `gorm:"size:255;not null"`
 	Description string
+
+	Headers     []HeaderEntity     `gorm:"foreignKey:EndpointID"`
+    QueryParams []QueryParamEntity `gorm:"foreignKey:EndpointID"`
+    BodyParams  []BodyParamEntity  `gorm:"foreignKey:EndpointID"`
 	// Add other fields as needed...
 }
+
+
+
+type HeaderEntity struct {
+    ID         int    `gorm:"primaryKey;autoIncrement"`
+    EndpointID int    `gorm:"not null"`
+    Key        string `gorm:"size:255;not null"`
+    Value      string `gorm:"size:255"`
+	Type     string `gorm:"size:255"` // e.g., string, int, boolean
+	ExampleValue     string `gorm:"size:255"`
+	required	 bool `gorm:"default:false"`
+    // Add other fields as needed...
+}
+
+type QueryParamEntity struct {
+    ID         int    `gorm:"primaryKey;autoIncrement"`
+    EndpointID int    `gorm:"not null"`
+    Key        string `gorm:"size:255;not null"`
+    Value      string `gorm:"size:255"`
+    // Add other fields as needed...
+}
+
+type BodyParamEntity struct {
+    ID         int    `gorm:"primaryKey;autoIncrement"`
+    EndpointID int    `gorm:"not null"`
+    Key        string `gorm:"size:255;not null"`
+    Value      string `gorm:"size:255"`
+    Type       string `gorm:"size:255"` // e.g., string, int, boolean
+    // Add other fields as needed...
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ApiVersionEntity represents the ApiVersions table
 type ApiVersionEntity struct {

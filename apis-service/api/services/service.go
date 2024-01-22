@@ -113,7 +113,16 @@ func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEnt
 		CategoryID:  item.CategoryID,
 		// Set other fields as needed
 	}
+
 	if err := s.gormDB.Create(&newApi).Error; err != nil {
+		return nil, err
+	}
+    newGroup := models.EndpointsGroupEntity{
+        ID: newApi.ID,
+        ApiID: newApi.ID,
+        Group: "Default",
+    }
+    if err := s.gormDB.Create(&newGroup).Error; err != nil {
 		return nil, err
 	}
 	return &newApi, nil

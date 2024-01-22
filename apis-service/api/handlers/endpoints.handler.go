@@ -130,3 +130,157 @@ func (h *EndpointsHandler) DeleteApiEndpoints(c *gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{"message": "API Endpoints deleted successfully"})
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// @Summary Create an Endpoints Group
+// @Description Creates a new Endpoints Group
+// @Tags Endpoints Group Operations
+// @Accept json
+// @Produce json
+// @Param endpoints-group body types.EndpointsGroupDto true "Endpoints Group Data"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /endpoints-group [post]
+func (h *EndpointsHandler) CreateEndpointsGroup(c *gin.Context) {
+    var endpointsGroup types.EndpointsGroupDto
+    if err := c.ShouldBindJSON(&endpointsGroup); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    result, err := h.service.CreateEndpointsGroup(c, endpointsGroup)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating Endpoints Group"})
+        return
+    }
+
+    c.JSON(http.StatusCreated, result)
+}
+
+// @Summary Get All Endpoints Groups
+// @Description Retrieves all Endpoints Groups
+// @Tags Endpoints Group Operations
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Number of items per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /endpoints-group [get]
+func (h *EndpointsHandler) GetApiEndpointsGroups(c *gin.Context) {
+    apiID, err := strconv.Atoi(c.Param("api-id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID"})
+        return
+    }
+
+    endpointsGroups, err := h.service.GetApiGroups(c, apiID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching Endpoints Groups"})
+        return
+    }
+
+    c.JSON(http.StatusOK, endpointsGroups)
+}
+
+// @Summary Update an Endpoints Group
+// @Description Updates an existing Endpoints Group
+// @Tags Endpoints Group Operations
+// @Accept json
+// @Produce json
+// @Param id path int true "Endpoints Group ID"
+// @Param endpoints-group body types.EndpointsGroupDto true "Endpoints Group Data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /endpoints-group/:id [patch]
+func (h *EndpointsHandler) UpdateEndpointsGroup(c *gin.Context) {
+    endpointsGroupID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Group ID"})
+        return
+    }
+
+    var endpointsGroup types.EndpointsGroupDto
+    if err := c.ShouldBindJSON(&endpointsGroup); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    updatedEndpointsGroup, err := h.service.UpdateEndpointsGroup(c, endpointsGroupID, endpointsGroup)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating Endpoints Group"})
+        return
+    }
+
+    c.JSON(http.StatusOK, updatedEndpointsGroup)
+}
+
+// @Summary Delete an Endpoints Group
+// @Description Deletes a specific Endpoints Group
+// @Tags Endpoints Group Operations
+// @Produce json
+// @Param id path int true "Endpoints Group ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /endpoints-group/:id [delete]
+func (h *EndpointsHandler) DeleteEndpointsGroup(c *gin.Context) {
+    endpointsGroupID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Group ID"})
+        return
+    }
+
+    err = h.service.DeleteEndpointsGroup(c, endpointsGroupID)
+    if err != nil {
+        if strings.Contains(err.Error(), "not found") {
+            c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting Endpoints Group"})
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Endpoints Group deleted successfully"})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

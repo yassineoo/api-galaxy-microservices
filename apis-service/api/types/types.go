@@ -37,6 +37,7 @@ type PlanDto struct {
 }
 
 type  EndpointsDto struct {
+	ApiID  int
 	GroupID  int
 	Methode string
 	Group string
@@ -49,6 +50,7 @@ type  EndpointsDto struct {
 type EndpointsGroupDto struct {
 	Group string
 	ApiID  int
+	Description string
 }
 
 

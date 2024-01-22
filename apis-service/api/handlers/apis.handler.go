@@ -83,6 +83,10 @@ func (h *ApiHandler) CreateApi(c *gin.Context) {
 
 	result, err := h.service.Create(c, api)
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API"})
 		return
 	}
@@ -102,12 +106,20 @@ func (h *ApiHandler) CreateApi(c *gin.Context) {
 func (h *ApiHandler) GetApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	api, err := h.service.GetOne(c, id)
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching API"})
 		return
 	}
@@ -129,6 +141,10 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 func (h *ApiHandler) UpdateApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
@@ -143,6 +159,10 @@ func (h *ApiHandler) UpdateApi(c *gin.Context) {
 
 	updatedApi, err := h.service.Update(c, id, api)
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API"})
 		return
 	}
@@ -163,12 +183,20 @@ func (h *ApiHandler) UpdateApi(c *gin.Context) {
 func (h *ApiHandler) DeleteApi(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	err = h.service.Delete(c, id)
 	if err != nil {
+		// Log the actual error
+		log.Println("Error creating API:", err)
+
+		// Return a customized error message to the client
 		   // Check if the error message indicates "not found"
 		   if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
