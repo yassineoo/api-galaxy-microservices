@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model apicollections {
+  ApiID        Int
+  CollectionID Int
+  apis         apis        @relation(fields: [ApiID], references: [ApiID], onUpdate: Restrict, map: "apicollections_ibfk_1")
+  collections  collections @relation(fields: [CollectionID], references: [CollectionID], onUpdate: Restrict, map: "apicollections_ibfk_2")
+
+  @@id([ApiID, CollectionID])
+  @@index([CollectionID], map: "CollectionID")
+}
+
+model apikeys {
+  ApiKeyID       Int           @id @default(autoincrement())
+  SubscriptionID Int
+  ApiKey         String        @unique(map: "ApiKey") @db.VarChar(255)
+  CreationDate   DateTime?     @default(now()) @db.DateTime(0)
+  IsActive       Boolean?      @default(true)
+  subscriptions  subscriptions @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict, map: "apikeys_ibfk_1")
+
+  @@index([SubscriptionID], map: "SubscriptionID")
+}
+
+model apiratings {
+  RatingID  Int       @id @default(autoincrement())
+  ApiID     Int
+  UserID    Int
+  Rating    Int
+  Comment   String?   @db.Text
+  DateRated DateTime? @default(now()) @db.DateTime(0)
+  apis      apis      @relation(fields: [ApiID], references: [ApiID], onUpdate: Restrict, map: "apiratings_ibfk_1")
+  users     users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "apiratings_ibfk_2")
+
+  @@index([ApiID], map: "ApiID")
+  @@index([UserID], map: "UserID")
+}
+
+model apis {
+  ApiID          Int              @id @default(autoincrement())
+  ProviderID     Int
+  Name           String           @db.VarChar(255)
+  ImagePath      String?          @db.VarChar(255)
+  Description    String?          @db.Text
+  CategoryID     Int?
+  DateCreated    DateTime?        @default(now()) @db.DateTime(0)
+  LastUpdated    DateTime?        @db.DateTime(0)
+  IsActive       Boolean?         @default(true)
+  apicollections apicollections[]
+  apiratings     apiratings[]
+  users          users            @relation(fields: [ProviderID], references: [UserID], onUpdate: Restrict, map: "apis_ibfk_1")
+  categories     categories?      @relation(fields: [CategoryID], references: [CategoryID], onDelete: Restrict, onUpdate: Restrict, map: "apis_ibfk_2")
+  apiversions    apiversions[]
+  subscriptions  subscriptions[]
+
+  @@index([CategoryID], map: "CategoryID")
+  @@index([ProviderID], map: "ProviderID")
+}
+
+model apiversions {
+  VersionID     Int       @id @default(autoincrement())
+  ApiID         Int
+  VersionNumber String    @db.VarChar(255)
+  ReleaseDate   DateTime? @db.DateTime(0)
+  WhatsNew      String?   @db.VarChar(255)
+  apis          apis      @relation(fields: [ApiID], references: [ApiID], onUpdate: Restrict, map: "apiversions_ibfk_1")
+
+  @@index([ApiID], map: "ApiID")
+}
+
+model billinghistory {
+  HistoryID   Int       @id @default(autoincrement())
+  UserID      Int
+  InvoiceID   Int
+  PaymentDate DateTime? @db.DateTime(0)
+  Amount      Decimal?  @db.Decimal(10, 2)
+  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "billinghistory_ibfk_1")
+  invoices    invoices  @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict, map: "billinghistory_ibfk_2")
+
+  @@index([InvoiceID], map: "InvoiceID")
+  @@index([UserID], map: "UserID")
+}
+
+model categories {
+  CategoryID   Int     @id @default(autoincrement())
+  CategoryName String  @db.VarChar(255)
+  Description  String? @db.Text
+  apis         apis[]
+}
+
+model collections {
+  CollectionID   Int              @id @default(autoincrement())
+  CollectionName String           @db.VarChar(255)
+  Description    String?          @db.Text
+  DateCreated    DateTime?        @default(now()) @db.DateTime(0)
+  LastUpdated    DateTime?        @db.DateTime(0)
+  apicollections apicollections[]
+}
+
+model comments {
+  CommentID   Int       @id @default(autoincrement())
+  PostID      Int
+  UserID      Int
+  CommentText String    @db.Text
+  CommentDate DateTime? @default(now()) @db.DateTime(0)
+  posts       posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict, map: "comments_ibfk_1")
+  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "comments_ibfk_2")
+
+  @@index([PostID], map: "PostID")
+  @@index([UserID], map: "UserID")
+}
+
+model follows {
+  FollowerID                       Int
+  FollowingID                      Int
+  FollowDate                       DateTime? @default(now()) @db.DateTime(0)
+  users_follows_FollowerIDTousers  users     @relation("follows_FollowerIDTousers", fields: [FollowerID], references: [UserID], onUpdate: Restrict, map: "follows_ibfk_1")
+  users_follows_FollowingIDTousers users     @relation("follows_FollowingIDTousers", fields: [FollowingID], references: [UserID], onUpdate: Restrict, map: "follows_ibfk_2")
+
+  @@id([FollowerID, FollowingID])
+  @@index([FollowingID], map: "FollowingID")
+}
+
+model invoices {
+  InvoiceID      Int              @id @default(autoincrement())
+  SubscriptionID Int
+  TotalAmount    Decimal?         @db.Decimal(10, 2)
+  DateIssued     DateTime?        @default(now()) @db.DateTime(0)
+  DueDate        DateTime?        @db.DateTime(0)
+  Status         String?          @db.VarChar(50)
+  billinghistory billinghistory[]
+  subscriptions  subscriptions    @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict, map: "invoices_ibfk_1")
+  transactions   transactions[]
+
+  @@index([SubscriptionID], map: "SubscriptionID")
+}
+
+model paymentmethods {
+  PaymentMethodID Int            @id @default(autoincrement())
+  UserID          Int
+  Provider        String?        @db.VarChar(255)
+  AccountDetails  String?        @db.Text
+  IsDefault       Boolean?       @default(false)
+  users           users          @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "paymentmethods_ibfk_1")
+  transactions    transactions[]
+
+  @@index([UserID], map: "UserID")
+}
+
+model plans {
+  PlanID        Int             @id @default(autoincrement())
+  PlanName      String          @db.VarChar(255)
+  Description   String?         @db.Text
+  Price         Decimal?        @db.Decimal(10, 2)
+  Features      String?         @db.LongText
+  subscriptions subscriptions[]
+}
+
+model postlikes {
+  PostID   Int
+  UserID   Int
+  LikeDate DateTime? @default(now()) @db.DateTime(0)
+  posts    posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict, map: "postlikes_ibfk_1")
+  users    users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "postlikes_ibfk_2")
+
+  @@id([PostID, UserID])
+  @@index([UserID], map: "UserID")
+}
+
+model posts {
+  PostID     Int         @id @default(autoincrement())
+  UserID     Int
+  PostData   String?     @db.LongText
+  PostedDate DateTime?   @default(now()) @db.DateTime(0)
+  comments   comments[]
+  postlikes  postlikes[]
+  users      users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "posts_ibfk_1")
+
+  @@index([UserID], map: "UserID")
+}
+
+model profiles {
+  ProfileID      Int       @id @default(autoincrement())
+  UserID         Int
+  FullName       String?   @db.VarChar(255)
+  Bio            String?   @db.Text
+  ProfilePicture String?   @db.VarChar(255)
+  DateOfBirth    DateTime? @db.Date
+  Location       String?   @db.VarChar(255)
+  users          users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "profiles_ibfk_1")
+
+  @@index([UserID], map: "UserID")
+}
+
+model subscriptions {
+  SubscriptionID Int         @id @default(autoincrement())
+  UserID         Int
+  ApiID          Int
+  PlanID         Int
+  StartDate      DateTime?   @db.DateTime(0)
+  EndDate        DateTime?   @db.DateTime(0)
+  Status         String?     @db.VarChar(50)
+  apikeys        apikeys[]
+  invoices       invoices[]
+  users          users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict, map: "subscriptions_ibfk_1")
+  apis           apis        @relation(fields: [ApiID], references: [ApiID], onUpdate: Restrict, map: "subscriptions_ibfk_2")
+  plans          plans       @relation(fields: [PlanID], references: [PlanID], onUpdate: Restrict, map: "subscriptions_ibfk_3")
+  usagelogs      usagelogs[]
+
+  @@index([ApiID], map: "ApiID")
+  @@index([PlanID], map: "PlanID")
+  @@index([UserID], map: "UserID")
+}
+
+model transactions {
+  TransactionID   Int             @id @default(autoincrement())
+  InvoiceID       Int
+  Amount          Decimal?        @db.Decimal(10, 2)
+  TransactionDate DateTime?       @default(now()) @db.DateTime(0)
+  PaymentMethodID Int?
+  Status          String?         @db.VarChar(50)
+  invoices        invoices        @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict, map: "transactions_ibfk_1")
+  paymentmethods  paymentmethods? @relation(fields: [PaymentMethodID], references: [PaymentMethodID], onDelete: Restrict, onUpdate: Restrict, map: "transactions_ibfk_2")
+
+  @@index([InvoiceID], map: "InvoiceID")
+  @@index([PaymentMethodID], map: "PaymentMethodID")
+}
+
+model usagelogs {
+  LogID          Int           @id @default(autoincrement())
+  SubscriptionID Int
+  Timestamp      DateTime?     @default(now()) @db.DateTime(0)
+  Endpoint       String?       @db.VarChar(255)
+  DataVolume     Int?
+  ResponseTime   Int?
+  subscriptions  subscriptions @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict, map: "usagelogs_ibfk_1")
+
+  @@index([SubscriptionID], map: "SubscriptionID")
+}
+
+model users {
+  UserID                             Int              @id @default(autoincrement())
+  Username                           String           @db.VarChar(255)
+  Email                              String           @unique(map: "Email") @db.VarChar(255)
+  PasswordHash                       String           @db.Char(60)
+  DateCreated                        DateTime?        @default(now()) @db.DateTime(0)
+  LastLogin                          DateTime?        @db.DateTime(0)
+  IsActive                           Boolean?         @default(true)
+  IsTwoFactor                        Boolean?         @default(false)
+  apiratings                         apiratings[]
+  apis                               apis[]
+  billinghistory                     billinghistory[]
+  comments                           comments[]
+  follows_follows_FollowerIDTousers  follows[]        @relation("follows_FollowerIDTousers")
+  follows_follows_FollowingIDTousers follows[]        @relation("follows_FollowingIDTousers")
+  paymentmethods                     paymentmethods[]
+  postlikes                          postlikes[]
+  posts                              posts[]
+  profiles                           profiles[]
+  subscriptions                      subscriptions[]
+}
