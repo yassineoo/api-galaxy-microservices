@@ -24,7 +24,7 @@ func NewPlanHandler(s *services.Service) *PlanHandler {
 // @Tags API Plan Operations
 // @Accept json
 // @Produce json
-// @Param plan body types.createPlanDto true "API Plan Data"
+// @Param plan body types.PlanDto true "API Plan Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Router /plan [post]
@@ -74,7 +74,7 @@ func (h *PlanHandler) GetApiPlans(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Plan ID"
-// @Param plan body types.CreatePlanDto true "API Plan Data"
+// @Param plan body types.PlanDto true "API Plan Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

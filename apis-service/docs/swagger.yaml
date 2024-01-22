@@ -1,187 +1,127 @@
 basePath: /
 definitions:
-  api.ApiResponse:
+  models.EndpointsParameterEntity:
     properties:
-      apis:
-        items:
-          $ref: '#/definitions/models.ApiEntity'
-        type: array
-      meta:
-        $ref: '#/definitions/api.PaginationMeta'
+      endpointID:
+        type: integer
+      exampleValue:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      parameterType:
+        description: e.g., Query, Header,
+        type: string
+      required:
+        type: boolean
+      valueType:
+        description: e.g., string, int, boolean
+        type: string
     type: object
-  api.CategoryDto:
+  types.ApiDto:
+    properties:
+      categoryID:
+        type: integer
+      description:
+        type: string
+      imagePath:
+        type: string
+      name:
+        type: string
+      providerID:
+        type: integer
+      status:
+        description: Add other fields as needed...
+        type: string
+    type: object
+  types.CategoryDto:
     properties:
       categoryName:
         type: string
       description:
         type: string
     type: object
-  api.CreateApiDto:
+  types.EndpointsDto:
     properties:
-      categoryID:
+      apiID:
         type: integer
       description:
         type: string
-      imagePath:
+      group:
         type: string
-      name:
+      groupID:
+        type: integer
+      methode:
         type: string
-      providerID:
-        type: integer
+      url:
+        type: string
     type: object
-  api.PaginationMeta:
+  types.EndpointsGroupDto:
     properties:
-      currentPage:
+      apiID:
         type: integer
-      itemCount:
-        type: integer
-      itemsPerPage:
-        type: integer
-      totalItems:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  api.UpdateApiDto:
-    properties:
       description:
         type: string
-      imagePath:
-        type: string
-      name:
-        type: string
-      status:
+      group:
         type: string
     type: object
-  models.ApiEntity:
+  types.EndpointsParameterDto:
     properties:
-      apiRatings:
-        items:
-          $ref: '#/definitions/models.ApiRatingEntity'
-        type: array
-      apiVersions:
-        items:
-          $ref: '#/definitions/models.ApiVersionEntity'
-        type: array
-      categoryID:
+      endpointID:
         type: integer
-      dateCreated:
+      exampleValue:
         type: string
-      dateDeleted:
+      key:
         type: string
-      description:
+      parameterType:
         type: string
-      id:
-        type: integer
-      imagePath:
-        type: string
-      lastUpdated:
-        type: string
-      name:
-        type: string
-      providerID:
-        type: integer
-      status:
-        $ref: '#/definitions/types.ApiStatus'
-      subscriptions:
-        items:
-          $ref: '#/definitions/models.SubscriptionEntity'
-        type: array
-    type: object
-  models.ApiKeyEntity:
-    properties:
-      apiKey:
-        type: string
-      creationDate:
-        type: string
-      id:
-        type: integer
-      isActive:
+      required:
         type: boolean
-      subscriptionID:
-        description: ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
-        type: integer
-    type: object
-  models.ApiRatingEntity:
-    properties:
-      apiID:
-        description: RatingID   int              `gorm:"primaryKey;autoIncrement"`
-        type: integer
-      comment:
-        type: string
-      dateRated:
-        type: string
-      id:
-        type: integer
-      rating:
-        type: integer
-      userID:
-        type: integer
-    type: object
-  models.ApiVersionEntity:
-    properties:
-      apiID:
-        description: VersionID     int            `gorm:"primaryKey;autoIncrement"`
-        type: integer
-      id:
-        type: integer
-      releaseDate:
-        type: string
-      versionNumber:
-        type: string
-      whatsNew:
+      valueType:
         type: string
     type: object
-  models.SubscriptionEntity:
+  types.PlanDto:
     properties:
       apiID:
         type: integer
-      apiKeys:
-        items:
-          $ref: '#/definitions/models.ApiKeyEntity'
-        type: array
-      endDate:
+      description:
         type: string
-      id:
-        type: integer
-      planID:
-        type: integer
-      startDate:
+      features:
         type: string
-      status:
-        type: string
-      usageLogs:
-        items:
-          $ref: '#/definitions/models.UsageLogEntity'
-        type: array
-      userID:
-        description: SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
+      limiteAmount:
         type: integer
+      limiteTimeUnit:
+        type: string
+      limiteType:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      recomonded:
+        type: boolean
+      type:
+        type: string
+      visibility:
+        type: string
     type: object
-  models.UsageLogEntity:
+  types.SubscriptionDto:
     properties:
-      dataVolume:
+      apiID:
         type: integer
-      endpoint:
+      planId:
+        type: integer
+    type: object
+  types.UpdateApiDto:
+    properties:
+      description:
         type: string
-      id:
-        type: integer
-      responseTime:
-        type: integer
-      subscriptionID:
-        description: LogID          int            `gorm:"primaryKey;autoIncrement"`
-        type: integer
-      timestamp:
+      imagePath:
+        type: string
+      name:
         type: string
     type: object
-  types.ApiStatus:
-    enum:
-    - active
-    - inactive
-    type: string
-    x-enum-varnames:
-    - StatusActive
-    - StatusInactive
 host: localhost:5000
 info:
   contact: {}
@@ -190,6 +130,139 @@ info:
   title: API Title
   version: "1.0"
 paths:
+  /Subscription:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new API Subscription
+      parameters:
+      - description: API Subscription Data
+        in: body
+        name: Subscription
+        required: true
+        schema:
+          $ref: '#/definitions/types.SubscriptionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an API Subscription
+      tags:
+      - API Subscription Operations
+  /Subscription/:api-id:
+    get:
+      description: Retrieves Subscriptions for a specific API
+      parameters:
+      - description: API ID
+        in: path
+        name: api-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get API Subscriptions by API ID
+      tags:
+      - API Subscription Operations
+  /Subscription/:id:
+    delete:
+      description: Deletes a specific API Subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an API Subscription
+      tags:
+      - API Subscription Operations
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing API Subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: API Subscription Data
+        in: body
+        name: Subscription
+        required: true
+        schema:
+          $ref: '#/definitions/types.SubscriptionDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an API Subscription
+      tags:
+      - API Subscription Operations
   /apis:
     get:
       description: Retrieves a paginated list of APIs
@@ -229,7 +302,7 @@ paths:
         name: api
         required: true
         schema:
-          $ref: '#/definitions/api.CreateApiDto'
+          $ref: '#/definitions/types.ApiDto'
       produces:
       - application/json
       responses:
@@ -307,7 +380,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.ApiResponse'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema: {}
@@ -329,7 +403,7 @@ paths:
         name: api
         required: true
         schema:
-          $ref: '#/definitions/api.UpdateApiDto'
+          $ref: '#/definitions/types.UpdateApiDto'
       produces:
       - application/json
       responses:
@@ -392,7 +466,7 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/api.CategoryDto'
+          $ref: '#/definitions/types.CategoryDto'
       produces:
       - application/json
       responses:
@@ -470,7 +544,7 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/api.CategoryDto'
+          $ref: '#/definitions/types.CategoryDto'
       produces:
       - application/json
       responses:
@@ -494,6 +568,539 @@ paths:
       summary: Update a category
       tags:
       - Category Operations
+  /endpoints:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new API Endpoints
+      parameters:
+      - description: API Endpoints Data
+        in: body
+        name: endpoints
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an API Endpoints
+      tags:
+      - API Endpoints Operations
+  /endpoints-group:
+    get:
+      description: Retrieves all Endpoints Groups
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get All Endpoints Groups
+      tags:
+      - Endpoints Group Operations
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Endpoints Group
+      parameters:
+      - description: Endpoints Group Data
+        in: body
+        name: endpoints-group
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsGroupDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an Endpoints Group
+      tags:
+      - Endpoints Group Operations
+  /endpoints-group/:id:
+    delete:
+      description: Deletes a specific Endpoints Group
+      parameters:
+      - description: Endpoints Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an Endpoints Group
+      tags:
+      - Endpoints Group Operations
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing Endpoints Group
+      parameters:
+      - description: Endpoints Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Endpoints Group Data
+        in: body
+        name: endpoints-group
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsGroupDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an Endpoints Group
+      tags:
+      - Endpoints Group Operations
+  /endpoints-parameter:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Endpoints Parameter
+      parameters:
+      - description: Endpoints Parameter Data
+        in: body
+        name: endpoints-parameter
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsParameterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.EndpointsParameterEntity'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an Endpoints Parameter
+      tags:
+      - Endpoints Parameter Operations
+  /endpoints-parameter/{endpoint-id}:
+    get:
+      description: Retrieves all Endpoints Parameters for a specific Endpoint
+      parameters:
+      - description: Endpoint ID
+        in: path
+        name: endpoint-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.EndpointsParameterEntity'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get All Endpoints Parameters
+      tags:
+      - Endpoints Parameter Operations
+  /endpoints-parameter/{id}:
+    delete:
+      description: Deletes a specific Endpoints Parameter
+      parameters:
+      - description: Endpoints Parameter ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an Endpoints Parameter
+      tags:
+      - Endpoints Parameter Operations
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing Endpoints Parameter
+      parameters:
+      - description: Endpoints Parameter ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Endpoints Parameter Data
+        in: body
+        name: endpoints-parameter
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsParameterDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EndpointsParameterEntity'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an Endpoints Parameter
+      tags:
+      - Endpoints Parameter Operations
+  /endpoints/:api-id:
+    get:
+      description: Retrieves endpointss for a specific API
+      parameters:
+      - description: API ID
+        in: path
+        name: api-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get API Endpointss by API ID
+      tags:
+      - API Endpoints Operations
+  /endpoints/:id:
+    delete:
+      description: Deletes a specific API Endpoints
+      parameters:
+      - description: Endpoints ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an API Endpoints
+      tags:
+      - API Endpoints Operations
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing API Endpoints
+      parameters:
+      - description: Endpoints ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: API Endpoints Data
+        in: body
+        name: endpoints
+        required: true
+        schema:
+          $ref: '#/definitions/types.EndpointsDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an API Endpoints
+      tags:
+      - API Endpoints Operations
+  /plan:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new API Plan
+      parameters:
+      - description: API Plan Data
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/types.PlanDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an API Plan
+      tags:
+      - API Plan Operations
+  /plan/:api-id:
+    get:
+      description: Retrieves plans for a specific API
+      parameters:
+      - description: API ID
+        in: path
+        name: api-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get API Plans by API ID
+      tags:
+      - API Plan Operations
+  /plan/:id:
+    delete:
+      description: Deletes a specific API Plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an API Plan
+      tags:
+      - API Plan Operations
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing API Plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: API Plan Data
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/types.PlanDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an API Plan
+      tags:
+      - API Plan Operations
 schemes:
 - http
 - https

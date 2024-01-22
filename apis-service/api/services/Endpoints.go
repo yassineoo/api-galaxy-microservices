@@ -10,16 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
-// ----------------------------- endpoints crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
+// ----------------------------- endpoints group crud -----------------------------
 
 
 func (s *Service) CreateEndpointsGroup(ctx context.Context, endpointsGroup types.EndpointsGroupDto) (*models.EndpointsGroupEntity, error) {
@@ -144,7 +144,7 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Endpoi
 }
 
 
-// getDefaultGroupByApiID fetches the default group by ApiID
+// private function  :  getDefaultGroupByApiID fetches the default group by ApiID
 func (s *Service) getDefaultGroupByApiID(ctx context.Context, apiID int) (*models.EndpointsGroupEntity, error) {
     var defaultGroup models.EndpointsGroupEntity
 
@@ -217,6 +217,106 @@ func (s *Service) DeleteApiEndpoints(ctx context.Context, endpointsID int) error
     return nil
 }
 
+
+
+
+
+
+
+
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud --------²---------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+// ----------------------------- endpoints paramter  crud -----------------------------
+
+
+func (s *Service) CreateEndpointsParameter(ctx context.Context, endpointsParameter types.EndpointsParameterDto) (*models.EndpointsParameterEntity, error) {
+    newEndpointsParameter := models.EndpointsParameterEntity{ 
+		
+		Key:  endpointsParameter.Key,
+		ValueType: endpointsParameter.ValueType,
+		ExampleValue : endpointsParameter.ExampleValue,
+		Required: endpointsParameter.Required,
+		EndpointID: endpointsParameter.EndpointID,
+		ParameterType: endpointsParameter.ParameterType,
+	}
+
+
+	if err := s.gormDB.Create(&newEndpointsParameter).Error; err != nil {
+        return nil, err
+    }
+    return &newEndpointsParameter, nil
+}
+
+func (s *Service) GetEndpointParameter(ctx context.Context, endpointsID int) ([]models.EndpointsParameterEntity, error) {
+    var categories []models.EndpointsParameterEntity
+
+  
+
+    if err := s.gormDB.Where("endpoint_id = ?", endpointsID).Find(&categories).Error; err != nil {
+        return nil, err
+    }
+
+    return categories, nil
+
+
+
+}
+
+
+func (s *Service) UpdateEndpointsParameter(ctx context.Context, id int, endpointsParameter types.EndpointsParameterDto) (*models.EndpointsParameterEntity, error) {
+    var existingEndpointsParameter models.EndpointsParameterEntity
+    if err := s.gormDB.First(&existingEndpointsParameter, id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("endpointsParameter not found")
+        }
+        return nil, err
+    }
+
+    // Update fields
+	if (endpointsParameter.Key  != "") {
+	existingEndpointsParameter.Key = endpointsParameter.Key
+	}
+
+	if (endpointsParameter.ValueType  != "") {
+	existingEndpointsParameter.ValueType = endpointsParameter.ValueType
+	}
+	if (endpointsParameter.ExampleValue  != "") {
+		existingEndpointsParameter.ExampleValue = endpointsParameter.ExampleValue
+		}
+	
+	existingEndpointsParameter.Required = endpointsParameter.Required
+
+
+    return &existingEndpointsParameter, nil
+}
+
+
+func (s *Service) DeleteEndpointsParameter(ctx context.Context, id int) error {
+
+
+
+	   // Check if the item exists before attempting to delete it
+	   var endpointsParameter models.ApiEntity
+	   if err := s.gormDB.First(&models.EndpointsParameterEntity{}, id).Error; err != nil {
+		   if errors.Is(err, gorm.ErrRecordNotFound) {
+			   return fmt.Errorf("endpointsParameter with id %d not found", id)
+		   }
+		   return err
+	   }
+   
+	   // Delete the item from the database
+	   if err := s.gormDB.Delete(&endpointsParameter).Error; err != nil {
+		   return err
+	   }
+	   return nil
+}
 
 
 

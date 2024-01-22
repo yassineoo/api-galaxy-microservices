@@ -53,6 +53,15 @@ type EndpointsGroupDto struct {
 	Description string
 }
 
+type EndpointsParameterDto struct {
+	EndpointID  int
+	Key string
+	ValueType string
+	ParameterType string
+	Required bool
+	ExampleValue string
+}
+
 
 type SubscriptionDto struct {
 	ApiID  int

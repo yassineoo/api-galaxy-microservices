@@ -53,39 +53,33 @@ type EndpointsEntity struct {
 	Url         string `gorm:"size:255;not null"`
 	Description string
 
-	Headers     []HeaderEntity     `gorm:"foreignKey:EndpointID"`
-    QueryParams []QueryParamEntity `gorm:"foreignKey:EndpointID"`
+	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"`
     BodyParams  []BodyParamEntity  `gorm:"foreignKey:EndpointID"`
 	// Add other fields as needed...
 }
 
 
 
-type HeaderEntity struct {
+type EndpointsParameterEntity struct {
     ID         int    `gorm:"primaryKey;autoIncrement"`
     EndpointID int    `gorm:"not null"`
     Key        string `gorm:"size:255;not null"`
-    Value      string `gorm:"size:255"`
-	Type     string `gorm:"size:255"` // e.g., string, int, boolean
+	ValueType     string `gorm:"size:255"` // e.g., string, int, boolean
+	ParameterType     string `gorm:"size:255"` // e.g., Query, Header, 
 	ExampleValue     string `gorm:"size:255"`
-	required	 bool `gorm:"default:false"`
+	Required	 bool `gorm:"default:false"`
     // Add other fields as needed...
 }
 
-type QueryParamEntity struct {
-    ID         int    `gorm:"primaryKey;autoIncrement"`
-    EndpointID int    `gorm:"not null"`
-    Key        string `gorm:"size:255;not null"`
-    Value      string `gorm:"size:255"`
-    // Add other fields as needed...
-}
 
 type BodyParamEntity struct {
-    ID         int    `gorm:"primaryKey;autoIncrement"`
+	ID         int    `gorm:"primaryKey;autoIncrement"`
     EndpointID int    `gorm:"not null"`
     Key        string `gorm:"size:255;not null"`
-    Value      string `gorm:"size:255"`
-    Type       string `gorm:"size:255"` // e.g., string, int, boolean
+	ValueType     string `gorm:"size:255"` // e.g., string, int, boolean
+	ParameterType     string `gorm:"size:255"` // e.g., Query, Header, 
+	ExampleValue     string `gorm:"size:255"`
+	Required	 bool `gorm:"default:false"`
     // Add other fields as needed...
 }
 

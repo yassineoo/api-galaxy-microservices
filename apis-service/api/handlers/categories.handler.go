@@ -63,7 +63,7 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags Category Operations
-// @Param category body CategoryDto true "Category Data"
+// @Param category body types.CategoryDto true "Category Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -92,7 +92,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // @Produce json
 // @Tags Category Operations
 // @Param id path int true "Category ID"
-// @Param category body CategoryDto true "Category Data"
+// @Param category body types.CategoryDto true "Category Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

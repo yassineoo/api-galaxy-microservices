@@ -14,6 +14,206 @@
     "host": "localhost:5000",
     "basePath": "/",
     "paths": {
+        "/Subscription": {
+            "post": {
+                "description": "Creates a new API Subscription",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Subscription Operations"
+                ],
+                "summary": "Create an API Subscription",
+                "parameters": [
+                    {
+                        "description": "API Subscription Data",
+                        "name": "Subscription",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.SubscriptionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Subscription/:api-id": {
+            "get": {
+                "description": "Retrieves Subscriptions for a specific API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Subscription Operations"
+                ],
+                "summary": "Get API Subscriptions by API ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API ID",
+                        "name": "api-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Subscription/:id": {
+            "delete": {
+                "description": "Deletes a specific API Subscription",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Subscription Operations"
+                ],
+                "summary": "Delete an API Subscription",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing API Subscription",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Subscription Operations"
+                ],
+                "summary": "Update an API Subscription",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "API Subscription Data",
+                        "name": "Subscription",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.SubscriptionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/apis": {
             "get": {
                 "description": "Retrieves a paginated list of APIs",
@@ -76,7 +276,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CreateApiDto"
+                            "$ref": "#/definitions/types.ApiDto"
                         }
                     }
                 ],
@@ -133,7 +333,8 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.ApiResponse"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -168,7 +369,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.UpdateApiDto"
+                            "$ref": "#/definitions/types.UpdateApiDto"
                         }
                     }
                 ],
@@ -320,7 +521,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CategoryDto"
+                            "$ref": "#/definitions/types.CategoryDto"
                         }
                     }
                 ],
@@ -380,7 +581,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CategoryDto"
+                            "$ref": "#/definitions/types.CategoryDto"
                         }
                     }
                 ],
@@ -469,24 +670,865 @@
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "api.ApiResponse": {
-            "type": "object",
-            "properties": {
-                "apis": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ApiEntity"
+        },
+        "/endpoints": {
+            "post": {
+                "description": "Creates a new API Endpoints",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Endpoints Operations"
+                ],
+                "summary": "Create an API Endpoints",
+                "parameters": [
+                    {
+                        "description": "API Endpoints Data",
+                        "name": "endpoints",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsDto"
+                        }
                     }
-                },
-                "meta": {
-                    "$ref": "#/definitions/api.PaginationMeta"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
-        "api.CategoryDto": {
+        "/endpoints-group": {
+            "get": {
+                "description": "Retrieves all Endpoints Groups",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Group Operations"
+                ],
+                "summary": "Get All Endpoints Groups",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new Endpoints Group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Group Operations"
+                ],
+                "summary": "Create an Endpoints Group",
+                "parameters": [
+                    {
+                        "description": "Endpoints Group Data",
+                        "name": "endpoints-group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsGroupDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints-group/:id": {
+            "delete": {
+                "description": "Deletes a specific Endpoints Group",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Group Operations"
+                ],
+                "summary": "Delete an Endpoints Group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing Endpoints Group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Group Operations"
+                ],
+                "summary": "Update an Endpoints Group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Endpoints Group Data",
+                        "name": "endpoints-group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsGroupDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints-parameter": {
+            "post": {
+                "description": "Creates a new Endpoints Parameter",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Parameter Operations"
+                ],
+                "summary": "Create an Endpoints Parameter",
+                "parameters": [
+                    {
+                        "description": "Endpoints Parameter Data",
+                        "name": "endpoints-parameter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsParameterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.EndpointsParameterEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints-parameter/{endpoint-id}": {
+            "get": {
+                "description": "Retrieves all Endpoints Parameters for a specific Endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Parameter Operations"
+                ],
+                "summary": "Get All Endpoints Parameters",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoint ID",
+                        "name": "endpoint-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.EndpointsParameterEntity"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints-parameter/{id}": {
+            "delete": {
+                "description": "Deletes a specific Endpoints Parameter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Parameter Operations"
+                ],
+                "summary": "Delete an Endpoints Parameter",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints Parameter ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing Endpoints Parameter",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Endpoints Parameter Operations"
+                ],
+                "summary": "Update an Endpoints Parameter",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints Parameter ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Endpoints Parameter Data",
+                        "name": "endpoints-parameter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsParameterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.EndpointsParameterEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints/:api-id": {
+            "get": {
+                "description": "Retrieves endpointss for a specific API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Endpoints Operations"
+                ],
+                "summary": "Get API Endpointss by API ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API ID",
+                        "name": "api-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/endpoints/:id": {
+            "delete": {
+                "description": "Deletes a specific API Endpoints",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Endpoints Operations"
+                ],
+                "summary": "Delete an API Endpoints",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing API Endpoints",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Endpoints Operations"
+                ],
+                "summary": "Update an API Endpoints",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Endpoints ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "API Endpoints Data",
+                        "name": "endpoints",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.EndpointsDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/plan": {
+            "post": {
+                "description": "Creates a new API Plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Plan Operations"
+                ],
+                "summary": "Create an API Plan",
+                "parameters": [
+                    {
+                        "description": "API Plan Data",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.PlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/plan/:api-id": {
+            "get": {
+                "description": "Retrieves plans for a specific API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Plan Operations"
+                ],
+                "summary": "Get API Plans by API ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API ID",
+                        "name": "api-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/plan/:id": {
+            "delete": {
+                "description": "Deletes a specific API Plan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Plan Operations"
+                ],
+                "summary": "Delete an API Plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing API Plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Plan Operations"
+                ],
+                "summary": "Update an API Plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "API Plan Data",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.PlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.EndpointsParameterEntity": {
+            "type": "object",
+            "properties": {
+                "endpointID": {
+                    "type": "integer"
+                },
+                "exampleValue": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "parameterType": {
+                    "description": "e.g., Query, Header,",
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "valueType": {
+                    "description": "e.g., string, int, boolean",
+                    "type": "string"
+                }
+            }
+        },
+        "types.ApiDto": {
+            "type": "object",
+            "properties": {
+                "categoryID": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providerID": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Add other fields as needed...",
+                    "type": "string"
+                }
+            }
+        },
+        "types.CategoryDto": {
             "type": "object",
             "properties": {
                 "categoryName": {
@@ -497,255 +1539,128 @@
                 }
             }
         },
-        "api.CreateApiDto": {
+        "types.EndpointsDto": {
             "type": "object",
             "properties": {
-                "categoryID": {
+                "apiID": {
                     "type": "integer"
                 },
                 "description": {
                     "type": "string"
                 },
-                "imagePath": {
+                "group": {
                     "type": "string"
                 },
-                "name": {
+                "groupID": {
+                    "type": "integer"
+                },
+                "methode": {
                     "type": "string"
                 },
-                "providerID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "api.PaginationMeta": {
-            "type": "object",
-            "properties": {
-                "currentPage": {
-                    "type": "integer"
-                },
-                "itemCount": {
-                    "type": "integer"
-                },
-                "itemsPerPage": {
-                    "type": "integer"
-                },
-                "totalItems": {
-                    "type": "integer"
-                },
-                "totalPages": {
-                    "type": "integer"
-                }
-            }
-        },
-        "api.UpdateApiDto": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "imagePath": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
+                "url": {
                     "type": "string"
                 }
             }
         },
-        "models.ApiEntity": {
+        "types.EndpointsGroupDto": {
             "type": "object",
             "properties": {
-                "apiRatings": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ApiRatingEntity"
-                    }
-                },
-                "apiVersions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ApiVersionEntity"
-                    }
-                },
-                "categoryID": {
+                "apiID": {
                     "type": "integer"
-                },
-                "dateCreated": {
-                    "type": "string"
-                },
-                "dateDeleted": {
-                    "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "imagePath": {
+                "group": {
                     "type": "string"
-                },
-                "lastUpdated": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "providerID": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/types.ApiStatus"
-                },
-                "subscriptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SubscriptionEntity"
-                    }
                 }
             }
         },
-        "models.ApiKeyEntity": {
+        "types.EndpointsParameterDto": {
             "type": "object",
             "properties": {
-                "apiKey": {
-                    "type": "string"
-                },
-                "creationDate": {
-                    "type": "string"
-                },
-                "id": {
+                "endpointID": {
                     "type": "integer"
                 },
-                "isActive": {
+                "exampleValue": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "parameterType": {
+                    "type": "string"
+                },
+                "required": {
                     "type": "boolean"
                 },
-                "subscriptionID": {
-                    "description": "ApiKeyID       int            `gorm:\"primaryKey;autoIncrement\"`",
-                    "type": "integer"
-                }
-            }
-        },
-        "models.ApiRatingEntity": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "description": "RatingID   int              `gorm:\"primaryKey;autoIncrement\"`",
-                    "type": "integer"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "dateRated": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "rating": {
-                    "type": "integer"
-                },
-                "userID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.ApiVersionEntity": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "description": "VersionID     int            `gorm:\"primaryKey;autoIncrement\"`",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "releaseDate": {
-                    "type": "string"
-                },
-                "versionNumber": {
-                    "type": "string"
-                },
-                "whatsNew": {
+                "valueType": {
                     "type": "string"
                 }
             }
         },
-        "models.SubscriptionEntity": {
+        "types.PlanDto": {
             "type": "object",
             "properties": {
                 "apiID": {
                     "type": "integer"
                 },
-                "apiKeys": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ApiKeyEntity"
-                    }
-                },
-                "endDate": {
+                "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "planID": {
-                    "type": "integer"
-                },
-                "startDate": {
+                "features": {
                     "type": "string"
                 },
-                "status": {
+                "limiteAmount": {
+                    "type": "integer"
+                },
+                "limiteTimeUnit": {
                     "type": "string"
                 },
-                "usageLogs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.UsageLogEntity"
-                    }
+                "limiteType": {
+                    "type": "string"
                 },
-                "userID": {
-                    "description": "SubscriptionID int            `gorm:\"primaryKey;autoIncrement\"`",
-                    "type": "integer"
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "recomonded": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "type": "string"
                 }
             }
         },
-        "models.UsageLogEntity": {
+        "types.SubscriptionDto": {
             "type": "object",
             "properties": {
-                "dataVolume": {
+                "apiID": {
                     "type": "integer"
                 },
-                "endpoint": {
-                    "type": "string"
-                },
-                "id": {
+                "planId": {
                     "type": "integer"
-                },
-                "responseTime": {
-                    "type": "integer"
-                },
-                "subscriptionID": {
-                    "description": "LogID          int            `gorm:\"primaryKey;autoIncrement\"`",
-                    "type": "integer"
-                },
-                "timestamp": {
-                    "type": "string"
                 }
             }
         },
-        "types.ApiStatus": {
-            "type": "string",
-            "enum": [
-                "active",
-                "inactive"
-            ],
-            "x-enum-varnames": [
-                "StatusActive",
-                "StatusInactive"
-            ]
+        "types.UpdateApiDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         }
     }
 }

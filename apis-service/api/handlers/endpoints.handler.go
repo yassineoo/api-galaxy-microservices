@@ -24,7 +24,7 @@ func NewEndpointsHandler(s *services.Service) *EndpointsHandler {
 // @Tags API Endpoints Operations
 // @Accept json
 // @Produce json
-// @Param endpoints body types.createEndpointsDto true "API Endpoints Data"
+// @Param endpoints body types.EndpointsDto true "API Endpoints Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Router /endpoints [post]
@@ -74,7 +74,7 @@ func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Endpoints ID"
-// @Param endpoints body types.CreateEndpointsDto true "API Endpoints Data"
+// @Param endpoints body types.EndpointsDto true "API Endpoints Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -137,13 +137,26 @@ func (h *EndpointsHandler) DeleteApiEndpoints(c *gin.Context) {
 
 
 
-
-
-
-
-
-
-
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
+// endpoints-group
 
 
 
@@ -270,6 +283,150 @@ func (h *EndpointsHandler) DeleteEndpointsGroup(c *gin.Context) {
 
 
 
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+//  ------------------------------- endpoints-endpoints parameters -----------------------------------
+
+// @Summary Create an Endpoints Parameter
+// @Description Creates a new Endpoints Parameter
+// @Tags Endpoints Parameter Operations
+// @Accept json
+// @Produce json
+// @Param endpoints-parameter body types.EndpointsParameterDto true "Endpoints Parameter Data"
+// @Success 201 {object} models.EndpointsParameterEntity
+// @Failure 400 {object} map[string]string
+// @Router /endpoints-parameter [post]
+func (h *EndpointsHandler) CreateEndpointsParameter(c *gin.Context) {
+    var endpointsParameter types.EndpointsParameterDto
+    if err := c.ShouldBindJSON(&endpointsParameter); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    result, err := h.service.CreateEndpointsParameter(c, endpointsParameter)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating Endpoints Parameter"})
+        return
+    }
+
+    c.JSON(http.StatusCreated, result)
+}
+
+
+// @Summary Get All Endpoints Parameters
+// @Description Retrieves all Endpoints Parameters for a specific Endpoint
+// @Tags Endpoints Parameter Operations
+// @Produce json
+// @Param endpoint-id path int true "Endpoint ID"
+// @Success 200 {array} models.EndpointsParameterEntity
+// @Failure 400 {object} map[string]string
+// @Router /endpoints-parameter/{endpoint-id} [get]
+func (h *EndpointsHandler) GetEndpointParameters(c *gin.Context) {
+    endpointID, err := strconv.Atoi(c.Param("endpoint-id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoint ID"})
+        return
+    }
+
+    endpointsParameters, err := h.service.GetEndpointParameter(c, endpointID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching Endpoints Parameters"})
+        return
+    }
+
+    c.JSON(http.StatusOK, endpointsParameters)
+}
+
+
+
+
+
+
+
+
+
+// @Summary Update an Endpoints Parameter
+// @Description Updates an existing Endpoints Parameter
+// @Tags Endpoints Parameter Operations
+// @Accept json
+// @Produce json
+// @Param id path int true "Endpoints Parameter ID"
+// @Param endpoints-parameter body types.EndpointsParameterDto true "Endpoints Parameter Data"
+// @Success 200 {object} models.EndpointsParameterEntity
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /endpoints-parameter/{id} [patch]
+func (h *EndpointsHandler) UpdateEndpointsParameter(c *gin.Context) {
+    endpointsParameterID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Parameter ID"})
+        return
+    }
+
+    var endpointsParameter types.EndpointsParameterDto
+    if err := c.ShouldBindJSON(&endpointsParameter); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    updatedEndpointsParameter, err := h.service.UpdateEndpointsParameter(c, endpointsParameterID, endpointsParameter)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating Endpoints Parameter"})
+        return
+    }
+
+    c.JSON(http.StatusOK, updatedEndpointsParameter)
+}
+
+
+
+
+
+
+
+
+
+// @Summary Delete an Endpoints Parameter
+// @Description Deletes a specific Endpoints Parameter
+// @Tags Endpoints Parameter Operations
+// @Produce json
+// @Param id path int true "Endpoints Parameter ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /endpoints-parameter/{id} [delete]
+func (h *EndpointsHandler) DeleteEndpointsParameter(c *gin.Context) {
+    endpointsParameterID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Parameter ID"})
+        return
+    }
+
+    err = h.service.DeleteEndpointsParameter(c, endpointsParameterID)
+    if err != nil {
+        if strings.Contains(err.Error(), "not found") {
+            c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting Endpoints Parameter"})
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Endpoints Parameter deleted successfully"})
+}
 
 
 

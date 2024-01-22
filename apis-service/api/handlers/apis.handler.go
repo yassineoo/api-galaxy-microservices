@@ -69,7 +69,7 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags Apis Operations
-// @Param api body types.CreateApiDto true "API Data"
+// @Param api body types.ApiDto true "API Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -100,7 +100,7 @@ func (h *ApiHandler) CreateApi(c *gin.Context) {
 // @Produce json
 // @Tags Apis Operations
 // @Param id path int true "API ID"
-// @Success 200 {object} ApiResponse
+// @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} error
 // @Router /apis/{id} [get]
 func (h *ApiHandler) GetApi(c *gin.Context) {
@@ -133,7 +133,7 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 // @Produce json
 // @Tags Apis Operations
 // @Param id path int true "API ID"
-// @Param api body UpdateApiDto true "API Data"
+// @Param api body types.UpdateApiDto true "API Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

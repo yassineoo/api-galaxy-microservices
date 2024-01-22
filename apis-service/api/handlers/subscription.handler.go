@@ -24,7 +24,7 @@ func NewSubscriptionHandler(s *services.Service) *SubscriptionHandler {
 // @Tags API Subscription Operations
 // @Accept json
 // @Produce json
-// @Param Subscription body types.createSubscriptionDto true "API Subscription Data"
+// @Param Subscription body types.SubscriptionDto true "API Subscription Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Router /Subscription [post]

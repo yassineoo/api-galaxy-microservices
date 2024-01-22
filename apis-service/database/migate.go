@@ -27,6 +27,8 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.SubscriptionEntity{},
 		&models.EndpointsGroupEntity{},
 		&models.EndpointsEntity{},
+		&models.EndpointsParameterEntity{},
+		&models.BodyParamEntity{},
 	
 	)
 	log.Println("Migrating database...");
