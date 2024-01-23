@@ -2,15 +2,15 @@ import { prismaClientSingleton } from '../utils/prismaClient';
 const currentDate: Date = new Date();
 
 
-export const AddUser = async (data: { userName: string; email: string; PasswordHash: string; }) => {
-    const { userName, email, PasswordHash } = data;
+export const AddUser = async (data: { Username: string; Email: string; PasswordHash: string; }) => {
+    const { Username, Email, PasswordHash } = data;
     const user = await prismaClientSingleton.users.create({
         data: {
-            Username: userName,
-            Email: email,
+            Username: Username,
+            Email: Email,
             PasswordHash: PasswordHash,
-            DateCreated: currentDate.toDateString(),
-            LastLogin: currentDate.toDateString(),
+            DateCreated: currentDate.toISOString(),
+            LastLogin: currentDate.toISOString(),
             IsActive: true
         }
     });
@@ -38,6 +38,9 @@ export const getUserById = async (id: number) => {
 }
 
 export const getUserByEmail = async (email: string) => {
+    if (!email) {
+        throw new Error("Email parameter is undefined");
+    }
     const user = await prismaClientSingleton.users.findUnique({
         where: {
             Email: email
@@ -48,7 +51,7 @@ export const getUserByEmail = async (email: string) => {
 
 
 
-export const setActivatedAccount = async (id: number,status: boolean) => {
+export const setActivatedAccount = async (id: number, status: boolean) => {
     const user = await prismaClientSingleton.users.update({
         where: {
             UserID: id
@@ -60,7 +63,7 @@ export const setActivatedAccount = async (id: number,status: boolean) => {
     return user;
 }
 
-export const setTwoFactor = async (id: number,status: boolean) => {
+export const setTwoFactor = async (id: number, status: boolean) => {
     const user = await prismaClientSingleton.users.update({
         where: {
             UserID: id
@@ -85,12 +88,17 @@ export const setLastLogin = async (id: number) => {
 }
 
 export const deleteUser = async (id: number) => {
-    const user = await prismaClientSingleton.users.delete({
-        where: {
-            UserID: id
-        }
-    });
-    return user;
+
+    try {
+        const transaction = await prismaClientSingleton.$transaction(async (prisma) => {
+            await prisma.profiles.deleteMany({ where: { UserID: id } });
+            await prisma.users.delete({ where: { UserID: id } });
+        });
+        return transaction;
+    } catch (error) {
+        console.error("Error in deleteUser transaction:", error);
+        throw error; 
+    }
 }
 
 export const getHashedPassword = async (id: number) => {
@@ -102,7 +110,7 @@ export const getHashedPassword = async (id: number) => {
             PasswordHash: true
         }
     });
-    return user;
+    return user ? user.PasswordHash : null;
 }
 
 

@@ -21,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "prisma": "^5.8.1",
-    "random-bytes": "^1.0.0"
+    "random-bytes": "^1.0.0",
+    "swagger": "^0.7.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -5,19 +5,21 @@ import { addProfile } from '../models/profileModel';
 
 require('dotenv').config();
 const tokenSecret = process.env.TOKEN_SECRET;
-const expiresIn = process.env.TOKEN_EXPIRES_IN;
+const expiresIn = process.env.EXPIRES_IN;
 
 
 export const registerService = async (data: any) => {
-    const email = getUserByEmail(data.email);
-    if (!email) {
+    const Email = getUserByEmail(data.Email);
+    if (!Email) {
         throw new Error('Email already exists');
     }
 
+    const hashedPassword = (await hashPassword(data.password)).toString();
+
     const user = await AddUser({
-        userName: data.userName,
-        email: data.email,
-        PasswordHash: data.PasswordHash
+        Username: data.Username,
+        Email: data.Email,
+        PasswordHash: hashedPassword
     });
 
     if (!user) {
@@ -33,7 +35,7 @@ export const registerService = async (data: any) => {
     const profile = addProfile({
         fullName: data.FullName,
         dateOfbirth: data.DateOfBirth,
-        userId: data.UserID
+        userId: user.UserID
     });
 
     if (!profile) {
@@ -43,19 +45,21 @@ export const registerService = async (data: any) => {
     return token;
 }
 
-export const loginService = async (data : {email : string , password: string}) => {
-    const user = await getUserByEmail(data.email);
+export const loginService = async (data : {Email : string , password: string}) => {
+    const user = await getUserByEmail(data.Email);
     if (!user || !user.IsActive) {
-        throw new Error('email or password is incorrect');
+        throw new Error('Email or password is incorrect ');
     }
     const hashedPassword = (await hashPassword(data.password)).toString();
 
     const dbHashedPassword = (await getHashedPassword(user.UserID))?.toString();
+    console.log("1"+dbHashedPassword)
+    console.log("2"+hashedPassword)
 
-    const isMatch = await checkPassword(dbHashedPassword || "", hashedPassword);
+    const isMatch = await checkPassword(dbHashedPassword?.toString() || "", hashedPassword);
     
     if (!isMatch) {
-        throw new Error('email or password is incorrect');
+        throw new Error('Email or password is incorrect ');
     }
 
 

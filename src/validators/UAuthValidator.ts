@@ -13,10 +13,10 @@ const passwordSchema = Joi.string().pattern(passwordPattern).message('Password m
 
 
 const signup = {
-    username: Joi.string().min(3).max(30),
-    fullname: Joi.string(),
-    dateofbirth: Joi.date(),
-    email: Joi.string().email().messages({
+    Username: Joi.string(),
+    FullName: Joi.string(),
+    DateOfBirth: Joi.date(),
+    Email: Joi.string().email().messages({
         "string.email": "Email must be a valid email"
     }),
     password: passwordSchema,
@@ -24,7 +24,7 @@ const signup = {
 
 
 const login = {
-    email: Joi.string().email().required().messages({
+    Email: Joi.string().email().required().messages({
         "string.email": "Email must be a valid email"
     }),
     password: passwordSchema,

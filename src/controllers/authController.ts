@@ -11,7 +11,6 @@ const tokenSecret = process.env.TOKEN_SECRET;
 
 export const signup = async (req: Request, res: Response) => {
     
-    console.log(req.body);
     const { error } = UAuthValidator.signUpSchema.validate(req.body);
     if (error) {
         res.status(statusCodes.badRequest).send(error.details[0].message);
@@ -28,6 +27,7 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
 
+    console.log(req.body);
     const { error } = UAuthValidator.loginSchema.validate(req.body);
     if (error) {
         res.status(statusCodes.badRequest).send(error.details[0].message);

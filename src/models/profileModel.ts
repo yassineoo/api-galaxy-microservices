@@ -6,8 +6,10 @@ export const addProfile = async (data: { userId: number; fullName: string; dateO
     const profile = await prismaClientSingleton.profiles.create({
         data: {
             FullName: fullName,
-            DateOfBirth: dateOfbirth,
-            UserID: userId
+            DateOfBirth: new Date(dateOfbirth),
+            users: {
+                connect: { UserID: userId }
+            }
         }
     });
     return profile;
