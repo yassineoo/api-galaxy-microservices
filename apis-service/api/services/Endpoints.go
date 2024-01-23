@@ -266,7 +266,6 @@ func (s *Service) GetEndpointParameter(ctx context.Context, endpointsID int) ([]
     return categories, nil
 
 
-
 }
 
 

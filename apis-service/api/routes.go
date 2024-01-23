@@ -14,6 +14,8 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	EndpointsHandler := handlers.NewEndpointsHandler(service)
 	PlanHandler := handlers.NewPlanHandler(service)
 	SubscriptionHandler := handlers.NewSubscriptionHandler(service)
+	healthCheckHandler := handlers.NewHealthCheckHandler(service)
+
 
 
 	router.GET("/", ApiHandler.HandleRequest)
@@ -59,6 +61,17 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 
 
 
+
+
+	
+	healthCareGroup := router.Group("/health-checks")
+		// Health Checks CRUD routes
+		healthCareGroup.POST("/health-checks", healthCheckHandler.CreateHealthCheck)
+		healthCareGroup.GET("/health-checks/:api-id", healthCheckHandler.GetHealthCheck)
+		healthCareGroup.PATCH("/health-checks/:id", healthCheckHandler.UpdateHealthCheck)
+		healthCareGroup.DELETE("/health-checks/:id", healthCheckHandler.DeleteHealthCheck)
+		healthCareGroup.GET("/health-checks/:api-id/success-percentage", healthCheckHandler.GetHealthCheckSuccessPercentage)
+	
 	// Grouping under "/subscriptions/"
 
 	subscriptionsGroup := router.Group("/subscriptions")

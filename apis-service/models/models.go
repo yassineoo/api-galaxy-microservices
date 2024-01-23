@@ -36,6 +36,35 @@ type ApiEntity struct {
 	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
 }
 
+
+
+// HealthCheckEntity represents the Health Checks table for scheduling API checks
+type HealthCheckEntity struct {
+	ID             int       `gorm:"primaryKey;autoIncrement"`
+	ApiID          int       `gorm:"unique;not null"` // Foreign key to the ApiEntity, unique to ensure one-to-one relation
+	URL            string    `gorm:"size:2048;not null"` // The URL to be checked
+	Schedule       string    `gorm:"size:50;not null"` // Cron schedule string for when to run the check
+	LastStatus     string    `gorm:"type:varchar(20);default:'pending'"` // Last status of the health check
+	LastCheckedAt  time.Time // The timestamp of the last health check
+	//NextCheckAt    time.Time // The timestamp of the next scheduled health check
+	AlertsEnabled  bool      // Whether alerts are enabled for this health check
+//	AlertEndpoints string    `gorm:"size:2048"` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)
+	//CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	//UpdatedAt      time.Time
+	Results        []HealthCheckResultEntity `gorm:"foreignKey:HealthCheckID"` // One-to-many relation to store results of health checks
+}
+
+// HealthCheckResultEntity represents the Health Check Results table for storing results of checks
+type HealthCheckResultEntity struct {
+	ID              int       `gorm:"primaryKey;autoIncrement"`
+	HealthCheckID   int       `gorm:"not null"` // Foreign key to the HealthCheckEntity
+	Status          string    `gorm:"type:varchar(20);not null"` // Status of the check (success, failure)
+	ResponseTime    int       // Response time in milliseconds
+	StatusMessage   string    // A message describing the status (error message, success, etc.)
+	CheckedAt       time.Time `gorm:"default:CURRENT_TIMESTAMP"` // The timestamp of when the check was performed
+}
+
+
 type EndpointsGroupEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
 	ApiID       int    `gorm:"not null"`

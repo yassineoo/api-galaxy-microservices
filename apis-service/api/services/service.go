@@ -13,22 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ApiService interface {
-	// GetOne retrieves a single item by its ID.
-	//GetOne(ctx context.Context, id string) (*models.ApiEntity, error)
-
-	// GetAll retrieves all items.
-	//GetAll(ctx context.Context , query QueryPagination) (ApiResponse, error)
-
-	// Create adds a new item.
-	//Create(ctx context.Context, item CreateApiDto) (*models.ApiEntity, error)
-
-	// Edit updates an item identified by the given ID.
-	//Edit(ctx context.Context, id string, item EditApiDto) (*models.ApiEntity, error)
-
-	// Delete removes an item based on its ID.
-	Delete(ctx context.Context, id string) error
-}
 
 var (
 	ErrInvalidUser  = errors.New("invalid user")

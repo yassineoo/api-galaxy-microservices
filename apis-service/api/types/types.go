@@ -4,6 +4,7 @@ package types
 import (
 	// replace with your actual models' package path
 	"local_packages/models"
+	"time"
 )
 
 // ApiDto represents the data needed to create a new Api.
@@ -60,6 +61,26 @@ type EndpointsParameterDto struct {
 	ParameterType string
 	Required bool
 	ExampleValue string
+}
+
+
+// HealthCheckDto is used to transfer health check data.
+type HealthCheckDto struct {
+	ApiID          int       `json:"apiId" binding:"required"`        // The ID of the API for which the health check is being set up
+	URL            string    `json:"url" binding:"required,url"`      // The URL to be checked
+	Schedule       string    `json:"schedule" binding:"required"`     // Cron schedule string for when to run the check
+	LastStatus     string    `json:"lastStatus"`                      // The last status of the health check
+	LastCheckedAt  time.Time `json:"lastCheckedAt"`                   // The timestamp of the last health check
+	NextCheckAt    time.Time `json:"nextCheckAt"`                     // The timestamp of the next scheduled health check
+	AlertsEnabled  bool      `json:"alertsEnabled"`                   // Whether alerts are enabled for this health check
+	//AlertEndpoints []string  `json:"alertEndpoints"`                  // A list of endpoints to send alerts to (email, SMS, webhook, etc.)
+}
+
+type HealthCheckResultDto struct {
+	HealthCheckID int       `json:"healthCheckId" binding:"required"` // The ID of the health check for which the result is being set up
+	Status        string    `json:"status" binding:"required"`        // The status of the check (success, failure)
+	ResponseTime  int       `json:"responseTime"`                     // Response time in milliseconds
+	StatusMessage string    `json:"statusMessage"`                    // A message describing the status (error message, success, etc.)
 }
 
 

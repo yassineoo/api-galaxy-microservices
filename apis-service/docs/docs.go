@@ -1276,6 +1276,235 @@ const docTemplate = `{
                 }
             }
         },
+        "/health-checks": {
+            "post": {
+                "description": "Creates a new Health Check for an API",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health Checks"
+                ],
+                "summary": "Create a Health Check",
+                "parameters": [
+                    {
+                        "description": "Health Check Data",
+                        "name": "health-check",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.HealthCheckDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.HealthCheckEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health-checks/{api-id}": {
+            "get": {
+                "description": "Retrieves a Health Check for a specific API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health Checks"
+                ],
+                "summary": "Get Health Check by API ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API ID",
+                        "name": "api-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.HealthCheckEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health-checks/{api-id}/success-percentage": {
+            "get": {
+                "description": "Get the success percentage of health checks for a specific API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health Checks"
+                ],
+                "summary": "Get Health Check Success Percentage",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API ID",
+                        "name": "api-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid API ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health-checks/{id}": {
+            "delete": {
+                "description": "Deletes a specific Health Check for an API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health Checks"
+                ],
+                "summary": "Delete a Health Check",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Health Check ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing Health Check for an API",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health Checks"
+                ],
+                "summary": "Update a Health Check",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Health Check ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Health Check Data",
+                        "name": "health-check",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.HealthCheckDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.HealthCheckEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/plan": {
             "post": {
                 "description": "Creates a new API Plan",
@@ -1506,6 +1735,73 @@ const docTemplate = `{
                 }
             }
         },
+        "models.HealthCheckEntity": {
+            "type": "object",
+            "properties": {
+                "alertsEnabled": {
+                    "description": "NextCheckAt    time.Time // The timestamp of the next scheduled health check",
+                    "type": "boolean"
+                },
+                "apiID": {
+                    "description": "Foreign key to the ApiEntity, unique to ensure one-to-one relation",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastCheckedAt": {
+                    "description": "The timestamp of the last health check",
+                    "type": "string"
+                },
+                "lastStatus": {
+                    "description": "Last status of the health check",
+                    "type": "string"
+                },
+                "results": {
+                    "description": "AlertEndpoints string    ` + "`" + `gorm:\"size:2048\"` + "`" + ` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)\nCreatedAt      time.Time ` + "`" + `gorm:\"default:CURRENT_TIMESTAMP\"` + "`" + `\nUpdatedAt      time.Time",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.HealthCheckResultEntity"
+                    }
+                },
+                "schedule": {
+                    "description": "Cron schedule string for when to run the check",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The URL to be checked",
+                    "type": "string"
+                }
+            }
+        },
+        "models.HealthCheckResultEntity": {
+            "type": "object",
+            "properties": {
+                "checkedAt": {
+                    "description": "The timestamp of when the check was performed",
+                    "type": "string"
+                },
+                "healthCheckID": {
+                    "description": "Foreign key to the HealthCheckEntity",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "responseTime": {
+                    "description": "Response time in milliseconds",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Status of the check (success, failure)",
+                    "type": "string"
+                },
+                "statusMessage": {
+                    "description": "A message describing the status (error message, success, etc.)",
+                    "type": "string"
+                }
+            }
+        },
         "types.ApiDto": {
             "type": "object",
             "properties": {
@@ -1597,6 +1893,44 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "valueType": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.HealthCheckDto": {
+            "type": "object",
+            "required": [
+                "apiId",
+                "schedule",
+                "url"
+            ],
+            "properties": {
+                "alertsEnabled": {
+                    "description": "Whether alerts are enabled for this health check",
+                    "type": "boolean"
+                },
+                "apiId": {
+                    "description": "The ID of the API for which the health check is being set up",
+                    "type": "integer"
+                },
+                "lastCheckedAt": {
+                    "description": "The timestamp of the last health check",
+                    "type": "string"
+                },
+                "lastStatus": {
+                    "description": "The last status of the health check",
+                    "type": "string"
+                },
+                "nextCheckAt": {
+                    "description": "The timestamp of the next scheduled health check",
+                    "type": "string"
+                },
+                "schedule": {
+                    "description": "Cron schedule string for when to run the check",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The URL to be checked",
                     "type": "string"
                 }
             }
