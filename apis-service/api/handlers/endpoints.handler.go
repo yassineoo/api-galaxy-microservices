@@ -441,3 +441,39 @@ func (h *EndpointsHandler) DeleteEndpointsParameter(c *gin.Context) {
 
 
 
+
+
+
+
+
+
+// CreateBodyParamAndParametersHandler handles the creation of a BodyParamEntity along with associated Parameters.
+//
+// This endpoint creates a new BodyParamEntity and its associated Parameters based on the provided BodyParamDto.
+//
+// @Summary Create a BodyParamEntity with Parameters
+// @Description Create a new BodyParamEntity and its associated Parameters.
+// @Tags BodyParams
+// @Accept json
+// @Produce json
+// @Param bodyParamDto body types.BodyParamDto true "BodyParamDto object containing EndpointID, ContentType, TextBody, and Parameters"
+// @Success 200 {object} models.BodyParamEntity
+// @Router /create-body-param-and-parameters [post]
+func (h * EndpointsHandler) CreateBodyParamAndParameters(c *gin.Context) {
+    // Parse the request body into a BodyParamDto
+    var bodyParamDto types.BodyParamDto
+    if err := c.ShouldBindJSON(&bodyParamDto); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Call the service function to create the BodyParamEntity and Parameters
+    result, err := h.service.CreateBodyParamAndParameters(c, bodyParamDto)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating BodyParamEntity and Parameters"})
+        return
+    }
+
+    // Respond with the created BodyParamEntity
+    c.JSON(http.StatusCreated, result)
+}

@@ -319,6 +319,40 @@ func (s *Service) DeleteEndpointsParameter(ctx context.Context, id int) error {
 
 
 
+func (s *Service) CreateBodyParamAndParameters(ctx context.Context, bodyParamDto types.BodyParamDto) (*models.BodyParamEntity, error) {
+    // Create a new BodyParamEntity
+    newBodyParam := models.BodyParamEntity{
+        EndpointID:  bodyParamDto.EndpointID,
+        ContentType: bodyParamDto.ContentType,
+        TextBody:    bodyParamDto.TextBody,
+    }
+
+    if err := s.gormDB.Create(&newBodyParam).Error; err != nil {
+        return nil, err
+    }
+
+    // Create Parameters for each element in the array
+    var params []models.EndpointsParameterEntity
+    for _, paramDto := range bodyParamDto.Parameters {
+        param := models.EndpointsParameterEntity{
+            EndpointID:    bodyParamDto.EndpointID,
+            Key:           paramDto.Key,
+            ValueType:     paramDto.ValueType,
+            ParameterType: paramDto.ParameterType,
+            ExampleValue:  paramDto.ExampleValue,
+            Required:      paramDto.Required,
+        }
+        params = append(params, param)
+    }
+
+    if err := s.gormDB.Create(&params).Error; err != nil {
+        return nil, err
+    }
+
+    return &newBodyParam, nil
+}
+
+
 
 
 

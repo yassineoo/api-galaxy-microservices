@@ -34,6 +34,18 @@ type ApiEntity struct {
 	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
 	Plans         []PlanEntity         `gorm:"foreignKey:ApiID"`
 	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
+	ApiDocs   ApiDocsEntity           `gorm:"foreignKey:ApiID"`  // One-to-one relationship with foreign key
+
+}
+
+type ApiDocsEntity struct {
+	ID          int    `gorm:"primaryKey;autoIncrement"`
+	ApiID  int    `gorm:"not null"`
+    Content string `gorm:"type:text"`
+	LastUpdated time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	//LastUpdated time.Time
+	//DateDeleted time.Time
+    // Add other fields as necessary
 }
 
 
@@ -82,8 +94,8 @@ type EndpointsEntity struct {
 	Url         string `gorm:"size:255;not null"`
 	Description string
 
-	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"`
-    BodyParams  []BodyParamEntity  `gorm:"foreignKey:EndpointID"`
+	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"` // query, header,Path ,  body
+	BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID"`  // One-to-one relationship with foreign key
 	// Add other fields as needed...
 }
 
@@ -104,12 +116,9 @@ type EndpointsParameterEntity struct {
 type BodyParamEntity struct {
 	ID         int    `gorm:"primaryKey;autoIncrement"`
     EndpointID int    `gorm:"not null"`
-    Key        string `gorm:"size:255;not null"`
-	ValueType     string `gorm:"size:255"` // e.g., string, int, boolean
-	ParameterType     string `gorm:"size:255"` // e.g., Query, Header, 
-	ExampleValue     string `gorm:"size:255"`
-	Required	 bool `gorm:"default:false"`
-    // Add other fields as needed...
+	ContentType  string `gorm:"size:255;not null"` // Content type (e.g., text/plain, application/json, multipart/form-data)
+    TextBody     string `gorm:"type:text"` 	// For text/plain content type  
+  //  MediaFileID  int      // Add other fields as needed...
 }
 
 

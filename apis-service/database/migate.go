@@ -19,6 +19,7 @@ func MigrateDatabase(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&models.CategoryEntity{},
 		&models.ApiEntity{},
+		&models.ApiDocsEntity{},
 		&models.UsageLogEntity{},
 		&models.ApiKeyEntity{},
 		&models.ApiRatingEntity{},
@@ -31,10 +32,10 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.BodyParamEntity{},
 		&models.HealthCheckEntity{},
 		&models.HealthCheckResultEntity{},
-		
-	
+		&models.BodyParamEntity{},
+		//&models.
 	)
-	log.Println("Migrating database...");
+	log.Println("Migrating database done  1");
 	log.Println("Migrating database...");
 	log.Println("Migrating database...");
 

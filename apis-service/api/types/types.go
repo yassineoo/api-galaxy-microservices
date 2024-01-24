@@ -17,6 +17,13 @@ type ApiDto struct {
 	Status		string	// Add other fields as needed...
 }
 
+
+type ApiDocsDto struct {
+	ApiID  int
+	//Version string
+	Content string
+	// Add other fields as needed...
+}
 type CategoryDto struct {
 	CategoryName        string
 	Description string
@@ -62,6 +69,14 @@ type EndpointsParameterDto struct {
 	Required bool
 	ExampleValue string
 }
+// BodyParamDto represents the data transfer object for a body parameter.
+type BodyParamDto struct {
+	EndpointID  int                  `json:"endpoint_id"`
+	ContentType string               `json:"content_type"`
+	TextBody    string               `json:"text_body"`
+	Parameters  []EndpointsParameterDto `json:"parameters"`
+}
+
 
 
 // HealthCheckDto is used to transfer health check data.

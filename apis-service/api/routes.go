@@ -33,6 +33,16 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	apisGroup.PATCH("/:id", ApiHandler.UpdateApi)
 	apisGroup.DELETE("/:id", ApiHandler.DeleteApi)
 
+
+		// Grouping under "/apis/"
+	apisDocsGroup := router.Group("/apis-docs")
+
+		// API CRUD routes
+		apisDocsGroup.POST("/", ApiHandler.CreateApi)
+		apisDocsGroup.GET("/:api-id", ApiHandler.GetApi)
+		apisDocsGroup.PATCH("/:id", ApiHandler.UpdateApi)
+		apisDocsGroup.DELETE("/:id", ApiHandler.DeleteApi)
+
 	// CRUD routes for categories under "/apis/"
 	categoriesGroup := router.Group("/categories")
 	categoriesGroup.POST("/", CategoryHandler.CreateCategory)
@@ -58,6 +68,13 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
 	endpointsGroupGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup)
 	endpointsGroupGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
+
+	// Routes for Endpoints Parameter CRUD operations
+	endpointsParameterGroup := router.Group("/endpoints-parameter")
+	endpointsParameterGroup.POST("/", EndpointsHandler.CreateEndpointsParameter)
+	endpointsParameterGroup.GET("/:api-id", EndpointsHandler.GetEndpointParameters)
+	endpointsParameterGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter)
+	endpointsParameterGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
 
 
 
