@@ -50,13 +50,9 @@ export const loginService = async (data : {Email : string , password: string}) =
     if (!user || !user.IsActive) {
         throw new Error('Email or password is incorrect ');
     }
-    const hashedPassword = (await hashPassword(data.password)).toString();
-
     const dbHashedPassword = (await getHashedPassword(user.UserID))?.toString();
-    console.log("1"+dbHashedPassword)
-    console.log("2"+hashedPassword)
 
-    const isMatch = await checkPassword(dbHashedPassword?.toString() || "", hashedPassword);
+    const isMatch = await checkPassword(data.password,dbHashedPassword?.toString() || "");
     
     if (!isMatch) {
         throw new Error('Email or password is incorrect ');

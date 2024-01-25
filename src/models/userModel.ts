@@ -86,7 +86,7 @@ export const setLastLogin = async (id: number) => {
             UserID: id
         },
         data: {
-            LastLogin: currentDate.toDateString()
+            LastLogin: currentDate.toISOString()
         }
     });
     return user;

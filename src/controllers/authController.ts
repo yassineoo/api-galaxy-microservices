@@ -26,8 +26,6 @@ export const signup = async (req: Request, res: Response) => {
 }
 
 export const login = async (req: Request, res: Response) => {
-
-    console.log(req.body);
     const { error } = UAuthValidator.loginSchema.validate(req.body);
     if (error) {
         res.status(statusCodes.badRequest).send(error.details[0].message);
@@ -43,29 +41,3 @@ export const login = async (req: Request, res: Response) => {
 }
 
 
-
-export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            throw new Error('No token provided');
-        }
-
-
-        const decodedToken: any = decodeAuthToken(token, tokenSecret || "");
-        if (!decodedToken) {
-            throw new Error('Invalid token');
-        }
-
-
-        const user = await getUserById(decodedToken.userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
-        req.body.user = user;
-
-        next();
-    } catch (error :any) {
-        res.status(401).send( error.message);
-    }
-}
