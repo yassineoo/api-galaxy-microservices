@@ -29,6 +29,11 @@ type CategoryDto struct {
 	Description string
 	// Add other fields as needed...
 }
+type ApiCollectionDto struct {
+	Name        string
+	Description string
+	// Add other fields as needed...
+}
 
 type PlanDto struct {
 	Name        string

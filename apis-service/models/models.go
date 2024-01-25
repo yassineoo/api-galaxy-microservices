@@ -14,6 +14,15 @@ type CategoryEntity struct {
 	Apis         []ApiEntity `gorm:"foreignKey:CategoryID"` // Define the foreign key constraint
 }
 
+type ApiCollectionEntity struct {
+    ID          int    `gorm:"primaryKey;autoIncrement"`
+    Name        string `gorm:"size:255;not null"`
+    Description string
+    Apis        []ApiEntity `gorm:"many2many:api_collections_apis;"` // many-to-many relationship
+}
+
+
+
 // ApiEntity represents the Apis table
 type ApiEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
@@ -22,6 +31,7 @@ type ApiEntity struct {
 	ImagePath   string
 	Description string
 	CategoryID  int             `gorm:"null"`
+	Collections []ApiCollectionEntity `gorm:"many2many:api_collections_apis;"` // many-to-many relationship
 	Status      typesglobale.ApiStatus `gorm:"type:varchar(20);default:'active'"`
 
 	DateCreated time.Time `gorm:"default:CURRENT_TIMESTAMP"`

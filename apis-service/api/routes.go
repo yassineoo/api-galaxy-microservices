@@ -9,104 +9,116 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine, service *services.Service) {
-	ApiHandler := handlers.NewApiHandler(service)
-	CategoryHandler := handlers.NewCategoryHandler(service)
-	EndpointsHandler := handlers.NewEndpointsHandler(service)
-	PlanHandler := handlers.NewPlanHandler(service)
-	SubscriptionHandler := handlers.NewSubscriptionHandler(service)
-	healthCheckHandler := handlers.NewHealthCheckHandler(service)
+    // Initialize handlers
+    ApiHandler := handlers.NewApiHandler(service)
+    CategoryHandler := handlers.NewCategoryHandler(service)
+    EndpointsHandler := handlers.NewEndpointsHandler(service)
+    PlanHandler := handlers.NewPlanHandler(service)
+    SubscriptionHandler := handlers.NewSubscriptionHandler(service)
+    HealthCheckHandler := handlers.NewHealthCheckHandler(service)
+    ApiCollectionHandler := handlers.NewApiCollectionHandler(service) // New handler for API collections
 
+    // Middleware
+    router.Use(CORSMiddleware())
 
+    // Root route
+    router.GET("/", ApiHandler.HandleRequest)
 
-	router.GET("/", ApiHandler.HandleRequest)
-	router.Use(CORSMiddleware())
-	// router.GET("/get-all", myHandler.HandleGetAllRequest)
+    // API routes
+    apisGroup := router.Group("/apis")
+    {
+        apisGroup.POST("/", ApiHandler.CreateApi)
+        apisGroup.GET("/", ApiHandler.GetAllApis)
+        apisGroup.GET("/:id", ApiHandler.GetApi)
+        apisGroup.PATCH("/:id", ApiHandler.UpdateApi)
+        apisGroup.DELETE("/:id", ApiHandler.DeleteApi)
+    }
 
+    // API Docs routes
+    apisDocsGroup := router.Group("/apis-docs")
+    {
+        apisDocsGroup.POST("/", ApiHandler.CreateApi)
+        apisDocsGroup.GET("/:api-id", ApiHandler.GetApi)
+        apisDocsGroup.PATCH("/:id", ApiHandler.UpdateApi)
+        apisDocsGroup.DELETE("/:id", ApiHandler.DeleteApi)
+    }
 
-	// Grouping under "/apis/"
-	apisGroup := router.Group("/apis")
+    // Category routes
+    categoriesGroup := router.Group("/categories")
+    {
+        categoriesGroup.POST("/", CategoryHandler.CreateCategory)
+        categoriesGroup.GET("/", CategoryHandler.GetAllCategories)
+        categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)
+        categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory)
+    }
 
-	// API CRUD routes
-	apisGroup.POST("/", ApiHandler.CreateApi)
-	apisGroup.GET("/", ApiHandler.GetAllApis)
-	apisGroup.GET("/:id", ApiHandler.GetApi)
-	apisGroup.PATCH("/:id", ApiHandler.UpdateApi)
-	apisGroup.DELETE("/:id", ApiHandler.DeleteApi)
+    // Endpoints routes
+    endpointsGroup := router.Group("/endpoints")
+    {
+        endpointsGroup.POST("/", EndpointsHandler.CreateApiEndpoints)
+        endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointss)
+        endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints)
+        endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
+    }
 
+    // Endpoints Group routes
+    endpointsGroupGroup := router.Group("/endpoints-group")
+    {
+        endpointsGroupGroup.POST("/", EndpointsHandler.CreateEndpointsGroup)
+        endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
+        endpointsGroupGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup)
+        endpointsGroupGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
+    }
 
-		// Grouping under "/apis/"
-	apisDocsGroup := router.Group("/apis-docs")
+    // Endpoints Parameter routes
+    endpointsParameterGroup := router.Group("/endpoints-parameter")
+    {
+        endpointsParameterGroup.POST("/", EndpointsHandler.CreateEndpointsParameter)
+        endpointsParameterGroup.GET("/:api-id", EndpointsHandler.GetEndpointParameters)
+        endpointsParameterGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter)
+        endpointsParameterGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
+    }
 
-		// API CRUD routes
-		apisDocsGroup.POST("/", ApiHandler.CreateApi)
-		apisDocsGroup.GET("/:api-id", ApiHandler.GetApi)
-		apisDocsGroup.PATCH("/:id", ApiHandler.UpdateApi)
-		apisDocsGroup.DELETE("/:id", ApiHandler.DeleteApi)
+    // Health Check routes
+    healthCheckGroup := router.Group("/health-checks")
+    {
+        healthCheckGroup.POST("/", HealthCheckHandler.CreateHealthCheck)
+        healthCheckGroup.GET("/:api-id", HealthCheckHandler.GetHealthCheck)
+        healthCheckGroup.PATCH("/:id", HealthCheckHandler.UpdateHealthCheck)
+        healthCheckGroup.DELETE("/:id", HealthCheckHandler.DeleteHealthCheck)
+        healthCheckGroup.GET("/:api-id/success-percentage", HealthCheckHandler.GetHealthCheckSuccessPercentage)
+    }
 
-	// CRUD routes for categories under "/apis/"
-	categoriesGroup := router.Group("/categories")
-	categoriesGroup.POST("/", CategoryHandler.CreateCategory)
-	categoriesGroup.GET("/", CategoryHandler.GetAllCategories)
-	//categoriesGroup.GET("/get-one/:id", CategoryHandler.GetApi) // Uncomment if needed
-	categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)
-	categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory)
+    // Plan routes
+    planGroup := router.Group("/plans")
+    {
+        planGroup.POST("/", PlanHandler.CreateApiPlan)
+        planGroup.GET("/:api-id", PlanHandler.GetApiPlans)
+        planGroup.PATCH("/:id", PlanHandler.UpdateApiPlan)
+        planGroup.DELETE("/:id", PlanHandler.DeleteApiPlan)
+    }
 
+    // Subscription routes
+    subscriptionsGroup := router.Group("/subscriptions")
+    {
+        subscriptionsGroup.GET("/", SubscriptionHandler.GetApiSubscriptions)
+        subscriptionsGroup.POST("/", SubscriptionHandler.CreateApiSubscription)
+        subscriptionsGroup.GET("/:subscriptionId", SubscriptionHandler.UpdateApiSubscription)
+        subscriptionsGroup.DELETE("/:subscriptionId", SubscriptionHandler.DeleteApiSubscription)
+    }
 
-
-	// CRUD routes for endpoints under "/apis/"
-	endpointsGroup := router.Group("/endpoints")
-	endpointsGroup.POST("/", EndpointsHandler.CreateApiEndpoints)
-	endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointss)
-	endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints)
-	endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
-
-	
-
-	// CRUD routes for endpoints groups under "/endpoints-group"
-	endpointsGroupGroup := router.Group("/endpoints-group")
-	endpointsGroupGroup.POST("/", EndpointsHandler.CreateEndpointsGroup)
-	endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
-	endpointsGroupGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup)
-	endpointsGroupGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
-
-	// Routes for Endpoints Parameter CRUD operations
-	endpointsParameterGroup := router.Group("/endpoints-parameter")
-	endpointsParameterGroup.POST("/", EndpointsHandler.CreateEndpointsParameter)
-	endpointsParameterGroup.GET("/:api-id", EndpointsHandler.GetEndpointParameters)
-	endpointsParameterGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter)
-	endpointsParameterGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
-
-
-
-
-
-	
-	healthCareGroup := router.Group("/health-checks")
-		// Health Checks CRUD routes
-		healthCareGroup.POST("/health-checks", healthCheckHandler.CreateHealthCheck)
-		healthCareGroup.GET("/health-checks/:api-id", healthCheckHandler.GetHealthCheck)
-		healthCareGroup.PATCH("/health-checks/:id", healthCheckHandler.UpdateHealthCheck)
-		healthCareGroup.DELETE("/health-checks/:id", healthCheckHandler.DeleteHealthCheck)
-		healthCareGroup.GET("/health-checks/:api-id/success-percentage", healthCheckHandler.GetHealthCheckSuccessPercentage)
-	
-	// Grouping under "/subscriptions/"
-
-	subscriptionsGroup := router.Group("/subscriptions")
-
-	// Api plan for an Api 
-	plan := router.Group("/plans")
-	plan.POST("/", PlanHandler.CreateApiPlan)
-	plan.GET("/:api-id", PlanHandler.GetApiPlans)
-	plan.PATCH("/:id", PlanHandler.UpdateApiPlan)
-	plan.DELETE("/:id", PlanHandler.DeleteApiPlan)
-
-	subscriptionsGroup.GET("/", SubscriptionHandler.GetApiSubscriptions)
-	subscriptionsGroup.POST("/", SubscriptionHandler.CreateApiSubscription)
-	subscriptionsGroup.GET("/:subscriptionId", SubscriptionHandler.UpdateApiSubscription)
-	subscriptionsGroup.DELETE("/:subscriptionId", SubscriptionHandler.DeleteApiSubscription	)
-
-
+    // API Collection routes
+    apiCollectionGroup := router.Group("/api-collections")
+    {
+        apiCollectionGroup.POST("/", ApiCollectionHandler.CreateCollection)
+        apiCollectionGroup.GET("/", ApiCollectionHandler.GetCollections)
+        apiCollectionGroup.PATCH("/:id", ApiCollectionHandler.UpdateCollection)
+        apiCollectionGroup.DELETE("/:id", ApiCollectionHandler.DeleteCollection)
+        apiCollectionGroup.POST("/:id/addApis", ApiCollectionHandler.AddApisToCollection)
+        apiCollectionGroup.POST("/:id/removeApis", ApiCollectionHandler.RemoveApisFromCollection)
+    }
 }
+
 
 
 func CORSMiddleware() gin.HandlerFunc {

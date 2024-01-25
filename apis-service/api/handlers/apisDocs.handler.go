@@ -31,12 +31,12 @@ func (h *ApiDocsHandler) HandleRequest(c *gin.Context) {
 // @Description Creates a new APIDocs from the provided data
 // @Accept json
 // @Produce json
-// @Tags ApiDocss Operations
+// @Tags ApiDocs Operations
 // @Param apiDocs body types.ApiDocsDto true "APIDocs Data"
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /apiDocss [post]
+// @Router /apiDocs [post]
 func (h *ApiDocsHandler) CreateApiDocs(c *gin.Context) {
 	var apiDocs types.ApiDocsDto // Replace with your actual model
 	if err := c.ShouldBindJSON(&apiDocs); err != nil {
@@ -61,11 +61,11 @@ func (h *ApiDocsHandler) CreateApiDocs(c *gin.Context) {
 // @Description Retrieve APIDocs details based on the provided ID.
 // @ID get-apiDocs-by-id
 // @Produce json
-// @Tags ApiDocss Operations
+// @Tags ApiDocs Operations
 // @Param id path int true "APIDocs ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} error
-// @Router /apiDocss/{api-id} [get]
+// @Router /apiDocs/{api-id} [get]
 func (h *ApiDocsHandler) GetApiDocs(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -94,13 +94,13 @@ func (h *ApiDocsHandler) GetApiDocs(c *gin.Context) {
 // @Description Updates the APIDocs with the given ID
 // @Accept json
 // @Produce json
-// @Tags ApiDocss Operations
+// @Tags ApiDocs Operations
 // @Param id path int true "APIDocs ID"
 // @Param apiDocs body types.UpdateApiDocsDto true "APIDocs Data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /apiDocss/{id} [put]
+// @Router /apiDocs/{id} [put]
 func (h *ApiDocsHandler) UpdateApiDocs(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -136,13 +136,13 @@ func (h *ApiDocsHandler) UpdateApiDocs(c *gin.Context) {
 // @Summary Delete APIDocs by ID
 // @Description Deletes the APIDocs with the provided ID
 // @Produce json
-// @Tags ApiDocss Operations
+// @Tags ApiDocs Operations
 // @Param id path int true "APIDocs ID"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /apiDocss/{id} [delete]
+// @Router /apiDocs/{id} [delete]
 func (h *ApiDocsHandler) DeleteApiDocs(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
