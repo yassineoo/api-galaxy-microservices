@@ -1,0 +1,43 @@
+// sms.proto
+syntax = "proto3";
+
+package sms;
+
+service SmsService {
+    rpc InitPhoneNumberVerification (PhoneNumberRequest) returns (VerificationResponse);
+    rpc VerifyPhoneNumber (PhoneNumberVerificationRequest) returns (VerifyResponse);
+  }
+
+
+message PhoneNumberRequest {
+  string phoneNumber = 1;
+}
+
+message PhoneNumberVerificationRequest {
+  string phoneNumber = 1;
+  string otp = 2;
+}
+
+message VerificationResponse {
+  string status = 1;
+}
+
+message VerifyResponse {
+  bool status = 1;
+}
+  
+service EmailService {
+    rpc SendResetPasswordEmail (VerificationRequest) returns (EmailResponse);
+    rpc SendVerificationEmail (VerificationRequest) returns (EmailResponse);
+}
+  
+message VerificationRequest {
+    string email = 1;
+    string name = 2;
+    string token = 3;
+}
+  
+message EmailResponse {
+    bool status = 1;
+}
+  

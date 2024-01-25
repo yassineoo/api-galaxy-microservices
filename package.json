@@ -7,22 +7,28 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
     "build": "tsc",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "grpc:gen": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:./generated --grpc_out=grpc_js:./generated --plugin=protoc-gen-grpc=$(which grpc_tools_node_protoc_plugin) --ts_out=grpc_js:./generated -I ./protos ./protos/your_proto_file.proto"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@grpc/grpc-js": "^1.9.14",
     "@prisma/client": "^5.8.1",
+    "@types/morgan": "^1.9.9",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.3.2",
     "express": "^4.18.2",
     "joi": "^17.11.1",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "prisma": "^5.8.1",
     "random-bytes": "^1.0.0",
-    "swagger": "^0.7.5"
+    "rxjs": "^7.8.1",
+    "swagger": "^0.7.5",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -30,6 +36,8 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.11.0",
     "@types/random-bytes": "^1.0.3",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
+    "grpc-tools": "^1.12.4",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"

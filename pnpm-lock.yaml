@@ -17,6 +17,12 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
+  grpc-tools:
+    specifier: ^1.12.4
+    version: 1.12.4
+  grpc_tools_node_protoc_ts:
+    specifier: ^5.3.3
+    version: 5.3.3
   joi:
     specifier: ^17.11.1
     version: 17.12.0
@@ -1477,6 +1483,10 @@ packages:
       ini: 1.3.8
     dev: false
 
+  /google-protobuf@3.15.8:
+    resolution: {integrity: sha512-2jtfdqTaSxk0cuBJBtTTWsot4WtR9RVr2rXg7x7OoqiuOKopPrwXpM1G4dXIkLcUNRh3RKzz76C8IOkksZSeOw==}
+    dev: false
+
   /gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
     dependencies:
@@ -1514,6 +1524,38 @@ packages:
 
   /growl@1.9.2:
     resolution: {integrity: sha512-RTBwDHhNuOx4F0hqzItc/siXCasGfC4DeWcBamclWd+6jWtBaeB/SGbMkGf0eiQoW7ib8JpvOgnUsmgMHI3Mfw==}
+    dev: false
+
+  /grpc-tools@1.12.4:
+    resolution: {integrity: sha512-5+mLAJJma3BjnW/KQp6JBjUMgvu7Mu3dBvBPd1dcbNIb+qiR0817zDpgPjS7gRb+l/8EVNIa3cB02xI9JLToKg==}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      '@mapbox/node-pre-gyp': 1.0.11
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: false
+
+  /grpc_tools_node_protoc_ts@5.3.3:
+    resolution: {integrity: sha512-M/YrklvVXMtuuj9kb42PxeouZhs7Ul+R4e/31XwrankUcKL8cQQP50Q9q+KEHGyHQaPt6VtKKsxMgLaKbCxeww==}
+    hasBin: true
+    dependencies:
+      google-protobuf: 3.15.8
+      handlebars: 4.7.7
+    dev: false
+
+  /handlebars@4.7.7:
+    resolution: {integrity: sha512-aAcXm5OAfE/8IXkcZvCepKU3VzW1/39Fb5ZuqMtgI/hT8X2YgoMvBY5dLhq/cpOvw7Lk1nK/UF71aLG/ZnVYRA==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.17.4
     dev: false
 
   /handlebars@4.7.8:

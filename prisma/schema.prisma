@@ -245,23 +245,43 @@ model usagelogs {
 }
 
 model users {
-  UserID                             Int              @id @default(autoincrement())
-  Username                           String           @db.VarChar(255)
-  Email                              String           @unique(map: "Email") @db.VarChar(255)
-  PasswordHash                       String           @db.Char(60)
-  DateCreated                        DateTime?        @default(now()) @db.DateTime(0)
-  LastLogin                          DateTime?        @db.DateTime(0)
-  IsActive                           Boolean?         @default(true)
-  IsTwoFactor                        Boolean?         @default(false)
+  UserID                             Int                    @id @default(autoincrement())
+  Username                           String                 @db.VarChar(255)
+  Email                              String                 @unique(map: "Email") @db.VarChar(255)
+  PasswordHash                       String                 @db.Char(60)
+  DateCreated                        DateTime?              @default(now()) @db.DateTime(0)
+  LastLogin                          DateTime?              @db.DateTime(0)
+  IsActive                           Boolean?               @default(true)
+  IsTwoFactor                        Boolean?               @default(false)
+  role                               String?                @db.VarChar(50)
   apiratings                         apiratings[]
   apis                               apis[]
   billinghistory                     billinghistory[]
   comments                           comments[]
-  follows_follows_FollowerIDTousers  follows[]        @relation("follows_FollowerIDTousers")
-  follows_follows_FollowingIDTousers follows[]        @relation("follows_FollowingIDTousers")
+  follows_follows_FollowerIDTousers  follows[]              @relation("follows_FollowerIDTousers")
+  follows_follows_FollowingIDTousers follows[]              @relation("follows_FollowingIDTousers")
+  moderatorpermissions               moderatorpermissions[]
   paymentmethods                     paymentmethods[]
   postlikes                          postlikes[]
   posts                              posts[]
   profiles                           profiles[]
   subscriptions                      subscriptions[]
+}
+
+model permissions {
+  PermissionID         Int                    @id @default(autoincrement())
+  Name                 String                 @db.VarChar(255)
+  Description          String?                @db.Text
+  moderatorpermissions moderatorpermissions[]
+}
+
+model moderatorpermissions {
+  ModeratorPermissionID Int          @id @default(autoincrement())
+  UserID                Int?
+  PermissionID          Int?
+  users                 users?       @relation(fields: [UserID], references: [UserID], onDelete: Restrict, onUpdate: Restrict, map: "moderatorpermissions_ibfk_1")
+  permissions           permissions? @relation(fields: [PermissionID], references: [PermissionID], onDelete: Restrict, onUpdate: Restrict, map: "moderatorpermissions_ibfk_2")
+
+  @@index([PermissionID], map: "PermissionID")
+  @@index([UserID], map: "UserID")
 }

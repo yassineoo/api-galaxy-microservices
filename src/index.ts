@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import authRouter from './routes/authRouter';
-import UAMRouter from './routes/UAMRouter';
+import UAMRouter from './routes/UPermissionRouter';
 
 
 

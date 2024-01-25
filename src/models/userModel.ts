@@ -17,7 +17,7 @@ export const AddUser = async (data: { Username: string; Email: string; PasswordH
     return user;
 }
 
-export const UpdateUser = async (id: number, data: any) => {
+export const updateUser = async (id: number, data: any) => {
     const updatedUser = await prismaClientSingleton.users.update({
         where: {
             UserID: id
@@ -35,6 +35,11 @@ export const getUserById = async (id: number) => {
         }
     });
     return user;
+}
+
+export const getAllUsers = async () => {   
+    const users = await prismaClientSingleton.users.findMany();
+    return users;
 }
 
 export const getUserByEmail = async (email: string) => {
@@ -97,7 +102,7 @@ export const deleteUser = async (id: number) => {
         return transaction;
     } catch (error) {
         console.error("Error in deleteUser transaction:", error);
-        throw error; 
+        throw error;
     }
 }
 
@@ -112,7 +117,6 @@ export const getHashedPassword = async (id: number) => {
     });
     return user ? user.PasswordHash : null;
 }
-
 
 
 
