@@ -77,7 +77,7 @@ export const getPermissions = async (id: number) => {
     return moderatorpermissions;
 }
 
-export const deleteUserPermission = async (data: { userId: number, permissionId: number }) => {
+export const deletePermission = async (data: { userId: number, permissionId: number }) => {
     const { userId, permissionId } = data;
 
     if (!userId || !permissionId) {
@@ -103,7 +103,7 @@ export const deleteUserPermission = async (data: { userId: number, permissionId:
 }
 
 
-export const deleteAllmoderatorpermissions = async (id: number) => {
+export const deleteAllPermissions = async (id: number) => {
     if (!id) {
         throw new Error("User parameter is undefined");
     }

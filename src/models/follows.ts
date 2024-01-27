@@ -1,11 +1,13 @@
 import { prismaClientSingleton } from '../utils/prismaClient';
-import { getUserById } from './userModel';
+import userModel from './userModel';
 const currentDate: Date = new Date();
 
 
-export const addFollower = async (data: { userId: number; followerId: number; }) => {
+export default class followsModel {
+
+static addFollower = async (data: { userId: number; followerId: number; }) => {
     const { userId, followerId } = data;
-    const user = await getUserById(userId);
+    const user = await userModel.getUserById(userId);
     if ((!user) || (userId === followerId)) {
         throw new Error("User not found");
     }
@@ -26,4 +28,6 @@ export const addFollower = async (data: { userId: number; followerId: number; })
     } catch (error) {
         console.error('Error creating follow relation: ', error);
     }
+}
+
 }

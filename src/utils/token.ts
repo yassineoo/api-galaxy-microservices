@@ -40,8 +40,20 @@ const generateAuthToken = (
 };
 
 //this is the function that will decode the token 
-const decodeAuthToken = (token: string, tokenSecret: string): string | object => {
-  return jwt.verify(token, tokenSecret);
+const decodeAuthToken = (token: string, tokenSecret: string): TokenData | string => {
+  try {
+      // Attempt to verify and decode the token
+      const decoded = jwt.verify(token, tokenSecret) as TokenData;
+      return decoded;
+  } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+          return "Token has expired";
+      } else if (error instanceof jwt.JsonWebTokenError) {
+          return "Invalid token";
+      } else {
+          return "Token verification failed";
+      }
+  }
 };
 
 export { hashPassword, checkPassword, generateAuthToken, decodeAuthToken };

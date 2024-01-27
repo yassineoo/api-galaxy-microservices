@@ -1,28 +1,96 @@
 import { NextFunction, Request, Response } from 'express'
 import { decodeAuthToken } from '../utils/token';
+import { statusCodes } from '../utils/http';
+import { getPermissions } from '../models/permissions';
+import userService from '../services/UAMService';
 
 require('dotenv').config();
 const tokenSecret = process.env.TOKEN_SECRET;
 
-export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
+
+export const verifyRole = (allowedRoles: string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = req.headers.authorization?.split(' ')[1];
+            if (!token) {
+                return res.status(statusCodes.unauthorized).send('No token provided');
+            }
+
+            const tokenData = decodeAuthToken(token, tokenSecret || "");
+            if (typeof tokenData === 'string') {
+                return res.status(statusCodes.unauthorized).send(tokenData);
+            }
 
 
+            const userRole = await userService.getUserRole(tokenData.userId);
+
+            if (userRole === null) {
+                return res.status(statusCodes.unauthorized).send('User role not found');
+            }
+            if (allowedRoles.includes(userRole)) {
+                return res.status(statusCodes.forbidden).send('Insufficient permissions');
+            }
+
+            next();
+        } catch (error: any) {
+            res.status(401).send(error instanceof Error ? error.message : 'Authentication failed');
+        }
+    };
+};
+
+export const verifyAuthWithId = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
-            throw new Error('No token provided');
+            return res.status(statusCodes.unauthorized).send('No token provided');
         }
 
-        const tokenData  = decodeAuthToken(token, tokenSecret || "");
-
-        if (!tokenData) {
-            throw new Error('Invalid token');
+        const tokenData = decodeAuthToken(token, tokenSecret || "");
+        if (typeof tokenData === 'string') {
+            return res.status(statusCodes.unauthorized).send(tokenData);
         }
 
-        
+        const id = tokenData.userId;
+        if (!id) {
+            return res.status(statusCodes.unauthorized).send('User not found');
+        }
+
+        const user = await userService.getUserById(id);
+            if (user?.role === "userClient" || user?.role === "APIClient") {
+                if (id !== parseInt(req.params.id)) {
+                    return res.status(statusCodes.forbidden).send('Insufficient permissions');
+                }
+            }
+        next();
+    } catch (error: any) {
+        res.status(401).send(error instanceof Error ? error.message : 'Authentication failed');
     }
-    catch (error:any) {
-        res.status(401).send(error.message);
-        return;
+};
+
+export const verifyModeratorPermissions = async (req: Request, res: Response, next: NextFunction, permissions: Array<string>) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(statusCodes.unauthorized).send('No token provided');
+        }
+
+        const tokenData = decodeAuthToken(token, tokenSecret || "");
+        if (typeof tokenData === 'string') {
+            return res.status(statusCodes.unauthorized).send(tokenData);
+        }
+
+        const userPermissions = await getPermissions(tokenData.userId);
+        if (!userPermissions) {
+            return res.status(statusCodes.forbidden).send('Insufficient permissions');
+        }
+
+        const hasPermission = userPermissions.some((permission: any) => permissions.includes(permission.Name));
+        if (!hasPermission) {
+            return res.status(statusCodes.forbidden).send('Insufficient permissions');
+        }
+
+        next();
+    } catch (error: any) {
+        res.status(401).send(error instanceof Error ? error.message : 'Authentication failed');
     }
-}
+};

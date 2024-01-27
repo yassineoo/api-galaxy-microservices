@@ -1,6 +1,6 @@
 
 export type Permission = 'viewContent' | 'editContent' | 'deleteContent' | 'addContent' | 'manageUsers' | 'manageRoles';
-export type Role = 'superadmin' | 'admin' | 'moderator' | 'user';
+export type Role =  'admin' | 'moderator' | 'userClient' | 'userProvider';
 
 interface RolePermissions {
     [role: string]: Permission[];

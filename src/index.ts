@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import authRouter from './routes/authRouter';
-import UAMRouter from './routes/UPermissionRouter';
+import userRouter from './routes/userRouter';
 
 
 
@@ -11,7 +11,7 @@ const port = 3000;
 
 
 app.use(bodyParser.json());
-app.use("/UAM", UAMRouter);
+app.use("/user", userRouter);
 
 app.use("/", authRouter);
 
