@@ -12,6 +12,8 @@ type ApiDto struct {
 	Name        string
 	ProviderID  int
 	ImagePath   string
+	ApiUrl 		string
+	Keywords 	string
 	Description string
 	CategoryID  int
 	Status		string	// Add other fields as needed...

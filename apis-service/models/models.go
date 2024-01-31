@@ -30,7 +30,10 @@ type ApiEntity struct {
 	Name        string `gorm:"size:255;not null"`
 	ImagePath   string
 	Description string
-	CategoryID  int             `gorm:"null"`
+	Keywords 	string 
+	
+	ApiUrl 		string
+	CategoryID  int             `gorm:"null"`                                                                     
 	Collections []ApiCollectionEntity `gorm:"many2many:api_collections_apis;"` // many-to-many relationship
 	Status      typesglobale.ApiStatus `gorm:"type:varchar(20);default:'active'"`
 
@@ -100,10 +103,11 @@ type EndpointsEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
 	GroupID       int    `gorm:"not null"`
 	Methode     string `gorm:"size:255;not null"`
-	Group       string `gorm:"size:255;not null"`
+	
 	Url         string `gorm:"size:255;not null"`
 	Description string
-
+	
+	Group       EndpointsGroupEntity      `gorm:"foreignKey:GroupID"`  // Add this line
 	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"` // query, header,Path ,  body
 	BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID"`  // One-to-one relationship with foreign key
 	// Add other fields as needed...

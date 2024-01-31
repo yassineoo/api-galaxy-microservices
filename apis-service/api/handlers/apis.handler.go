@@ -201,6 +201,7 @@ func (h *ApiHandler) DeleteApi(c *gin.Context) {
 		   if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         } else {
+			log.Println("Error creating API:", err)
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
         }
         return

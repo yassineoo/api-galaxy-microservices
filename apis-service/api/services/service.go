@@ -92,6 +92,8 @@ func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEnt
 	newApi := models.ApiEntity{
 		ProviderID:  item.ProviderID,
 		Name:        item.Name,
+        ApiUrl:      item.ApiUrl,
+        Keywords:    item.Keywords,
 		ImagePath:   item.ImagePath,
 		Description: item.Description,
 		CategoryID:  item.CategoryID,

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -37,6 +38,8 @@ func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
 
     result, err := h.service.CreateApiEndpoints(c, endpoint)
     if err != nil {
+        log.Println("Error ", err)
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Endpoints"})
         return
     }
@@ -52,15 +55,20 @@ func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Router /endpoints/:api-id [get]
-func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
+func (h *EndpointsHandler) GetApiEndpoints(c *gin.Context) {
     apiID, err := strconv.Atoi(c.Param("api-id"))
     if err != nil {
+        log.Println("Error ", err)
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID"})
         return
     }
 
-    endpointss, err := h.service.GetApiEndpointss(c, apiID)
+    endpointss, err := h.service.GetApiEndpoints(c, apiID)
     if err != nil {
+        log.Println("Error ", err)
+        
+        log.Println("Error fetching  API Endpoints:", err)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching API Endpointss"})
         return
     }
@@ -82,6 +90,8 @@ func (h *EndpointsHandler) GetApiEndpointss(c *gin.Context) {
 func (h *EndpointsHandler) UpdateApiEndpoints(c *gin.Context) {
     endpointsID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints ID"})
         return
     }
@@ -94,6 +104,8 @@ func (h *EndpointsHandler) UpdateApiEndpoints(c *gin.Context) {
 
     updatedEndpoints, err := h.service.UpdateApiEndpoints(c, endpointsID, endpoints)
     if err != nil {
+        log.Println("Error ", err)
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API Endpoints"})
         return
     }
@@ -114,12 +126,16 @@ func (h *EndpointsHandler) UpdateApiEndpoints(c *gin.Context) {
 func (h *EndpointsHandler) DeleteApiEndpoints(c *gin.Context) {
     endpointsID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints ID"})
         return
     }
 
     err = h.service.DeleteApiEndpoints(c, endpointsID)
     if err != nil {
+        log.Println("Error ", err)
+        
         if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         } else {
@@ -182,6 +198,9 @@ func (h *EndpointsHandler) CreateEndpointsGroup(c *gin.Context) {
 
     result, err := h.service.CreateEndpointsGroup(c, endpointsGroup)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating Endpoints Group"})
         return
     }
@@ -201,12 +220,18 @@ func (h *EndpointsHandler) CreateEndpointsGroup(c *gin.Context) {
 func (h *EndpointsHandler) GetApiEndpointsGroups(c *gin.Context) {
     apiID, err := strconv.Atoi(c.Param("api-id"))
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID"})
         return
     }
 
     endpointsGroups, err := h.service.GetApiGroups(c, apiID)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching Endpoints Groups"})
         return
     }
@@ -228,6 +253,9 @@ func (h *EndpointsHandler) GetApiEndpointsGroups(c *gin.Context) {
 func (h *EndpointsHandler) UpdateEndpointsGroup(c *gin.Context) {
     endpointsGroupID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Group ID"})
         return
     }
@@ -240,6 +268,9 @@ func (h *EndpointsHandler) UpdateEndpointsGroup(c *gin.Context) {
 
     updatedEndpointsGroup, err := h.service.UpdateEndpointsGroup(c, endpointsGroupID, endpointsGroup)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating Endpoints Group"})
         return
     }
@@ -260,12 +291,18 @@ func (h *EndpointsHandler) UpdateEndpointsGroup(c *gin.Context) {
 func (h *EndpointsHandler) DeleteEndpointsGroup(c *gin.Context) {
     endpointsGroupID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Group ID"})
         return
     }
 
     err = h.service.DeleteEndpointsGroup(c, endpointsGroupID)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         } else {
@@ -317,6 +354,9 @@ func (h *EndpointsHandler) CreateEndpointsParameter(c *gin.Context) {
 
     result, err := h.service.CreateEndpointsParameter(c, endpointsParameter)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating Endpoints Parameter"})
         return
     }
@@ -336,12 +376,18 @@ func (h *EndpointsHandler) CreateEndpointsParameter(c *gin.Context) {
 func (h *EndpointsHandler) GetEndpointParameters(c *gin.Context) {
     endpointID, err := strconv.Atoi(c.Param("endpoint-id"))
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoint ID"})
         return
     }
 
     endpointsParameters, err := h.service.GetEndpointParameter(c, endpointID)
     if err != nil {
+        log.Println("Error ", err)
+
+        
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching Endpoints Parameters"})
         return
     }
@@ -371,6 +417,8 @@ func (h *EndpointsHandler) GetEndpointParameters(c *gin.Context) {
 func (h *EndpointsHandler) UpdateEndpointsParameter(c *gin.Context) {
     endpointsParameterID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Parameter ID"})
         return
     }
@@ -383,6 +431,8 @@ func (h *EndpointsHandler) UpdateEndpointsParameter(c *gin.Context) {
 
     updatedEndpointsParameter, err := h.service.UpdateEndpointsParameter(c, endpointsParameterID, endpointsParameter)
     if err != nil {
+        log.Println("Error ", err)
+
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating Endpoints Parameter"})
         return
     }
@@ -411,12 +461,16 @@ func (h *EndpointsHandler) UpdateEndpointsParameter(c *gin.Context) {
 func (h *EndpointsHandler) DeleteEndpointsParameter(c *gin.Context) {
     endpointsParameterID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
+        log.Println("Error ", err)
+
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Endpoints Parameter ID"})
         return
     }
 
     err = h.service.DeleteEndpointsParameter(c, endpointsParameterID)
     if err != nil {
+        log.Println("Error ", err)
+
         if strings.Contains(err.Error(), "not found") {
             c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         } else {

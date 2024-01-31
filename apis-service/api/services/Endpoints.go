@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"local_packages/api/types"
 	"local_packages/models"
+	"log"
 
 	"gorm.io/gorm"
 )
@@ -23,6 +24,10 @@ import (
 
 
 func (s *Service) CreateEndpointsGroup(ctx context.Context, endpointsGroup types.EndpointsGroupDto) (*models.EndpointsGroupEntity, error) {
+    log.Println("CreateEndpointsGroup ===============================")
+    log.Println("CreateEndpointsGroup ===============================")
+    log.Println("CreateEndpointsGroup ===============================")
+    log.Println(endpointsGroup.Group)
     newEndpointsGroup := models.EndpointsGroupEntity{ 
 		Group:  endpointsGroup.Group,
 		ApiID: endpointsGroup.ApiID,
@@ -121,9 +126,9 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Endpoi
 
 		newEndpoints := models.EndpointsEntity{
 			Methode: endpoints.Methode,
-			Group: endpoints.Group,
 			Url: endpoints.Url,
 			Description: endpoints.Description,
+           
 		}
 
 	  // If GroupID is not provided, fetch the default GroupID based on ApiID
@@ -148,20 +153,24 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Endpoi
 func (s *Service) getDefaultGroupByApiID(ctx context.Context, apiID int) (*models.EndpointsGroupEntity, error) {
     var defaultGroup models.EndpointsGroupEntity
 
-    // Adjust the logic based on how you define the default group (e.g., where conditions)
-    if err := s.gormDB.Where("api_id = ? AND is_default = true", apiID).First(&defaultGroup).Error; err != nil {
-        return nil, err
-    }
+ // Adjust the logic based on how you define the default group (e.g., where conditions)
+if err := s.gormDB.Where("api_id = ? AND \"group\" = ?", apiID, "Default").First(&defaultGroup).Error; err != nil {
+    return nil, err
+}
+
 
     return &defaultGroup, nil
 }
 
-func (s *Service) GetApiEndpointss(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
+func (s *Service) GetApiEndpoints(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
     var endpointss []models.EndpointsEntity
-
-    if err := s.gormDB.Where("api_id = ?", apiID).Find(&endpointss).Error; err != nil {
+    if err := s.gormDB.
+        Preload("Group").
+        Where("group_id = ?", apiID).
+        Find(&endpointss).Error; err != nil {
         return nil, err
     }
+
 
     return endpointss, nil
 }
@@ -181,9 +190,6 @@ func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpo
 }
     if endpointsDto.Methode != "" {
     existingEndpoints.Methode = endpointsDto.Methode
-}
-    if endpointsDto.Group != "" {
-    existingEndpoints.Group = endpointsDto.Group
 }
 
     if endpointsDto.Description != "" {
