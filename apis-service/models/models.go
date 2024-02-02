@@ -101,12 +101,12 @@ type EndpointsGroupEntity struct {
 
 type EndpointsEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
-	GroupID       int    `gorm:"not null"`
+	GroupID       int   `gorm:"not null"`
 	Methode     string `gorm:"size:255;not null"`
 	
 	Url         string `gorm:"size:255;not null"`
 	Description string
-	
+
 	Group       EndpointsGroupEntity      `gorm:"foreignKey:GroupID"`  // Add this line
 	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"` // query, header,Path ,  body
 	BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID"`  // One-to-one relationship with foreign key

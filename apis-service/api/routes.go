@@ -20,7 +20,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     ApiCollectionHandler := handlers.NewApiCollectionHandler(service) // New handler for API collections
 
     // Middleware
-    router.Use(CORSMiddleware())
+    //router.Use(CORSMiddleware())
 
     // Root route
     router.GET("/", ApiHandler.HandleRequest)
