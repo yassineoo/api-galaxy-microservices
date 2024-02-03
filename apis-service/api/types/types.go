@@ -55,9 +55,10 @@ type  EndpointsDto struct {
 	ApiID  int
 	GroupID  int
 	Methode string
-	Group string
+	Name string
 	Url string
 	Description string
+	Parameters []EndpointsParameterDto
 	// Add other fields as needed...
 }
 

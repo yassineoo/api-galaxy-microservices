@@ -20,7 +20,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     ApiCollectionHandler := handlers.NewApiCollectionHandler(service) // New handler for API collections
 
     // Middleware
-    //router.Use(CORSMiddleware())
+    router.Use(CORSMiddleware())
 
     // Root route
     router.GET("/", ApiHandler.HandleRequest)
@@ -75,7 +75,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     endpointsParameterGroup := router.Group("/endpoints-parameter")
     {
         endpointsParameterGroup.POST("/", EndpointsHandler.CreateEndpointsParameter)
-        endpointsParameterGroup.GET("/:api-id", EndpointsHandler.GetEndpointParameters)
+        endpointsParameterGroup.GET("/:endpoint-id", EndpointsHandler.GetEndpointParameters)
         endpointsParameterGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter)
         endpointsParameterGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
     }

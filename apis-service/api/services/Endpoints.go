@@ -121,32 +121,52 @@ func (s *Service) DeleteEndpointsGroup(ctx context.Context, id int) error {
 // ----------------------------- API Endpoints CRUD -----------------------------
 // ----------------------------- API Endpoints CRUD -----------------------------
 
+// ...
+
 func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.EndpointsDto) (*models.EndpointsEntity, error) {
-   
+    newEndpoints := models.EndpointsEntity{
+        Name:        endpoints.Name,
+        Methode:     endpoints.Methode,
+        Url:         endpoints.Url,
+        Description: endpoints.Description,
+    }
 
-		newEndpoints := models.EndpointsEntity{
-			Methode: endpoints.Methode,
-			Url: endpoints.Url,
-			Description: endpoints.Description,
-           
-		}
-
-	  // If GroupID is not provided, fetch the default GroupID based on ApiID
-	  if endpoints.GroupID == 0 {
+    // If GroupID is not provided, fetch the default GroupID based on ApiID
+    if endpoints.GroupID == 0 {
         defaultGroup, err := s.getDefaultGroupByApiID(ctx, endpoints.ApiID)
         if err != nil {
             return nil, err
         }
-		newEndpoints.GroupID = defaultGroup.ID
-        //endpoints.GroupID = defaultGroup.ID
+        newEndpoints.GroupID = defaultGroup.ID
     }
-
 
     if err := s.gormDB.Create(&newEndpoints).Error; err != nil {
         return nil, err
     }
+
+    // Create Parameters for each element in the array
+    var params []models.EndpointsParameterEntity
+    for _, paramDto := range endpoints.Parameters {
+        param := models.EndpointsParameterEntity{
+            Key:           paramDto.Key,
+            ValueType:     paramDto.ValueType,
+            ExampleValue:  paramDto.ExampleValue,
+            Required:      paramDto.Required,
+            EndpointID:    newEndpoints.ID, // Set the EndpointID to the newly created endpoint's ID
+            ParameterType: paramDto.ParameterType,
+        }
+        params = append(params, param)
+    }
+
+    if err := s.gormDB.Create(&params).Error; err != nil {
+        return nil, err
+    }
+
     return &newEndpoints, nil
 }
+
+// ...
+
 
 
 // private function  :  getDefaultGroupByApiID fetches the default group by ApiID
