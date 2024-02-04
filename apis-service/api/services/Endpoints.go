@@ -183,16 +183,19 @@ if err := s.gormDB.Where("api_id = ? AND \"group\" = ?", apiID, "Default").First
 }
 
 func (s *Service) GetApiEndpoints(ctx context.Context, apiID int) ([]models.EndpointsEntity, error) {
-    var endpointss []models.EndpointsEntity
+    var endpoints []models.EndpointsEntity
+
+    // Join the EndpointsEntity and EndpointsGroupEntity tables and filter by ApiID
     if err := s.gormDB.
         Preload("Group").
-        Where("group_id = ?", apiID).
-        Find(&endpointss).Error; err != nil {
+        Preload("Parameters").
+        Joins("JOIN endpoints_group_entities ON endpoints_entities.group_id = endpoints_group_entities.id").
+        Where("endpoints_group_entities.api_id = ?", apiID).
+        Find(&endpoints).Error; err != nil {
         return nil, err
     }
 
-
-    return endpointss, nil
+    return endpoints, nil
 }
 
 func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpointsDto types.EndpointsDto) (*models.EndpointsEntity, error) {
@@ -215,6 +218,9 @@ func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpo
     if endpointsDto.Description != "" {
     existingEndpoints.Description = endpointsDto.Description
 }
+    if endpointsDto.GroupID != 0 {
+        existingEndpoints.GroupID = endpointsDto.GroupID
+    }
 
 
     // Add other fields as needed
