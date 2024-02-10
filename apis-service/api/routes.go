@@ -31,6 +31,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
         apisGroup.POST("/", ApiHandler.CreateApi)
         apisGroup.GET("/", ApiHandler.GetAllApis)
         apisGroup.GET("/:id", ApiHandler.GetApi)
+        apisGroup.GET("/user-apis/:user_id", ApiHandler.GetUserAPIs)
         apisGroup.PUT("/:id", ApiHandler.UpdateApi)
         apisGroup.DELETE("/:id", ApiHandler.DeleteApi)
     }

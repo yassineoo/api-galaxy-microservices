@@ -17,6 +17,7 @@ type ApiDto struct {
 	Description string
 	CategoryID  int
 	Status		string	// Add other fields as needed...
+	Visibility  bool
 }
 
 
@@ -50,6 +51,48 @@ type PlanDto struct {
 	LimiteTimeUnit   string
 	Features    string 
 }
+
+type PlansDto struct {
+	ApiID       int
+	PublicPlan  []PublicPlanDto
+	ObjectList  []ObjectListDto
+}
+
+
+
+type PublicPlanDto struct {
+	ID   int
+	Name   string
+	Active   bool
+	Price   float64
+	Rate   int
+	RateUnite   string
+	RecomndedPlan   bool
+	Type   string
+}
+
+type ObjectListDto struct {
+	ID   int
+	Name   string
+	Description   string
+	Cross  []CrossObjectListDto
+	EndpointList []EndpointsObjectDto
+}
+
+type EndpointsObjectDto struct {
+	ID   int
+	Name   string
+}
+
+type CrossObjectListDto struct {
+	ID   int
+	LimitFee   int
+	LimitType   string
+	Price   float64
+	QuotaType   string
+	QuotaValue   float64
+}
+
 
 type  EndpointsDto struct {
 	ApiID  int

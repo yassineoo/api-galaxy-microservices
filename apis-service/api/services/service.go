@@ -8,6 +8,7 @@ import (
 	"local_packages/api/types"
 	"local_packages/models"
 	"local_packages/typesglobale"
+	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"gorm.io/gorm"
@@ -32,14 +33,16 @@ func NewService(db *pgxpool.Pool, gormDB *gorm.DB) *Service {
 }
 
 func (s *Service) GetOne(ctx context.Context, id int) (*models.ApiEntity, error) {
-	// Implement the logic to retrieve an item by ID from the database.
-	// You can use s.db and s.gormDB to interact with the database.
-	// Replace the placeholder logic with your actual database query.
-	var api models.ApiEntity
-	if err := s.gormDB.Where("id = ?", id).First(&api).Error; err != nil {
-		return nil, err
-	}
-	return &api, nil
+    // Implement the logic to retrieve an item by ID from the database.
+    // You can use s.db and s.gormDB to interact with the database.
+    // Replace the placeholder logic with your actual database query.
+
+    var api models.ApiEntity
+    if err := s.gormDB.Preload("ApiDocs").Preload("Category").Where("id = ?", id).First(&api).Error; err != nil {
+        return nil, err
+    }
+
+    return &api, nil
 }
 
 func (s *Service) GetAll(ctx context.Context, page int, limit int) (types.ApiResponse, error) {
@@ -85,6 +88,17 @@ func (s *Service) GetAll(ctx context.Context, page int, limit int) (types.ApiRes
 	return response, nil
 }
 
+func (s *Service) GetUserAPIs(ctx context.Context, userID int) ([]models.ApiEntity, error) {
+    // Retrieve the APIs associated with the specified user ID as the provider
+    var userApis []models.ApiEntity
+    if err := s.gormDB.Where("provider_id = ?", userID).Find(&userApis).Error; err != nil {
+        return nil, err
+    }
+
+    return userApis, nil
+}
+
+
 func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEntity, error) {
 	// Implement the logic to create a new item in the database.
 	// You can use s.db and s.gormDB to interact with the database.
@@ -97,12 +111,27 @@ func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEnt
 		ImagePath:   item.ImagePath,
 		Description: item.Description,
 		CategoryID:  item.CategoryID,
+        Visibility:  item.Visibility,
 		// Set other fields as needed
 	}
 
 	if err := s.gormDB.Create(&newApi).Error; err != nil {
 		return nil, err
 	}
+
+
+    // Create associated ApiDocsEntity with empty content
+	newApiDocs := models.ApiDocsEntity{
+		ApiID:   newApi.ID,
+		Content: newApi.Name + " Docs", // You can set the default content here
+		// Set other fields as needed
+	}
+
+	if err := s.gormDB.Create(&newApiDocs).Error; err != nil {
+		return nil, err
+	}
+
+
     newGroup := models.EndpointsGroupEntity{
         ID: newApi.ID,
         ApiID: newApi.ID,
@@ -140,12 +169,12 @@ func (s *Service) Update(ctx context.Context, id int, item types.ApiDto) (*model
 
 	
 	if item.Status == "active" {
-			api.Status = typesglobale.StatusActive
-		} else {
-			api.Status = typesglobale.StatusInactive
-		}
+	    api.Status = typesglobale.StatusActive
+	} else {
+		api.Status = typesglobale.StatusInactive
+	}
 		
-	 
+    api.Visibility = item.Visibility
 
 
 
@@ -273,27 +302,62 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 // ----------------------------- API Plan CRUD -----------------------------
 // ----------------------------- API Plan CRUD -----------------------------
 
-func (s *Service) CreateApiPlan(ctx context.Context, plan types.PlanDto) (*models.PlanEntity, error) {
-    newPlan := models.PlanEntity{
-        ApiID: plan.ApiID,
-        PlanName: plan.Name,
-        Price: plan.Price,
-        Type: plan.Type,
-        LimiteType: plan.LimiteType,
-        LimiteAmount: plan.LimiteAmount,
-        Description: plan.Description,
-        Recomonded: plan.Recomonded,
-        LimiteTimeUnit: plan.LimiteTimeUnit,
-        Features: plan.Features,
-        // Populate with fields from plan
-        // Example: PlanName: plan.PlanName
+// CreateApiPlan creates new API plans and objects in the database based on the provided DTO
+func (s *Service) CreateApiPlan(ctx context.Context, planDto types.PlansDto) ([]models.PlanEntity, error) {
+    var newPlans []models.PlanEntity
+    var newObjectPlans []models.ObjectPlanEntity
+    
+
+    for _, publicPlanDto := range planDto.PublicPlan {
+        // Convert PublicPlanDto to PlanEntity
+        newPlan := models.PlanEntity{
+            ApiID:         planDto.ApiID,
+            Name:          publicPlanDto.Name,
+            Visibility:    true,
+            Type:          publicPlanDto.Type,
+            Rate:          publicPlanDto.Rate,
+            RateUnite:     publicPlanDto.RateUnite,
+            RecomndedPlan: publicPlanDto.RecomndedPlan,
+            Price:         publicPlanDto.Price,
+            // Add other fields as needed
+        }
+
+        newPlans = append(newPlans, newPlan)
     }
 
-    if err := s.gormDB.Create(&newPlan).Error; err != nil {
-        return nil, err
+    for _, objectListDto := range planDto.ObjectList {
+        // Convert ObjectListDto to ObjectPlanEntity
+        newObjectPlan := models.ObjectPlanEntity{
+            ApiID:        planDto.ApiID,
+            Name:         objectListDto.Name,
+            AllEndpoints: true,
+            Description:  objectListDto.Description,
+            // Add other fields as needed
+        }
+
+        newObjectPlans = append(newObjectPlans, newObjectPlan)
     }
-    return &newPlan, nil
+
+    // Insert plans into the database
+
+        if err := s.gormDB.Create(&newPlans).Error; err != nil {
+            log.Println("Error creating API Plan service:", err)
+            return nil,err
+        }
+    
+
+    // Insert object plans into the database
+
+        if err := s.gormDB.Create(&newObjectPlans).Error; err != nil {
+            log.Println("Error creating API Object Plan service:", err)
+            return nil,err
+        }
+    
+
+    // Return the newly created plans and object plans
+    return newPlans,nil
 }
+
 
 func (s *Service) GetApiPlans(ctx context.Context, apiID int) ([]models.PlanEntity, error) {
     var plans []models.PlanEntity
@@ -313,11 +377,11 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.P
         }
         return nil, err
     }
-
+/*
 
      // Update fields
 	if (planDto.Name  != "") {
-        existingPlan.PlanName = planDto.Name 
+        existingPlan.Name = planDto.Name 
         }
         if (planDto.Type != "") {
     
@@ -352,7 +416,7 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planID int, planDto types.P
             existingPlan.LimiteType = planDto.LimiteType
         }
         //  other fields as needed
-        
+        */
     // Updae fields from planDto
     // ExampleexistingPlan.PlanName = planDto.PlanName if planDto.PlanName != ""
     // Add other fields as needed

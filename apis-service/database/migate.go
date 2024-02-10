@@ -34,6 +34,10 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.HealthCheckEntity{},
 		&models.HealthCheckResultEntity{},
 		&models.BodyParamEntity{},
+		&models.ObjectPlanEntity{},
+		&models.CrossObjectEntity{},
+		&models.EndpointObjectEntity{},
+
 
 		//&models.
 	)

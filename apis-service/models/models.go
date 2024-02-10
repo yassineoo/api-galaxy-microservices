@@ -31,6 +31,7 @@ type ApiEntity struct {
 	ImagePath   string
 	Description string
 	Keywords 	string 
+	Visibility  bool `gorm:"default:false"`
 	
 	ApiUrl 		string
 	CategoryID  int             `gorm:"null"`                                                                     
@@ -43,12 +44,14 @@ type ApiEntity struct {
 
 	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID"`
 	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID"`
-	//Subscriptions []SubscriptionEntity `gorm:"foreignKey:ApiID"`
+	//Subscriptionss []SubscriptionEntity `gorm:"foreignKey:ApiID"`
 	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
 	Plans         []PlanEntity         `gorm:"foreignKey:ApiID"`
+	ObjectPlan	  []ObjectPlanEntity  `gorm:"foreignKey:ApiID"`
 	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
 	ApiDocs   ApiDocsEntity           `gorm:"foreignKey:ApiID"`  // One-to-one relationship with foreign key
 
+	Category    CategoryEntity  `gorm:"foreignKey:CategoryID"`
 }
 
 type ApiDocsEntity struct {
@@ -111,6 +114,7 @@ type EndpointsEntity struct {
 	Group       EndpointsGroupEntity      `gorm:"foreignKey:GroupID"`  // Add this line
 	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"` // query, header,Path ,  body
     BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID"`  // One-to-one relationship with foreign key
+//	Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
 	// Add other fields as needed...
 }
 
@@ -172,22 +176,53 @@ type ApiRatingEntity struct {
 
 
 
-// PlanEntity represents the Plans table
+
+
 type PlanEntity struct {
-	ID int `gorm:"primaryKey;autoIncrement"`
-	//PlanID      int               `gorm:"primaryKey;autoIncrement"`
-	ApiID		 int    `gorm:"not null"`
-	PlanName      string `gorm:"size:255;not null"`
-	Description   string
-	Visibility	  string
-	Type 		  string  // free or paid
-	LimiteType 	  string
-	LimiteAmount           int
-    LimiteTimeUnit         string
-	Recomonded  	bool
-	Price         float64              `gorm:"type:decimal(10,2)"`
-	Features      string               `gorm:"type:json"`
-	Subscriptions []SubscriptionEntity `gorm:"foreignKey:PlanID"`
+	ID             int    `gorm:"primaryKey;autoIncrement"`
+	ApiID          int    `gorm:"not null"`
+	Name           string `gorm:"size:255;not null"`
+	Active		   bool 	
+	Visibility     bool
+	Type           string // free or paid
+	Rate           int
+	RateUnite      string
+	RecomndedPlan  bool
+	Price          float64 `gorm:"type:decimal(10,2)"`
+	Features       string `gorm:"type:text"`
+	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
+}
+
+type ObjectPlanEntity struct {
+	ID 			int    `gorm:"primaryKey;autoIncrement"`
+	ApiID       int    `gorm:"not null"`
+	Name        string `gorm:"size:255;not null"`
+	Description string
+	Cross       []CrossObjectEntity `gorm:"foreignKey:ObjectID"`
+	EndpointList []EndpointObjectEntity `gorm:"foreignKey:ObjectID"`
+	AllEndpoints bool 
+}
+
+
+
+// CrossObjectEntity represents the CrossObjects table
+type CrossObjectEntity struct {
+	ID         int    `gorm:"primaryKey;autoIncrement"`
+	ObjectID   int    `gorm:"not null"`
+	LimitFee   int
+	LimitType  string
+	Price      float64 `gorm:"type:decimal(10,2)"`
+	QuotaType  string
+	QuotaValue float64 `gorm:"type:decimal(10,2)"`
+	// Add other fields related to cross objects
+}
+
+// EndpointObjectEntity represents the EndpointObjects table
+type EndpointObjectEntity struct {
+	ID       int    `gorm:"primaryKey;autoIncrement"`
+	ObjectID int    `gorm:"not null"`
+	EndpointsID int `gorm:"not null"`
+	// Add other fields related to endpoint objects
 }
 
 // SubscriptionEntity represents the Subscriptions table

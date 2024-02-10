@@ -127,6 +127,47 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 	c.JSON(http.StatusOK, api)
 }
 
+
+
+
+// @Summary Get APIs by User ID (Provider ID)
+// @Description Retrieves APIs associated with the specified user ID (Provider ID)
+// @Produce json
+// @Tags Apis Operations
+// @Param user_id path int true "User ID (Provider ID)"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /user-apis/{user_id} [get]
+func (h *ApiHandler) GetUserAPIs(c *gin.Context) {
+    userID, err := strconv.Atoi(c.Param("user_id"))
+    if err != nil {
+        // Log the actual error
+        log.Println("Error retrieving user APIs:", err)
+
+        // Return a customized error message to the client
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
+        return
+    }
+
+    // Call the GetUserAPIs service method
+    userAPIs, err := h.service.GetUserAPIs(c, userID)
+    if err != nil {
+        // Log the actual error
+        log.Println("Error fetching user APIs:", err)
+
+        // Return a customized error message to the client
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user APIs"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": userAPIs})
+}
+
+
+
+
+
 // @Summary Update API by ID
 // @Description Updates the API with the given ID
 // @Accept json

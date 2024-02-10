@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,17 +30,20 @@ func NewPlanHandler(s *services.Service) *PlanHandler {
 // @Failure 400 {object} map[string]string
 // @Router /plan [post]
 func (h *PlanHandler) CreateApiPlan(c *gin.Context) {
-    var plan types.PlanDto
+    var plan types.PlansDto
     if err := c.ShouldBindJSON(&plan); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+    log.Println("trying to create the plannnnnnnn :", plan)
 
-    result, err := h.service.CreateApiPlan(c, plan)
+   result,  err := h.service.CreateApiPlan(c, plan)
     if err != nil {
+        log.Println("Error ========== creating API Plan:", err)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Plan"})
         return
     }
+    log.Println("done  create the plannnnnnnn :", plan)
 
     c.JSON(http.StatusCreated, result)
 }
