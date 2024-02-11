@@ -91,6 +91,7 @@ type CrossObjectListDto struct {
 	Price   float64
 	QuotaType   string
 	QuotaValue   float64
+	Add bool
 }
 
 
@@ -184,3 +185,30 @@ type QueryPagination struct {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// responses  ==============================================================
+
+type ApiPlansResponse struct {
+    Plans         []models.PlanEntity
+    ObjectPlans   []models.ObjectPlanEntity
+}
+
+type ObjectPlanResponse struct {
+    models.ObjectPlanEntity
+    Cross []models.CrossObjectEntity
+}

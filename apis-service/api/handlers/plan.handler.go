@@ -84,19 +84,15 @@ func (h *PlanHandler) GetApiPlans(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /plan/:id [patch]
 func (h *PlanHandler) UpdateApiPlan(c *gin.Context) {
-    planID, err := strconv.Atoi(c.Param("id"))
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Plan ID"})
-        return
-    }
-
-    var plan types.PlanDto
+    var plan types.PlansDto
     if err := c.ShouldBindJSON(&plan); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+    log.Println("trying to create the plannnnnnnn :", plan)
 
-    updatedPlan, err := h.service.UpdateApiPlan(c, planID, plan)
+
+    updatedPlan, err := h.service.UpdateApiPlan(c, plan)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API Plan"})
         return

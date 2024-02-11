@@ -214,6 +214,8 @@ type CrossObjectEntity struct {
 	Price      float64 `gorm:"type:decimal(10,2)"`
 	QuotaType  string
 	QuotaValue float64 `gorm:"type:decimal(10,2)"`
+	Add 	  bool 		`gorm:"default:false"`
+	Object    ObjectPlanEntity `gorm:"foreignKey:ObjectID"`
 	// Add other fields related to cross objects
 }
 

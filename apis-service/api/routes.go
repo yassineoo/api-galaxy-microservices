@@ -96,7 +96,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     {
         planGroup.POST("/", PlanHandler.CreateApiPlan)
         planGroup.GET("/:api-id", PlanHandler.GetApiPlans)
-        planGroup.PATCH("/:id", PlanHandler.UpdateApiPlan)
+        planGroup.PATCH("/", PlanHandler.UpdateApiPlan)
         planGroup.DELETE("/:id", PlanHandler.DeleteApiPlan)
     }
 
