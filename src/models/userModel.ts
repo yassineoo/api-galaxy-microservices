@@ -2,18 +2,15 @@ import { prismaClientSingleton } from '../utils/prismaClient';
 const currentDate: Date = new Date();
 
 export default class userModel {
-    static AddUser = async (data: { Username: string; Email: string; PasswordHash: string; role:string}) => {
+
+    static AddUser = async (data: { Username: string; Email: string; PasswordHash: string; PhoneNumber?: string, role: string }) => {
         try {
-            const { Username, Email, PasswordHash } = data;
             const user = await prismaClientSingleton.users.create({
                 data: {
-                    Username: Username,
-                    Email: Email,
-                    PasswordHash: PasswordHash,
+                    ...data,
                     DateCreated: currentDate.toISOString(),
                     LastLogin: currentDate.toISOString(),
-                    IsActive: true,
-                    role: data.role
+                    IsActive: true
                 }
             });
             return user;
@@ -37,7 +34,7 @@ export default class userModel {
             throw error;
         }
     }
-    
+
     static getUserById = async (id: number) => {
         try {
             const user = await prismaClientSingleton.users.findUnique({
@@ -65,8 +62,10 @@ export default class userModel {
                     Email: email
                 }
             });
-            if (!user) {
-                console.log("No data found for getUserByEmail");
+            if (user) {
+                console.log("User found:", user);
+            } else {
+                console.log("User not found with email:", email);
             }
             return user;
         } catch (error) {
@@ -74,8 +73,31 @@ export default class userModel {
             throw error;
         }
     }
-    
-    static getAllUsers = async () => {   
+
+    static getUserByPhoneNumber = async (phoneNumber: string) => {
+        try {
+            if (!phoneNumber) {
+                throw new Error("PhoneNumber parameter is undefined");
+            }
+            const user = await prismaClientSingleton.users.findUnique({
+                where: {
+                    PhoneNumber: phoneNumber.toString()
+                }
+            });
+            if (user) {
+                console.log("User found:", user);
+            } else {
+                console.log("User not found with phonenumber:", phoneNumber);
+            }
+        
+            return user;
+        } catch (error) {
+            console.error("Error in getUserByPhoneNumber:", error);
+            throw error;
+        }
+    }
+
+    static getAllUsers = async () => {
         try {
             const users = await prismaClientSingleton.users.findMany();
             if (users.length === 0) {
@@ -90,7 +112,7 @@ export default class userModel {
 
     static deleteUser = async (id: number) => {
         try {
-            const transaction = await prismaClientSingleton.$transaction(async (prisma) => {
+            const transaction = await prismaClientSingleton.$transaction(async (prisma: any) => {
                 await prisma.profiles.deleteMany({ where: { UserID: id } });
                 await prisma.users.delete({ where: { UserID: id } });
             });
@@ -101,7 +123,7 @@ export default class userModel {
         }
     }
 
-    
+
 
     static setActivatedAccount = async (id: number, status: boolean) => {
         try {
@@ -119,7 +141,7 @@ export default class userModel {
             throw error;
         }
     }
-    
+
     static setTwoFactor = async (id: number, status: boolean) => {
         try {
             const user = await prismaClientSingleton.users.update({
@@ -136,7 +158,7 @@ export default class userModel {
             throw error;
         }
     }
-    
+
     static setLastLogin = async (id: number) => {
         try {
             const user = await prismaClientSingleton.users.update({
@@ -153,7 +175,7 @@ export default class userModel {
             throw error;
         }
     }
-   
+
     static getHashedPassword = async (id: number) => {
         try {
             const user = await prismaClientSingleton.users.findUnique({

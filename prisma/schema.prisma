@@ -254,6 +254,8 @@ model users {
   IsActive                           Boolean?               @default(true)
   IsTwoFactor                        Boolean?               @default(false)
   role                               String?                @db.VarChar(50)
+  PhoneNumber                        String?                @unique(map: "PhoneNumber") @db.VarChar(20)
+  Verified                           Boolean?
   apiratings                         apiratings[]
   apis                               apis[]
   billinghistory                     billinghistory[]

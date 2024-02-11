@@ -1,7 +1,5 @@
-import { permissions } from '@prisma/client';
 import { prismaClientSingleton } from '../utils/prismaClient';
 import { Permission, permissionIds } from './enum';
-import { get } from 'http';
 
 export const createPermission = async (data: { name: string, description: string }) => {
     const { name, description } = data;

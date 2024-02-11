@@ -43,6 +43,10 @@ export default class profileModel {
         return updatedUser;
     }
 
+    static getAllProfiles = async () => {
+        const profiles = await prismaClientSingleton.profiles.findMany();
+        return profiles;
+    }
     static getProfileById = async (id: number) => {
         const profile = await prismaClientSingleton.profiles.findUnique({
             where: {
@@ -68,6 +72,15 @@ export default class profileModel {
             }
         });
         return profile;
+    }
+
+    static deleteAllUserProfiles = async (id: number) => {
+        const profiles = await prismaClientSingleton.profiles.deleteMany({
+            where: {
+                UserID: id
+            }
+        });
+        return profiles;
     }
 
 }

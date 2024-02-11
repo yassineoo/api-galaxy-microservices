@@ -1,9 +1,10 @@
 import express from "express";
 
+
+
 const userPermissionRouter = express.Router();
 
 
-userPermissionRouter.post("/assignRole/:userId", );
 
 userPermissionRouter.post("/addPermission/userId", );
 

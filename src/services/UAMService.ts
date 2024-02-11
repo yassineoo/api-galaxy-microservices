@@ -1,9 +1,17 @@
 import userModel from "../models/userModel";
 import { Role, defaultRolePermissions, permissionIds } from "../models/enum";
 import { createMultiplePermissions, getPermissions } from "../models/permissions";
+import profileModel from "../models/profileModel";
+import UPMService from "./UPMService";
 
 export default class userService {
 
+    /**
+     * Retrieves a user by their ID.
+     * @param id - The ID of the user.
+     * @returns The user object.
+     * @throws Error if the ID is not an integer.
+     */
     static  getUserById = async (id: number) => {
 
         if (!Number.isInteger(id)) {
@@ -14,11 +22,22 @@ export default class userService {
         return user;
     }
 
+    /**
+     * Retrieves all users.
+     * @returns {Promise<User[]>} A promise that resolves to an array of users.
+     */
     static  getAllUsers = async () => {
         const users = await userModel.getAllUsers();
         return users;
     }
 
+    /**
+     * Updates a user with the specified ID.
+     * @param id - The ID of the user to update.
+     * @param data - The data to update the user with.
+     * @returns The updated user.
+     * @throws Error if the ID is not an integer.
+     */
     static  updateUser = async (id: number, data: any) => {
         if (!Number.isInteger(id)) {
             throw new Error("ID must be an integer");
@@ -28,6 +47,11 @@ export default class userService {
 
     }
 
+    /**
+     * Deletes a user by their ID.
+     * @param id - The ID of the user to delete.
+     * @throws Error if the ID is not an integer.
+     */
     static  deleteUser = async (id: number) => {
         if (!Number.isInteger(id)) {
             throw new Error("ID must be an integer");
@@ -37,6 +61,12 @@ export default class userService {
 
 
 
+    /**
+     * Retrieves the role of a user by their ID.
+     * @param id - The ID of the user.
+     * @returns The role of the user.
+     * @throws Error if the user is not found.
+     */
     static  getUserRole = async (id: number) => {
         const user = await userModel.getUserById(id);
 
@@ -45,6 +75,16 @@ export default class userService {
         }
         return user.role;
     }
+
+
+    /**
+     * Updates the role of a user.
+     * 
+     * @param id - The ID of the user.
+     * @param role - The new role for the user.
+     * @returns The updated user object.
+     * @throws Error if the ID is not an integer, user is not found, user already has the role, or there is an error adding permissions.
+     */
     static  updateRole = async (id: number, role: Role) => {
         //check if user exists
         if (!Number.isInteger(id)) {
@@ -88,12 +128,24 @@ export default class userService {
 
 
 
+    /**
+     * Retrieves the moderator permissions for a given ID.
+     * @param id - The ID of the user.
+     * @throws {Error} If the ID is not an integer.
+     */
     static  getModeratorPermissions = async (id: number) => {
         if (!Number.isInteger(id)) {
             throw new Error("ID must be an integer");
         }
         getPermissions(id);
     }
+
+    /**
+     * Adds a moderator permission to a user.
+     * @param id - The ID of the user.
+     * @param permission - The moderator permission to add.
+     * @throws Error if the ID is not an integer.
+     */
     static  addModeratorPermission = (id: number, permission: string) => {
         if (!Number.isInteger(id)) {
             throw new Error("ID must be an integer");

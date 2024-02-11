@@ -10,6 +10,11 @@ interface TokenData {
   authToken: string;
 }
 
+interface TokenEmailData {
+  email: string;
+  authToken: string;
+}
+
 //this is the function that will hash the password
 const hashPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, 10);
@@ -39,6 +44,20 @@ const generateAuthToken = (
   return { token: signedToken, expiry: tokenExpiry };
 };
 
+const generateEmailToken = (
+  email: string,
+  tokenSecret: string,
+  tokenExpiry: string | number
+): string => {
+  const authToken: string = randomBytes(32).toString();
+  const tokenData: TokenEmailData = { email, authToken };
+  const signedToken: string = jwt.sign(tokenData, tokenSecret, {
+    expiresIn: tokenExpiry
+  });
+
+  return signedToken;
+}
+
 //this is the function that will decode the token 
 const decodeAuthToken = (token: string, tokenSecret: string): TokenData | string => {
   try {
@@ -56,4 +75,20 @@ const decodeAuthToken = (token: string, tokenSecret: string): TokenData | string
   }
 };
 
-export { hashPassword, checkPassword, generateAuthToken, decodeAuthToken };
+const decodeEmailToken = (token: string, tokenSecret: string): TokenEmailData | string => {
+  try {
+      // Attempt to verify and decode the token
+      const decoded = jwt.verify(token, tokenSecret) as TokenEmailData;
+      return decoded;
+  } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+          return "Token has expired";
+      } else if (error instanceof jwt.JsonWebTokenError) {
+          return "Invalid token";
+      } else {
+          return "Token verification failed";
+      }
+  }
+}
+
+export { hashPassword, checkPassword, generateAuthToken, generateEmailToken ,  decodeAuthToken , decodeEmailToken };

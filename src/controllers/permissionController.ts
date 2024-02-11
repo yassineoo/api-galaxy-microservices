@@ -4,6 +4,12 @@ import { statusCodes } from '../utils/http';
 import { getPermissions } from '../models/permissions';
 import userService from '../services/UAMService';
 
+declare module 'express-serve-static-core' {
+    interface Request {
+        userId?: number;
+    }
+}
+
 require('dotenv').config();
 const tokenSecret = process.env.TOKEN_SECRET;
 
@@ -23,11 +29,11 @@ export const verifyRole = (allowedRoles: string[]) => {
 
 
             const userRole = await userService.getUserRole(tokenData.userId);
-
+         
             if (userRole === null) {
                 return res.status(statusCodes.unauthorized).send('User role not found');
             }
-            if (allowedRoles.includes(userRole)) {
+            if (!allowedRoles.includes(userRole)) {
                 return res.status(statusCodes.forbidden).send('Insufficient permissions');
             }
 
@@ -37,6 +43,25 @@ export const verifyRole = (allowedRoles: string[]) => {
         }
     };
 };
+
+export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(statusCodes.unauthorized).send('No token provided');
+        }
+
+        const tokenData = decodeAuthToken(token, tokenSecret || "");
+        if (typeof tokenData === 'string') {
+            return res.status(statusCodes.unauthorized).send(tokenData);
+        }
+        req.userId = tokenData.userId;
+
+        next();
+    } catch (error: any) {
+        res.status(401).send(error instanceof Error ? error.message : 'Authentication failed');
+    }
+}
 
 export const verifyAuthWithId = async (req: Request, res: Response, next: NextFunction) => {
     try {

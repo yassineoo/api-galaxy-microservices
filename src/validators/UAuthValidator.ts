@@ -20,6 +20,7 @@ const signup = {
         "string.email": "Email must be a valid email"
     }),
     password: passwordSchema,
+    phoneNumber: Joi.string(),
 }
 
 
@@ -30,7 +31,14 @@ const login = {
     password: passwordSchema,
 }
 
+const Email = {
+    Email: Joi.string().email().required().messages({
+        "string.email": "Email must be a valid email"
+    })
+}
+
 export default {
     loginSchema: Joi.object(login),
-    signUpSchema: Joi.object(signup)
+    signUpSchema: Joi.object(signup),
+    EmailSchema: Joi.object(Email)
 }

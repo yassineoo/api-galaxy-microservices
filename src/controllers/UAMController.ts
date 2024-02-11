@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { statusCodes } from '../utils/http';
 import userService from '../services/UAMService';
 import UAMValidator from '../validators/UAMValidator';
+import followsModel from '../models/follows';
 
 export const getUserById = async (req: Request, res: Response) => {
 
@@ -53,6 +54,29 @@ export const updateUser = async (req: Request, res: Response) => {
 
 }
 
+export const updateUserRole = async (req: Request, res: Response) => {
+    
+        const { error } = UAMValidator.updateRoleSchema.validate(req.body);
+        if (error) {
+            res.status(statusCodes.badRequest).send(error.details[0].message);
+            return;
+        }
+    
+        if ((!req.params) || (req.params.id === undefined)) {
+            res.status(statusCodes.badRequest).send("User not found");
+            return;
+        }
+    
+        try {
+            const user = await userService.updateRole(parseInt(req.params.id), req.body.role);
+            res.status(statusCodes.ok).send(user);
+            return;
+        } catch (error) {
+            return res.status(statusCodes.serverError).send("Internal server error");
+        }
+}
+
+
 export const deleteUser = async (req: Request, res: Response) => {
 
     if ((!req.params) || (req.params.id === undefined)) {
@@ -67,3 +91,17 @@ export const deleteUser = async (req: Request, res: Response) => {
         res.status(statusCodes.serverError).send("Internal server error");
     }
 }
+
+export const followUser = async (req: Request, res: Response) => {
+        try {
+            await followsModel.followUser(
+                {   
+                   userId: req.userId as number, 
+                   followingId: parseInt(req.body.followingId)
+                }
+                );
+            res.status(statusCodes.ok).send("User followed successfully");
+        } catch (error) {
+            res.status(statusCodes.serverError).send("Internal server error");
+        }
+    }
