@@ -38,22 +38,24 @@ func (s *Service) CreateApiDocs(ctx context.Context, apiDocs types.ApiDocsDto) (
 }
 
 func (s *Service) UpdateApiDocs(ctx context.Context, id int, apiDocs types.ApiDocsDto) (*models.ApiDocsEntity, error) {
-	// Implement the logic to edit an existing item in the database.
-	// You can use s.db and s.gormDB to interact with the database.
-	// Replace the placeholder logic with your actual database update.
 	var api models.ApiDocsEntity
-	if err := s.gormDB.Where("id = ?", id).First(&api).Error; err != nil {
-		return nil, err
+	if err := s.gormDB.First(&api,id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("category not found")
+        }
+        return nil, err
 	}
-	if apiDocs.Content != "" {
+
 		api.Content = apiDocs.Content
-	}
+
+	
 	api.LastUpdated = time.Now()
 	if err := s.gormDB.Save(&api).Error; err != nil {
 		return nil, err
 	}
 	return &api, nil
 }
+
 
 
 

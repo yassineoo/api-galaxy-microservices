@@ -12,6 +12,7 @@ import (
 func SetupRoutes(router *gin.Engine, service *services.Service) {
     // Initialize handlers
     ApiHandler := handlers.NewApiHandler(service)
+    ApiDocsHandler := handlers.NewApiDocsHandler(service)
     CategoryHandler := handlers.NewCategoryHandler(service)
     EndpointsHandler := handlers.NewEndpointsHandler(service)
     PlanHandler := handlers.NewPlanHandler(service)
@@ -39,10 +40,10 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     // API Docs routes
     apisDocsGroup := router.Group("/apis-docs")
     {
-        apisDocsGroup.POST("/", ApiHandler.CreateApi)
-        apisDocsGroup.GET("/:api-id", ApiHandler.GetApi)
-        apisDocsGroup.PATCH("/:id", ApiHandler.UpdateApi)
-        apisDocsGroup.DELETE("/:id", ApiHandler.DeleteApi)
+        apisDocsGroup.POST("/", ApiDocsHandler.CreateApiDocs)
+        apisDocsGroup.GET("/:api-id", ApiDocsHandler.GetApiDocs)
+        apisDocsGroup.PATCH("/:id", ApiDocsHandler.UpdateApiDocs)
+        apisDocsGroup.DELETE("/:id", ApiDocsHandler.DeleteApiDocs)
     }
 
     // Category routes

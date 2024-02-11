@@ -176,6 +176,7 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planDto types.PlansDto) ([]
                             existingCrossObjects[j].Price = dtoCrossObject.Price
                             existingCrossObjects[j].QuotaType = dtoCrossObject.QuotaType
                             existingCrossObjects[j].QuotaValue = dtoCrossObject.QuotaValue
+                            existingCrossObjects[j].Add = dtoCrossObject.Add
                             // Update other fields as needed
                             break
                         }
