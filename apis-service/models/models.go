@@ -189,9 +189,9 @@ type PlanEntity struct {
 	RateUnite      string
 	RecomndedPlan  bool
 	Price          float64 `gorm:"type:decimal(10,2)"`
-	Features       string `gorm:"type:text"`
-	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
+//	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
 }
+
 
 type ObjectPlanEntity struct {
 	ID 			int    `gorm:"primaryKey;autoIncrement"`
@@ -238,6 +238,7 @@ type SubscriptionEntity struct {
 	ApiKeys   []ApiKeyEntity   `gorm:"foreignKey:SubscriptionID"`
 	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID"`
 }
+
 
 // ApiKeyEntity represents the ApiKeys table
 type ApiKeyEntity struct {

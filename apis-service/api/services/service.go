@@ -306,9 +306,10 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 func (s *Service) CreateApiPlan(ctx context.Context, planDto types.PlansDto) ([]models.PlanEntity, error) {
     var newPlans []models.PlanEntity
     var newObjectPlans []models.ObjectPlanEntity
+    var newCrossObjects []models.CrossObjectEntity
     
 
-    for _, publicPlanDto := range planDto.PublicPlan {
+    for _, publicPlanDto := range planDto.PublicPlans {
         // Convert PublicPlanDto to PlanEntity
         newPlan := models.PlanEntity{
             ApiID:         planDto.ApiID,
@@ -322,12 +323,14 @@ func (s *Service) CreateApiPlan(ctx context.Context, planDto types.PlansDto) ([]
             // Add other fields as needed
         }
 
+        
         newPlans = append(newPlans, newPlan)
     }
 
     for _, objectListDto := range planDto.ObjectList {
         // Convert ObjectListDto to ObjectPlanEntity
         newObjectPlan := models.ObjectPlanEntity{
+            ID :          objectListDto.ID,
             ApiID:        planDto.ApiID,
             Name:         objectListDto.Name,
             AllEndpoints: true,
@@ -335,8 +338,24 @@ func (s *Service) CreateApiPlan(ctx context.Context, planDto types.PlansDto) ([]
             // Add other fields as needed
         }
 
+        for _,CrossObjectListDto := range objectListDto.Cross {
+
+            newCrossObject := models.CrossObjectEntity{
+                ObjectID:   objectListDto.ID,
+                LimitFee:   CrossObjectListDto.LimitFee,
+                LimitType:  CrossObjectListDto.LimitType,
+                Price:      CrossObjectListDto.Price,
+                QuotaType:  CrossObjectListDto.QuotaType,
+                QuotaValue: CrossObjectListDto.QuotaValue,
+                // Add other fields as needed
+            }
+            newCrossObjects = append(newCrossObjects, newCrossObject)
+        }
+
         newObjectPlans = append(newObjectPlans, newObjectPlan)
     }
+
+
 
     // Insert plans into the database
 
@@ -350,6 +369,12 @@ func (s *Service) CreateApiPlan(ctx context.Context, planDto types.PlansDto) ([]
 
         if err := s.gormDB.Create(&newObjectPlans).Error; err != nil {
             log.Println("Error creating API Object Plan service:", err)
+            return nil,err
+        }
+    
+    // Insert cross objects into the database
+        if err := s.gormDB.Create(&newCrossObjects).Error; err != nil {
+            log.Println("Error creating API Cross Object service:", err)
             return nil,err
         }
     

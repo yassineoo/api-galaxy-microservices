@@ -54,7 +54,7 @@ type PlanDto struct {
 
 type PlansDto struct {
 	ApiID       int
-	PublicPlan  []PublicPlanDto
+	PublicPlans	  []PublicPlanDto
 	ObjectList  []ObjectListDto
 }
 
