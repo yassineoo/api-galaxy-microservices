@@ -62,11 +62,6 @@ export default class userModel {
                     Email: email
                 }
             });
-            if (user) {
-                console.log("User found:", user);
-            } else {
-                console.log("User not found with email:", email);
-            }
             return user;
         } catch (error) {
             console.error("Error in getUserByEmail:", error);
@@ -84,12 +79,7 @@ export default class userModel {
                     PhoneNumber: phoneNumber.toString()
                 }
             });
-            if (user) {
-                console.log("User found:", user);
-            } else {
-                console.log("User not found with phonenumber:", phoneNumber);
-            }
-        
+
             return user;
         } catch (error) {
             console.error("Error in getUserByPhoneNumber:", error);
@@ -125,39 +115,6 @@ export default class userModel {
 
 
 
-    static setActivatedAccount = async (id: number, status: boolean) => {
-        try {
-            const user = await prismaClientSingleton.users.update({
-                where: {
-                    UserID: id
-                },
-                data: {
-                    IsActive: status
-                }
-            });
-            return user;
-        } catch (error) {
-            console.error("Error in setActivatedAccount:", error);
-            throw error;
-        }
-    }
-
-    static setTwoFactor = async (id: number, status: boolean) => {
-        try {
-            const user = await prismaClientSingleton.users.update({
-                where: {
-                    UserID: id
-                },
-                data: {
-                    IsTwoFactor: status
-                }
-            });
-            return user;
-        } catch (error) {
-            console.error("Error in setTwoFactor:", error);
-            throw error;
-        }
-    }
 
     static setLastLogin = async (id: number) => {
         try {

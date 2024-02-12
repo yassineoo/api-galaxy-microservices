@@ -55,26 +55,20 @@ export const login = async (req: Request, res: Response) => {
     }
 }
 
-//requires a token to be sent in the header and being logged in
+//requires being logged in
 export const resendVerificationEmail = async (req: Request, res: Response) => {
-    const { error } = UAuthValidator.EmailSchema.validate(req.body);
-    if (error) {
-        res.status(statusCodes.badRequest).send(error.details[0].message);
-        return;
-    }
-
     try {
         if (req.userId == null) {
             throw new Error("User not found")
         }
-        authService.sendVerificationEmail(req.body.email)
+        authService.resendVerificationEmail(req.userId);
         res.status(statusCodes.ok).send("Email sent");
     } catch (error: any) {
         res.status(statusCodes.badRequest).send({ error: error.message });
     }
 }
 
-
+//requires a token to be sent in the link and being logged in
 export const verifyEmail = async (req: Request, res: Response) => {
     try {
         const token = req.params.token;
@@ -84,12 +78,8 @@ export const verifyEmail = async (req: Request, res: Response) => {
         if (req.userId == null) {
             throw new Error("Not authentified");
         }
-        const user = await userService.getUserById(req.userId)
-
-        if (!user) {
-            throw new Error("Unknown error");
-        }
-        authService.verifyEmail(user?.Email, token);
+       
+        authService.verifyEmail(req.userId, token);
 
     } catch (error: any) {
         res.status(statusCodes.badRequest).send({ error: error.message });

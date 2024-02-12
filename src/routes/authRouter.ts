@@ -1,5 +1,6 @@
 import express from "express";
-import { login, signup } from "../controllers/authController";
+import { login, resendVerificationEmail, signup, verifyEmail } from "../controllers/authController";
+import { verifyAuth } from "../controllers/permissionController";
 
 const authRouter = express.Router();
 
@@ -162,5 +163,9 @@ const authRouter = express.Router();
 authRouter.post("/login", login);
 authRouter.post("/signup/user-client", signup("userClient"));
 authRouter.post("/signup/api-client", signup("APIClient"));
+
+authRouter.get("/resend-email",verifyAuth, resendVerificationEmail);
+authRouter.get("/verify-email/:token",verifyAuth, verifyEmail);
+
 
 export default authRouter;

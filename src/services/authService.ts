@@ -2,8 +2,10 @@ import { checkPassword, decodeEmailToken, generateAuthToken, generateEmailToken,
 import userModel from '../models/userModel';
 import profileModel from '../models/profileModel';
 import { Role } from '../models/enum';
-import { SendVerificationEmail, sendPasswordResetEmail } from './grpcClient/notifService';
+import { SendVerificationEmail, sendPasswordResetEmail, verifyPhoneNumber } from './grpcClient/notifService';
 import { error } from 'console';
+import userService from './UAMService';
+import otpModel from '../models/otp';
 
 require('dotenv').config();
 const tokenSecret = process.env.TOKEN_SECRET;
@@ -87,6 +89,12 @@ export default class authService {
         const token = generateAuthToken(user.UserID, user.Email, tokenSecret || "", expiresIn || "");
         userModel.setLastLogin(user.UserID);
 
+        if (user.IsTwoFactor && (user.PhoneNumber!=null)) {
+            const randomNumber = Math.floor(1000 + Math.random() * 9000);
+            verifyPhoneNumber({phoneNumber: user.PhoneNumber, otp: randomNumber.toString()});
+            const otp = otpModel.addOtp(user.UserID,randomNumber);
+        }
+
         return token;
     }
 
@@ -116,13 +124,34 @@ export default class authService {
         };
     }
 
-    static verifyEmail = (Email: string, token: string) => {
+    static resendVerificationEmail = async (userId: number) => {
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return this.sendVerificationEmail(user.Email);
+    }
+
+    static verifyEmail = async (userId: number, token: string) => {
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw new Error("Unknown error");
+        }
         const decodedToken = decodeEmailToken(token, emailTokenSecret || "");
         if ((!decodedToken) || (typeof decodedToken === 'string')) {
             throw new Error('Invalid token');
         }
-        return Email === decodedToken.email;
+        console.log({
+            user: user.Email,
+            decodedToken: decodedToken.email
+        });
+        if (user.Email === decodedToken.email) {
+            userModel.updateUser(userId, { Verified: 1 });
+            return true;
+        }
     }
+
+
 
 
 }
