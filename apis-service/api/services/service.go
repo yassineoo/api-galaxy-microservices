@@ -209,8 +209,7 @@ func (s *Service) Delete(ctx context.Context, id int) error {
 
 
 
-
-func (s *Service) SendRequest (ctx context.Context,data types.RequestData) (*http.Response, error) {
+func sendRequest(data RequestData) (*types.ResponseData, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(data.Method, data.URL, bytes.NewBufferString(""))
@@ -237,9 +236,30 @@ func (s *Service) SendRequest (ctx context.Context,data types.RequestData) (*htt
 		req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
 	}
 
-	return client.Do(req)
-}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
 
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	responseData := &types.ResponseData{
+		StatusCode: response.StatusCode,
+		Body:       string(body),
+		Headers:    map[string]string{},
+	}
+
+	// Copy headers to the responseData.Headers map
+	for key, values := range response.Header {
+		responseData.Headers[key] = values[0] // Assuming single values for simplicity
+	}
+
+	return responseData, nil
+}
 
 
 

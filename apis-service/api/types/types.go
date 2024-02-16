@@ -16,6 +16,13 @@ type RequestData struct {
 	Data    map[string]string `json:"data"`
 }
 
+// ResponseData represents the data structure for the outgoing response
+type ResponseData struct {
+	StatusCode int               `json:"statusCode"`
+	Body       string            `json:"body"`
+	Headers    map[string]string `json:"headers"`
+}
+
 
 
 
