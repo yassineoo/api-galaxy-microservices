@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -249,4 +250,48 @@ func (h *ApiHandler) DeleteApi(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "API deleted successfully"})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
+	var requestData types.RequestData
+
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := h.service.SendRequest(c,requestData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"statusCode": response.StatusCode,
+		"body":       string(body),
+	})
 }

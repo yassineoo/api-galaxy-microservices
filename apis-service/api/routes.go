@@ -25,6 +25,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 
     // Root route
     router.GET("/", ApiHandler.HandleRequest)
+    router.POST("/send-request", ApiHandler.HandleSendRequest)
 
     // API routes
     apisGroup := router.Group("/apis")

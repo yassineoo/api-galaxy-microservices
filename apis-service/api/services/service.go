@@ -2,12 +2,16 @@ package services
 
 import (
 	//"auth/security"
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"local_packages/api/types"
 	"local_packages/models"
 	"local_packages/typesglobale"
+	"net/http"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"gorm.io/gorm"
@@ -196,11 +200,54 @@ func (s *Service) Delete(ctx context.Context, id int) error {
    }
 
    // Delete the item from the database
-   if err := s.gormDB.Delete(&apiEntity).Error; err != nil {
+   if err := s.gormDB.Delete(&apiEntity,id).Error; err != nil {
 	   return err
    }
    return nil
 }
+
+
+
+
+
+func (s *Service) SendRequest (ctx context.Context,data types.RequestData) (*http.Response, error) {
+	client := &http.Client{}
+
+	req, err := http.NewRequest(data.Method, data.URL, bytes.NewBufferString(""))
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range data.Headers {
+		req.Header.Set(key, value)
+	}
+
+	q := req.URL.Query()
+	for key, value := range data.Params {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
+
+	if len(data.Data) > 0 {
+		req.Header.Set("Content-Type", "application/json")
+		jsonData, err := json.Marshal(data.Data)
+		if err != nil {
+			return nil, err
+		}
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
+	}
+
+	return client.Do(req)
+}
+
+
+
+
+
+
+
+
+
 
 
 // ----------------------------- category crud -----------------------------

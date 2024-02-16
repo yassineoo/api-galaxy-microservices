@@ -11,7 +11,7 @@ type CategoryEntity struct {
 	ID           int    `gorm:"primaryKey;autoIncrement"` // Set as primary key
 	CategoryName string `gorm:"size:255;not null"`
 	Description  string
-	Apis         []ApiEntity `gorm:"foreignKey:CategoryID"` // Define the foreign key constraint
+	Apis         []ApiEntity `gorm:"foreignKey:CategoryID;onDelete:CASCADE"` // Define the foreign key constraint
 }
 
 type ApiCollectionEntity struct {
@@ -42,14 +42,14 @@ type ApiEntity struct {
 	LastUpdated time.Time
 	DateDeleted time.Time
 
-	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID"`
-	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID"`
-	//Subscriptionss []SubscriptionEntity `gorm:"foreignKey:ApiID"`
-	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID"`
-	Plans         []PlanEntity         `gorm:"foreignKey:ApiID"`
-	ObjectPlan	  []ObjectPlanEntity  `gorm:"foreignKey:ApiID"`
-	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID"`
-	ApiDocs   ApiDocsEntity           `gorm:"foreignKey:ApiID"`  // One-to-one relationship with foreign key
+	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	//Subscriptionss []SubscriptionEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	Plans         []PlanEntity         `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	ObjectPlan	  []ObjectPlanEntity  `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	ApiDocs   ApiDocsEntity           `gorm:"foreignKey:ApiID;onDelete:CASCADE"` // One-to-one relationship with foreign key
 
 	Category    CategoryEntity  `gorm:"foreignKey:CategoryID"`
 }
@@ -79,7 +79,7 @@ type HealthCheckEntity struct {
 //	AlertEndpoints string    `gorm:"size:2048"` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)
 	//CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	//UpdatedAt      time.Time
-	Results        []HealthCheckResultEntity `gorm:"foreignKey:HealthCheckID"` // One-to-many relation to store results of health checks
+	Results        []HealthCheckResultEntity `gorm:"foreignKey:HealthCheckID;onDelete:CASCADE"` // One-to-many relation to store results of health checks
 }
 
 // HealthCheckResultEntity represents the Health Check Results table for storing results of checks
@@ -112,8 +112,8 @@ type EndpointsEntity struct {
 	Description string
 
 	Group       EndpointsGroupEntity      `gorm:"foreignKey:GroupID"`  // Add this line
-	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID"` // query, header,Path ,  body
-    BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID"`  // One-to-one relationship with foreign key
+	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID;onDelete:CASCADE"` // query, header,Path ,  body
+    BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID;onDelete:CASCADE"`  // One-to-one relationship with foreign key
 //	Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
 	// Add other fields as needed...
 }
@@ -198,7 +198,7 @@ type ObjectPlanEntity struct {
 	ApiID       int    `gorm:"not null"`
 	Name        string `gorm:"size:255;not null"`
 	Description string
-	Cross       []CrossObjectEntity `gorm:"foreignKey:ObjectID"`
+	Cross       []CrossObjectEntity `gorm:"foreignKey:ObjectID;onDelete:CASCADE"`
 	EndpointList []EndpointObjectEntity `gorm:"foreignKey:ObjectID"`
 	AllEndpoints bool 
 }
@@ -238,7 +238,7 @@ type SubscriptionEntity struct {
 	EndDate   time.Time
 	Status    string           `gorm:"size:50"`
 	ApiKeys   []ApiKeyEntity   `gorm:"foreignKey:SubscriptionID"`
-	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID"`
+	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
 }
 
 

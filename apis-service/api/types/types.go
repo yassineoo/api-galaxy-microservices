@@ -7,6 +7,20 @@ import (
 	"time"
 )
 
+// RequestData represents the data structure for the incoming request
+type RequestData struct {
+	Method  string            `json:"method"`
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers"`
+	Params  map[string]string `json:"params"`
+	Data    map[string]string `json:"data"`
+}
+
+
+
+
+
+
 // ApiDto represents the data needed to create a new Api.
 type ApiDto struct {
 	Name        string
