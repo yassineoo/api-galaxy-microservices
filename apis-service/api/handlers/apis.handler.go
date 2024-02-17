@@ -277,7 +277,7 @@ func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.SendRequest(c,requestData)
+	response, err := h.service.SendRequest(c, requestData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -290,8 +290,12 @@ func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
 		return
 	}
 
+	// Get the request header from the context
+	requestHeader := c.Request.Header
+
 	c.JSON(http.StatusOK, gin.H{
-		"statusCode": response.StatusCode,
-		"body":       string(body),
+		"RequestHeader": requestHeader,
+		"statusCode":    response.StatusCode,
+		"RequestBody":          string(body),
 	})
 }

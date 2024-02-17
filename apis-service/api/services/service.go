@@ -209,56 +209,44 @@ func (s *Service) Delete(ctx context.Context, id int) error {
 
 
 
-func sendRequest(data RequestData) (*types.ResponseData, error) {
-	client := &http.Client{}
 
-	req, err := http.NewRequest(data.Method, data.URL, bytes.NewBufferString(""))
-	if err != nil {
-		return nil, err
-	}
+func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
+    client := &http.Client{}
 
-	for key, value := range data.Headers {
-		req.Header.Set(key, value)
-	}
+    req, err := http.NewRequest(data.Method, data.URL, bytes.NewBufferString(""))
+    if err != nil {
+        return nil, err
+    }
 
-	q := req.URL.Query()
-	for key, value := range data.Params {
-		q.Add(key, value)
-	}
-	req.URL.RawQuery = q.Encode()
+    // Set request headers
+    for key, value := range data.Headers {
+        req.Header.Set(key, value)
+    }
 
-	if len(data.Data) > 0 {
-		req.Header.Set("Content-Type", "application/json")
-		jsonData, err := json.Marshal(data.Data)
-		if err != nil {
-			return nil, err
-		}
-		req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
-	}
+    // Set query parameters
+    q := req.URL.Query()
+    for key, value := range data.Params {
+        q.Add(key, value)
+    }
+    req.URL.RawQuery = q.Encode()
 
-	response, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
+    // Set request body if data is provided
+    if len(data.Data) > 0 {
+        req.Header.Set("Content-Type", "application/json")
+        jsonData, err := json.Marshal(data.Data)
+        if err != nil {
+            return nil, err
+        }
+        req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
+    }
 
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
+    // Send the request and get the response
+    resp, err := client.Do(req)
+    if err != nil {
+        return nil, err
+    }
 
-	responseData := &types.ResponseData{
-		StatusCode: response.StatusCode,
-		Body:       string(body),
-		Headers:    map[string]string{},
-	}
-
-	// Copy headers to the responseData.Headers map
-	for key, values := range response.Header {
-		responseData.Headers[key] = values[0] // Assuming single values for simplicity
-	}
-
-	return responseData, nil
+    return resp, nil
 }
 
 
