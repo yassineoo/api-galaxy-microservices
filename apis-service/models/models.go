@@ -261,4 +261,6 @@ type UsageLogEntity struct {
 	EndpointID int    `gorm:"not null"`
 	Status 		int    // status code of the response
 	ResponseTime   int  // in ms 
+	Endpoint    EndpointsEntity  `gorm:"foreignKey:EndpointID"`
+
 }

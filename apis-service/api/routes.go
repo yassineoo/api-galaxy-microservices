@@ -19,12 +19,14 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     SubscriptionHandler := handlers.NewSubscriptionHandler(service)
     HealthCheckHandler := handlers.NewHealthCheckHandler(service)
     ApiCollectionHandler := handlers.NewApiCollectionHandler(service) // New handler for API collections
+    ApiLogsHandler := handlers.NewLogsHandler(service) // New handler for API collections
 
     // Middleware
     router.Use(CORSMiddleware())
 
     // Root route
     router.GET("/", ApiHandler.HandleRequest)
+    router.GET("/hi", ApiHandler.HandleRequest)
     router.POST("/send-request", ApiHandler.HandleSendRequest)
 
     // API routes
@@ -46,6 +48,14 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
         apisDocsGroup.PATCH("/:id", ApiDocsHandler.UpdateApiDocs)
         apisDocsGroup.DELETE("/:id", ApiDocsHandler.DeleteApiDocs)
     }
+    // apiLogs routes
+    apiLogsGroup := router.Group("/apis-logs")
+           {
+                  // categoriesGroup.POST("/", CategoryHandler.CreateCategory)
+                  apiLogsGroup.GET("/:api-id", ApiLogsHandler.GetApiLogs)
+                  // categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)
+                 //  categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory)
+           }
 
     // Category routes
     categoriesGroup := router.Group("/categories")
@@ -121,6 +131,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
         apiCollectionGroup.POST("/:id/addApis", ApiCollectionHandler.AddApisToCollection)
         apiCollectionGroup.POST("/:id/removeApis", ApiCollectionHandler.RemoveApisFromCollection)
     }
+ 
 }
 
 

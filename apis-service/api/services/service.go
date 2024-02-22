@@ -464,3 +464,25 @@ func (s *Service) DeleteApiSubscription(ctx context.Context, subscriptionID int)
 
 
 
+
+// ===================== API Logs  =====================
+// ===================== API Logs  =====================
+// ===================== API Logs  =====================
+// ===================== API Logs  =====================
+// ===================== API Logs  =====================
+func (s *Service) GetApiLogs(ctx context.Context, apiID int) ([]models.UsageLogEntity, error) {
+    var apiLogs []models.UsageLogEntity
+    
+        // Join UsageLogs with Endpoints and filter by apiID
+        if err := s.gormDB.
+            Preload("Endpoint").
+         
+            Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
+            Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
+        Where("endpoints_group_entities.api_id = ?", apiID).
+        Find(&apiLogs).Error; err != nil {
+        return nil, err
+    }
+    
+        return apiLogs, nil
+    }
