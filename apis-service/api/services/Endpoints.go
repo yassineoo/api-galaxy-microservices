@@ -211,6 +211,12 @@ func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpo
 	if endpointsDto.Url != "" {
     existingEndpoints.Url = endpointsDto.Url
 }
+    if endpointsDto.Name != "" {
+        existingEndpoints.Name = endpointsDto.Name
+
+    }
+
+
     if endpointsDto.Methode != "" {
     existingEndpoints.Methode = endpointsDto.Methode
 }

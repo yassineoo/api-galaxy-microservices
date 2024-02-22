@@ -9,11 +9,12 @@ import (
 
 // RequestData represents the data structure for the incoming request
 type RequestData struct {
-	Method  string            `json:"method"`
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers"`
-	Params  map[string]string `json:"params"`
-	Data    map[string]string `json:"data"`
+	Method  string            
+	URL     string            
+	Headers map[string]string 
+	Params  map[string]string 
+	Data    map[string]string 
+	EndpointID int 
 }
 
 // ResponseData represents the data structure for the outgoing response
@@ -175,6 +176,7 @@ type HealthCheckResultDto struct {
 type SubscriptionDto struct {
 	ApiID  int
 	PlanId int
+	UserID int
 }
 
 

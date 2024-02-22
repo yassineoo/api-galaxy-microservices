@@ -40,7 +40,7 @@ func main() {
 
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
 
-	router.Run(":5000")
+	router.Run(":7000")
 }
 
 

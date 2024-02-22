@@ -41,7 +41,7 @@ func (s *Service) UpdateApiDocs(ctx context.Context, id int, apiDocs types.ApiDo
 	var api models.ApiDocsEntity
 	if err := s.gormDB.First(&api,id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("category not found")
+            return nil, errors.New("docs not found")
         }
         return nil, err
 	}

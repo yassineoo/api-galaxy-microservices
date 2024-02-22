@@ -113,7 +113,9 @@ type EndpointsEntity struct {
 
 	Group       EndpointsGroupEntity      `gorm:"foreignKey:GroupID"`  // Add this line
 	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID;onDelete:CASCADE"` // query, header,Path ,  body
-    BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID;onDelete:CASCADE"`  // One-to-one relationship with foreign key
+    BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID;onDelete:CASCADE"` 
+	Logs 		[]UsageLogEntity		`gorm:"foreignKey:EndpointID;onDelete:CASCADE"`
+	// One-to-one relationship with foreign key
 //	Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
 	// Add other fields as needed...
 }
@@ -232,12 +234,10 @@ type SubscriptionEntity struct {
 	ID int `gorm:"primaryKey;autoIncrement"`
 	//SubscriptionID int            `gorm:"primaryKey;autoIncrement"`
 	UserID    int `gorm:"not null"`
-	ApiID     int `gorm:"not null"`
 	PlanID    int `gorm:"not null"`
 	StartDate time.Time
 	EndDate   time.Time
 	Status    string           `gorm:"size:50"`
-	ApiKeys   []ApiKeyEntity   `gorm:"foreignKey:SubscriptionID"`
 	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
 }
 
@@ -258,7 +258,7 @@ type UsageLogEntity struct {
 	//LogID          int            `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID int       `gorm:"not null"`
 	Timestamp      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	Endpoint       string
-	DataVolume     int
-	ResponseTime   int
+	EndpointID int    `gorm:"not null"`
+	Status 		int    // status code of the response
+	ResponseTime   int  // in ms 
 }

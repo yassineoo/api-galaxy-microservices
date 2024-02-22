@@ -12,6 +12,8 @@ import (
 	"local_packages/models"
 	"local_packages/typesglobale"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"gorm.io/gorm"
@@ -209,6 +211,20 @@ func (s *Service) Delete(ctx context.Context, id int) error {
 
 
 
+func (s *Service) Subscribe(ctx context.Context, apiID int) ([]models.ApiCollectionEntity, error) {
+    var collections []models.ApiCollectionEntity
+
+    if err := s.gormDB.Where("id = ?", apiID).Find(&collections).Error; err != nil {
+        return nil, err
+    }
+
+    return collections, nil
+}
+
+
+
+
+
 
 func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
     client := &http.Client{}
@@ -241,10 +257,39 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
     }
 
     // Send the request and get the response
+    startTime := time.Now() // Start time measurement
+
     resp, err := client.Do(req)
     if err != nil {
         return nil, err
     }
+
+      // Calculate response time based on content length and potential header information
+  endTime := time.Now()
+  contentLength, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+  if err != nil {
+    // Handle error or use another method for response time estimation
+    contentLength = 0
+  }
+  responseTime := endTime.Sub(startTime) - time.Duration(contentLength) * time.Nanosecond / 1024 / 1024
+
+  // Create log entity with all info after receiving response
+  newLog := models.UsageLogEntity {
+    // Set fields from request data: EndpointID, SubscriptionID (if applicable)
+    EndpointID:  data.EndpointID,
+    SubscriptionID: 1,
+    Timestamp:    startTime,
+    Status:      resp.StatusCode,
+    ResponseTime: int(responseTime.Milliseconds()),
+  }
+
+  go func() {
+
+    if err := s.gormDB.Create(&newLog).Error; err != nil {
+        return ;
+    }
+  }()   
+    
 
     return resp, nil
 }
@@ -348,10 +393,10 @@ func (s *Service) DeleteCategory(ctx context.Context, id int) error {
 
 func (s *Service) CreateApiSubscription(ctx context.Context, subscription types.SubscriptionDto) (*models.SubscriptionEntity, error) {
     newSubscription := models.SubscriptionEntity{
-        UserID: 1,
+        UserID: subscription.UserID,
         PlanID: subscription.PlanId,
-        ApiID: subscription.ApiID,
-
+        StartDate : time.Now() ,
+      
         // Populate with fields from subscription
         // Example: SubscriptionName: subscription.SubscriptionName
     }
