@@ -1,39 +1,40 @@
-import { NextFunction, Request, Response } from 'express'
-import UAuthValidator from '../validators/UAuthValidator';
+import { Request, Response } from 'express'
 import { statusCodes } from '../utils/http';
 import authService from '../services/authService';
 import { Role } from '../models/enum';
 import { SendVerificationEmail } from '../services/grpcClient/notifService';
-import { decodeEmailToken, generateAuthToken, generateEmailToken } from '../utils/token';
-import userService from '../services/UAMService';
+import { generateEmailToken } from '../utils/token';
+
 
 require('dotenv').config();
-const tokenSecret = process.env.TOKEN_SECRET;
-const expiresIn = process.env.EXPIRES_IN;
-
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
 
 
 export const signup = (role: string) => {
     return async (req: Request, res: Response) => {
-
-        const { error } = UAuthValidator.signUpSchema.validate(req.body);
+       
+        /*const { error } = UAuthValidator.signUpSchema.validate(req.body);
         if (error) {
             res.status(statusCodes.badRequest).send(error.details[0].message);
             return;
-        }
-
+        }*/
         try {
-            const tokenData = await authService.register(req.body, role as Role);
+            const tokenData = await authService.register(req.body, role as Role) as any;
             const emailToken = generateEmailToken(req.body.Email, emailTokenSecret || "", emailTokenExpiry || "");
-            await SendVerificationEmail({ email: req.body.Email, name: req.body.Username, token: emailToken });
+            /*await SendVerificationEmail({ email: req.body.Email, name: req.body.Username, token: emailToken });
             res.status(statusCodes.ok).send({
                 message: "signed up with success , email sent",
                 emailToken: emailToken,
                 loginToken: tokenData
 
-            });
+            });*/
+            if(!tokenData?.message){
+                return res.status(statusCodes.ok).send(true)
+            }else{
+                return res.json({message:tokenData.message})
+            }
+            
         } catch (error: any) {
             res.status(statusCodes.badRequest).send(error.message);
         }
@@ -41,19 +42,65 @@ export const signup = (role: string) => {
 }
 
 export const login = async (req: Request, res: Response) => {
-    const { error } = UAuthValidator.loginSchema.validate(req.body);
+    /*const { error } = UAuthValidator.loginSchema.validate(req.body);
     if (error) {
+        console.log(error)
         res.status(statusCodes.badRequest).send(error.details[0].message);
         return;
     }
+    console.log(req.body)
+*/
 
     try {
+       
         const token = await authService.login(req.body);
-        res.status(statusCodes.ok).send({ token });
+        if(!token.message){
+            return res.status(statusCodes.ok).send({ ...token });
+        }else {
+            
+           return res.json({ message: token?.message });
+        }
+        
+    } catch (error: any) {
+         res.status(statusCodes.badRequest).send({ error: error?.message });
+    }
+}
+
+export const Oauthlogin = async (req: Request, res: Response) => {
+   /* const { error } = UAuthValidator.loginSchema.validate(req.body);
+    if (error) {
+        console.log(error)
+        res.status(statusCodes.badRequest).send(error.details[0].message);
+        return;
+    }
+*/
+   
+    try {
+        console.log(req.body);
+        
+        const token = await authService.OathUser(req.body)
+        if(!token.message){
+            return res.status(statusCodes.ok).send({ ...token });
+        }else {
+            res.status(statusCodes.badRequest).send({ error: token?.message });
+        }
+        
     } catch (error: any) {
         res.status(statusCodes.badRequest).send({ error: error.message });
     }
 }
+
+//get user session
+
+export const getUserSession=async(req:Request,res:Response)=>{
+    try {
+        const token = await authService.getSession(req.body)
+        res.status(statusCodes.ok).send({ ...token });
+    } catch (error:any) {
+        res.status(statusCodes.badRequest).send({ error: error.message });
+    }
+}
+
 
 //requires being logged in
 export const resendVerificationEmail = async (req: Request, res: Response) => {

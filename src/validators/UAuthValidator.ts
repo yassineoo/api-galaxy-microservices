@@ -29,6 +29,7 @@ const login = {
         "string.email": "Email must be a valid email"
     }),
     password: passwordSchema,
+    Username: Joi.string()
 }
 
 const Email = {

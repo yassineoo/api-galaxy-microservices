@@ -248,7 +248,7 @@ model users {
   UserID                             Int                    @id @default(autoincrement())
   Username                           String                 @db.VarChar(255)
   Email                              String                 @unique(map: "Email") @db.VarChar(255)
-  PasswordHash                       String                 @db.Char(60)
+  PasswordHash                       String?                 @db.Char(60)
   DateCreated                        DateTime?              @default(now()) @db.DateTime(0)
   LastLogin                          DateTime?              @db.DateTime(0)
   IsActive                           Boolean?               @default(true)

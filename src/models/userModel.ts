@@ -3,7 +3,7 @@ const currentDate: Date = new Date();
 
 export default class userModel {
 
-    static AddUser = async (data: { Username: string; Email: string; PasswordHash: string; PhoneNumber?: string, role: string }) => {
+    static AddUser = async (data: { Username: string; Email: string; PasswordHash?: string; PhoneNumber?: string, role?: string }) => {
         try {
             const user = await prismaClientSingleton.users.create({
                 data: {
@@ -54,6 +54,7 @@ export default class userModel {
 
     static getUserByEmail = async (email: string) => {
         try {
+            console.log(email)
             if (!email) {
                 throw new Error("Email parameter is undefined");
             }

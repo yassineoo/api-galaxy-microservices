@@ -1,5 +1,5 @@
 import express from "express";
-import { login, resendVerificationEmail, signup, verifyEmail } from "../controllers/authController";
+import { Oauthlogin, getUserSession, login, resendVerificationEmail, signup, verifyEmail } from "../controllers/authController";
 import { verifyAuth } from "../controllers/permissionController";
 
 const authRouter = express.Router();
@@ -161,7 +161,9 @@ const authRouter = express.Router();
  *                   description: Error message
  */
 authRouter.post("/login", login);
-authRouter.post("/signup/user-client", signup("userClient"));
+authRouter.post("/oauth",Oauthlogin)
+authRouter.post("/session",getUserSession)
+authRouter.post("/register", signup("userClient"));
 authRouter.post("/signup/api-client", signup("APIClient"));
 
 authRouter.get("/resend-email",verifyAuth, resendVerificationEmail);

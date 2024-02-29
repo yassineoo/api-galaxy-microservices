@@ -3,7 +3,6 @@ import userModel from '../models/userModel';
 import profileModel from '../models/profileModel';
 import { Role } from '../models/enum';
 import { SendVerificationEmail, sendPasswordResetEmail, verifyPhoneNumber } from './grpcClient/notifService';
-import { error } from 'console';
 import userService from './UAMService';
 import otpModel from '../models/otp';
 
@@ -24,19 +23,19 @@ type register = {
 }
 
 export default class authService {
-
-
+    
     static register = async (data: register, role: Role) => {
-        console.log(data);
-        const userEmail = await userModel.getUserByEmail(data.Email);
+
+        try {
+            const userEmail = await userModel.getUserByEmail(data.Email);
+            console.log(userEmail)
         if (userEmail) {
             throw new Error('Email already exists');
         }
-        const userPhoneNumber = await userModel.getUserByPhoneNumber(data.phoneNumber);
+        /*const userPhoneNumber = await userModel.getUserByPhoneNumber(data.phoneNumber);
         if (userPhoneNumber) {
             throw new Error('Phone number already exists');
-        }
-
+        }*/
         const hashedPassword = (await hashPassword(data.password)).toString();
 
         const user = await userModel.AddUser({
@@ -51,7 +50,7 @@ export default class authService {
             throw new Error('User could not be created');
         }
 
-        const token = generateAuthToken(user.UserID, user.Email, tokenSecret || "", expiresIn || "");
+        /*const token = generateAuthToken(user.UserID, user.Email, tokenSecret || "", expiresIn || "");
 
         if (!token) {
             throw new Error('Token could not be generated');
@@ -61,7 +60,7 @@ export default class authService {
             user.UserID
             , {
                 FullName: data.FullName,
-                DateOfBirth: data.DateOfBirth,
+                DateOfBirth: data.DateOfBirth || "",
             });
 
         if (!profile) {
@@ -69,11 +68,20 @@ export default class authService {
             throw new Error('Profile could not be created');
         }
 
-        return token;
+        return token;*/
+        return true
+        } catch (error:any) {
+            return {
+                message :error.message
+            }
+        }
+        
     }
 
     static login = async (data: { Email: string, password: string }) => {
-        const user = await userModel.getUserByEmail(data.Email);
+
+        try {
+            const user = await userModel.getUserByEmail(data.Email);
         if (!user || !user.IsActive) {
             throw new Error('Email or password is incorrect ');
         }
@@ -86,17 +94,65 @@ export default class authService {
         }
 
 
-        const token = generateAuthToken(user.UserID, user.Email, tokenSecret || "", expiresIn || "");
-        userModel.setLastLogin(user.UserID);
-
-        if (user.IsTwoFactor && (user.PhoneNumber!=null)) {
+        
+       /* if (user.IsTwoFactor && (user.PhoneNumber!=null)) {
             const randomNumber = Math.floor(1000 + Math.random() * 9000);
             verifyPhoneNumber({phoneNumber: user.PhoneNumber, otp: randomNumber.toString()});
             const otp = otpModel.addOtp(user.UserID,randomNumber);
         }
-
-        return token;
+*/
+        return {
+            email:user?.Email,
+            name:user?.Username,
+            id:user?.UserID
+        }
+        } catch (error:any) {
+            return {
+                message : error.message
+            }
+        }
+        
     }
+
+    static OathUser = async (data: { Email: string,Username:string,role:string }) => {
+        let user;
+        try {
+         user = await userModel.getUserByEmail(data.Email);
+        if (!user || !user.IsActive) {
+        user = await userModel.AddUser({
+            Username: data.Username,
+            Email: data.Email,
+            role: data.role,
+        });
+
+        }
+
+        /*const token = generateAuthToken(user?.UserID, user?.Email!, tokenSecret || "", expiresIn || "");
+        userModel.setLastLogin(user?.UserID!);*/
+        return {
+            email:user?.Email,
+            name:user?.Username,
+            userId:user?.UserID
+        }
+        } catch (error:any) {
+            return {
+                message : error.message
+            }
+        }
+        
+    }
+
+
+    static getSession = async (data: { email: string }) => {
+        let user = await userModel.getUserByEmail(data.email);
+        return {
+            email:user?.Email,
+            name:user?.Username,
+            id:user?.UserID
+        }
+    }
+
+
 
     static sendVerificationEmail = async (Email: string) => {
         const user = await userModel.getUserByEmail(Email);
