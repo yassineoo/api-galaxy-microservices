@@ -50,7 +50,11 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     }
     // apiLogs routes
     apiLogsGroup := router.Group("/apis-logs")
+
            {
+            apiLogsGroup.POST("/statss", ApiLogsHandler.GetLast7DaysStats)
+            apiLogsGroup.POST("/stats", ApiLogsHandler.GetStatisticsByTimeFilter)
+
                   // categoriesGroup.POST("/", CategoryHandler.CreateCategory)
                   apiLogsGroup.GET("/:api-id", ApiLogsHandler.GetApiLogs)
                   // categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)

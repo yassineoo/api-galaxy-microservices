@@ -60,6 +60,13 @@ type ApiCollectionDto struct {
 	// Add other fields as needed...
 }
 
+type EndpointsIDsDto struct {
+	EndpointIds []int
+	// Add other fields as needed...
+}
+
+
+
 type PlanDto struct {
 	Name        string
 	ApiID       int
@@ -189,8 +196,17 @@ type UpdateApiDto struct {
 	// Add other fields as needed...
 }
 
+type EndpointStatDto struct {
+	EndpointIDs []int
+	 TimeFilter string
+}
+
 type ApiResponse struct {
 	Apis []models.ApiEntity `json:"apis"`
+	Meta PaginationMeta     `json:"meta"`
+}
+type ApiLogsResponse struct {
+	Logs []models.UsageLogEntity `json:"logs"`
 	Meta PaginationMeta     `json:"meta"`
 }
 

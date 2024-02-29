@@ -470,19 +470,53 @@ func (s *Service) DeleteApiSubscription(ctx context.Context, subscriptionID int)
 // ===================== API Logs  =====================
 // ===================== API Logs  =====================
 // ===================== API Logs  =====================
-func (s *Service) GetApiLogs(ctx context.Context, apiID int) ([]models.UsageLogEntity, error) {
-    var apiLogs []models.UsageLogEntity
-    
-        // Join UsageLogs with Endpoints and filter by apiID
-        if err := s.gormDB.
-            Preload("Endpoint").
-         
-            Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
-            Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
-        Where("endpoints_group_entities.api_id = ?", apiID).
-        Find(&apiLogs).Error; err != nil {
-        return nil, err
-    }
-    
-        return apiLogs, nil
-    }
+// GetApiLogs retrieves API logs with pagination based on the provided parameters.
+func (s *Service) GetApiLogs(ctx context.Context, apiID int, page int, limit int) (types.ApiLogsResponse, error) {
+	// Set a default limit if it's not specified or if it's <= 0.
+	if limit <= 0 {
+		limit = 10 // You can choose a suitable default value.
+	}
+
+	// Set a default page if it's not specified or if it's <= 0.
+	if page <= 0 {
+		page = 1 // Default to the first page.
+	}
+
+	// Calculate the offset based on the page and limit.
+	offset := (page - 1) * limit
+
+	var totalItems int64
+	if err := s.gormDB.Model(&models.UsageLogEntity{}).
+		Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
+		Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
+		Where("endpoints_group_entities.api_id = ?", apiID).
+		Count(&totalItems).Error; err != nil {
+		return types.ApiLogsResponse{}, err
+	}
+
+	var apiLogs []models.UsageLogEntity
+	if err := s.gormDB.
+		Preload("Endpoint").
+		Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
+		Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
+		Where("endpoints_group_entities.api_id = ?", apiID).
+		Offset(offset).Limit(limit).
+		Find(&apiLogs).Error; err != nil {
+		return types.ApiLogsResponse{}, err
+	}
+
+	totalPages := (int(totalItems) + limit - 1) / limit // Calculate total pages.
+
+	response := types.ApiLogsResponse{
+		Logs: apiLogs,
+		Meta: types.PaginationMeta{
+			TotalItems:   int(totalItems),
+			ItemCount:    len(apiLogs),
+			ItemsPerPage: limit,
+			TotalPages:   totalPages,
+			CurrentPage:  page,
+		},
+	}
+
+	return response, nil
+}

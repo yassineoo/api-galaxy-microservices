@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
 	"local_packages/api/services"
+	"local_packages/api/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,13 +31,30 @@ func NewLogsHandler(s *services.Service) *LogsHandler {
 // @Failure 400 {object} map[string]string
 // @Router /categories [get]
 func (h *LogsHandler) GetApiLogs(c *gin.Context) {
+	// Default values for pagination
+	defaultPage := 1
+	defaultLimit := 10
+
+	// Extract query parameters
+	page, err := strconv.Atoi(c.DefaultQuery("page", strconv.Itoa(defaultPage)))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", strconv.Itoa(defaultLimit)))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		return
+	}
+
     apiID, err := strconv.Atoi(c.Param("api-id"))
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID"})
         return
     }
 
-    plans, err := h.service.GetApiLogs(c, apiID)
+    plans, err := h.service.GetApiLogs(c, apiID , page, limit)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching API Plans"})
         return
@@ -46,7 +65,80 @@ func (h *LogsHandler) GetApiLogs(c *gin.Context) {
 
 
 
+
+
+
+
+
+
+
+
+
+// @Summary Get last 7 days statistics for multiple endpoints
+// @Description Retrieves statistics for multiple endpoints for the last 7 days
+// @Produce json
+// @Tags Logs Operations
+// @Accept json
+// @Param endpoint-ids body []int true "Endpoint IDs"
+// @Success 200 {array} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /logs/stats [post]
+func (h *LogsHandler) GetLast7DaysStats(c *gin.Context) {
+	var EndpointIds types.EndpointsIDsDto
+
+	// Bind the JSON body to the EndpointIds slice
+	if err := c.ShouldBindJSON(&EndpointIds); err != nil {
+		log.Println("Error binding JSON:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
+		return
+	}
+
+
+
+	// Assuming GetLast7DaysStatistics returns an array of 7 objects as mentioned
+	stats, err := h.service.GetLast7DaysStatistics(c, EndpointIds.EndpointIds)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching last 7 days' statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}
+
+
+
+
+
+
+
+
+func (h *LogsHandler) GetStatisticsByTimeFilter(c *gin.Context) {
+	var EndpointStat types.EndpointStatDto
+
+	// Bind the JSON body to the EndpointIds slice
+	if err := c.ShouldBindJSON(&EndpointStat); err != nil {
+		log.Println("Error binding JSON:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
+		return
+	}
+
+
+
+	// Assuming GetLast7DaysStatistics returns an array of 7 objects as mentioned
+	stats, err := h.service.GetStatisticsByTimeFilter(c, EndpointStat)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching last 7 days' statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}
+
+
+
 /*
+
 
 
 
