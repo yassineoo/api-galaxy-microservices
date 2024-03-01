@@ -215,7 +215,7 @@ type CrossObjectEntity struct {
 	LimitType  string
 	Price      float64 `gorm:"type:decimal(10,2)"`
 	QuotaType  string
-	QuotaValue float64 `gorm:"type:decimal(10,2)"`
+	QuotaValue int 
 	Add 	  bool 		`gorm:"default:false"`
 	Object    ObjectPlanEntity `gorm:"foreignKey:ObjectID"`
 	// Add other fields related to cross objects
@@ -237,20 +237,14 @@ type SubscriptionEntity struct {
 	PlanID    int `gorm:"not null"`
 	StartDate time.Time
 	EndDate   time.Time
+	UsedCalls  int    // Number of calls used
 	Status    string           `gorm:"size:50"`
 	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
+	Plan     PlanEntity `gorm:"foreignKey:PlanID"`
+
 }
 
 
-// ApiKeyEntity represents the ApiKeys table
-type ApiKeyEntity struct {
-	ID int `gorm:"primaryKey;autoIncrement"`
-	//ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
-	SubscriptionID int       `gorm:"not null"`
-	ApiKey         string    `gorm:"size:255;unique;not null"`
-	CreationDate   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive       bool      `gorm:"default:true"`
-}
 
 // UsageLogEntity represents the UsageLogs table
 type UsageLogEntity struct {
@@ -263,4 +257,15 @@ type UsageLogEntity struct {
 	ResponseTime   int  // in ms 
 	Endpoint    EndpointsEntity  `gorm:"foreignKey:EndpointID"`
 
+}
+
+
+// ApiKeyEntity represents the ApiKeys table
+type ApiKeyEntity struct {
+	ID int `gorm:"primaryKey;autoIncrement"`
+	//ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
+	SubscriptionID int       `gorm:"not null"`
+	ApiKey         string    `gorm:"size:255;unique;not null"`
+	CreationDate   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	IsActive       bool      `gorm:"default:true"`
 }

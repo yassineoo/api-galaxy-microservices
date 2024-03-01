@@ -11,6 +11,7 @@ import (
 	"local_packages/api/types"
 	"local_packages/models"
 	"local_packages/typesglobale"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -229,6 +230,11 @@ func (s *Service) Subscribe(ctx context.Context, apiID int) ([]models.ApiCollect
 func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
     client := &http.Client{}
 
+    if err := s.checkSubscriptionAndQuota(ctx, data.EndpointID ,123, 24); err != nil {
+        return nil, err // Return appropriate error for plan/quota issues
+    }
+
+
     req, err := http.NewRequest(data.Method, data.URL, bytes.NewBufferString(""))
     if err != nil {
         return nil, err
@@ -277,7 +283,7 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
   newLog := models.UsageLogEntity {
     // Set fields from request data: EndpointID, SubscriptionID (if applicable)
     EndpointID:  data.EndpointID,
-    SubscriptionID: 1,
+    SubscriptionID: 2,
     Timestamp:    startTime,
     Status:      resp.StatusCode,
     ResponseTime: int(responseTime.Milliseconds()),
@@ -285,6 +291,7 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
 
   go func() {
 
+    log.Println("newLog ============================= ")
     if err := s.gormDB.Create(&newLog).Error; err != nil {
         return ;
     }
@@ -295,6 +302,80 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
 }
 
 
+
+
+func (s *Service) checkSubscriptionAndQuota(ctx context.Context, endpointID int , userID int , ApiID int ) error {
+
+
+    // Get active subscription for the user
+    var subscription models.SubscriptionEntity
+    if err := s.gormDB.Preload("Plan"). Where("user_id = ? AND status = ?", userID, "active").First(&subscription).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return errors.New("user does not have an active subscription")
+        }
+        return fmt.Errorf("error retrieving user subscription: %w", err)
+    }
+
+
+
+    // Retrieve chosen object and its cross objects
+    var objectPlan models.ObjectPlanEntity
+    if err := s.gormDB.Preload("Cross").Where("api_id = ?", 24).First(&objectPlan).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return errors.New("object not found")
+        }
+        return fmt.Errorf("error retrieving object: %w", err)
+
+        
+    }
+    var crossObject models.CrossObjectEntity; 
+    if (objectPlan.Cross != nil) {
+        if (subscription.Plan.Name == "Basic") {
+            crossObject = objectPlan.Cross[0] 
+        }
+        if (subscription.Plan.Name == "Pro") {
+            crossObject = objectPlan.Cross[1]
+        }
+        if (subscription.Plan.Name == "Ultra") {
+            crossObject = objectPlan.Cross[2]
+        }
+        if (subscription.Plan.Name == "Mega") {
+            crossObject = objectPlan.Cross[3]
+        }
+    }
+
+    log.Println("subscription.UsedCalls ============================= ")
+
+    log.Println("subscription.UsedCalls", subscription)
+    log.Println("subscription.UsedCalls ============================= ")
+    
+
+
+    // Increase used calls based on plan type
+    if subscription.Plan.Type == "Usage" {
+        subscription.UsedCalls++
+    } else if subscription.Plan.Type == "Monthely" {
+        if subscription.UsedCalls >= crossObject.QuotaValue {
+            if crossObject.LimitType == "hard" {
+                return errors.New("monthly quota exceeded")
+            } else if crossObject.LimitType == "soft" {
+                subscription.UsedCalls++;
+            }
+        }
+        subscription.UsedCalls++
+    } else {
+        return errors.New("unsupported plan type")
+    }
+   
+
+
+    // Update subscription usage in the database
+    if err := s.gormDB.Save(&subscription).Error; err != nil {
+        return fmt.Errorf("error updating subscription usage: %w", err)
+    }
+
+    return nil
+}
 
 
 

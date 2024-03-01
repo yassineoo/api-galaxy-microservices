@@ -4,6 +4,8 @@ import (
 	"local_packages/api"
 	"local_packages/api/services"
 	"local_packages/database"
+	"log"
+	"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	gorm "gorm.io/gorm"
@@ -28,6 +30,7 @@ func main() {
 	var dbpool *pgxpool.Pool
 	dbpool, gorm = database.InitDB()
 	svc := services.NewService(dbpool, gorm)
+	log.SetOutput(os.Stdout)
 
 	router := gin.Default()
 	api.SetupRoutes(router, svc)

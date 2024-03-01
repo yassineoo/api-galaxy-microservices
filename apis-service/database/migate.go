@@ -21,12 +21,13 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.ApiCollectionEntity{},
 		&models.ApiEntity{},
 		&models.ApiDocsEntity{},
+		&models.SubscriptionEntity{},
+
 		&models.UsageLogEntity{},
 		&models.ApiKeyEntity{},
 		&models.ApiRatingEntity{},
 		&models.ApiVersionEntity{},
 		&models.PlanEntity{},
-		&models.SubscriptionEntity{},
 		&models.EndpointsGroupEntity{},
 		&models.EndpointsEntity{},
 		&models.EndpointsParameterEntity{},
@@ -37,6 +38,7 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.ObjectPlanEntity{},
 		&models.CrossObjectEntity{},
 		&models.EndpointObjectEntity{},
+
 
 
 		//&models.

@@ -15,6 +15,7 @@ type RequestData struct {
 	Params  map[string]string 
 	Data    map[string]string 
 	EndpointID int 
+	ApiID int
 }
 
 // ResponseData represents the data structure for the outgoing response
@@ -119,7 +120,7 @@ type CrossObjectListDto struct {
 	LimitType   string
 	Price   float64
 	QuotaType   string
-	QuotaValue   float64
+	QuotaValue   int
 	Add bool
 }
 
