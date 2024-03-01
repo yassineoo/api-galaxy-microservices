@@ -59,7 +59,6 @@ export default class userModel {
 
   static getUserByEmail = async (email: string) => {
     try {
-      console.log(email);
       if (!email) {
         throw new Error('Email parameter is undefined');
       }

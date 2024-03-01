@@ -176,6 +176,6 @@ authRouter.post('/signup/api-client', signup('APIClient'));
 
 authRouter.get('/resend-email', verifyAuth, resendVerificationEmail);
 authRouter.get('/verifyEmail/:token', verifyAuth, verifyEmail);
-authRouter.post('/verifyEmail', verifyAuth, verifyEmail);
+authRouter.post('/verifyEmail',verifyEmail);
 authRouter.patch('/resetPassword', verifyAuth, resetPassword);
 export default authRouter;

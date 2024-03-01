@@ -227,18 +227,17 @@ export default class authService {
     isEmailProvided: boolean
   ) => {
     try {
-      const user = await userService.getUserById(userId);
+      if (isEmailProvided){
+        const user = await userModel.getUserByEmail(data.email)
+      if (!user) {
+        throw new Error('Unknown email');
+      }
+      return true
+      } else {
+        const user = await userService.getUserById(userId);
       if (!user) {
         throw new Error('Unknown error');
       }
-      if (isEmailProvided) {
-        console.log('called');
-        if (user.Email == data.email) {
-          return true;
-        } else {
-          throw new Error('Unknown email');
-        }
-      } else {
         const decodedToken = decodeEmailToken(data, emailTokenSecret || '');
         if (!decodedToken || typeof decodedToken === 'string') {
           throw new Error('Invalid token');

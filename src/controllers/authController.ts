@@ -98,11 +98,9 @@ export const verifyEmail = async (req: Request, res: Response) => {
   try {
     const data = req.params.token ?? req.body;
     const isEmailProvided = !Boolean(req.params.token);
-    if (req.userId == null) {
-      throw new Error('Not authentified');
-    }
+    console.log(isEmailProvided,data)
     const result = (await authService.verifyEmail(
-      req.userId,
+      req.userId!,
       data,
       isEmailProvided
     )) as any;
