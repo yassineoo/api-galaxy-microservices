@@ -1,6 +1,14 @@
-import express from "express";
-import { Oauthlogin, getUserSession, login, resendVerificationEmail, signup, verifyEmail } from "../controllers/authController";
-import { verifyAuth } from "../controllers/permissionController";
+import express from 'express';
+import {
+  Oauthlogin,
+  getUserSession,
+  login,
+  resendVerificationEmail,
+  signup,
+  verifyEmail,
+  resetPassword,
+} from '../controllers/authController';
+import { verifyAuth } from '../controllers/permissionController';
 
 const authRouter = express.Router();
 
@@ -43,7 +51,7 @@ const authRouter = express.Router();
  *                 error:
  *                   type: string
  *                   description: Error message
- * 
+ *
  * /signup/user-client:
  *   post:
  *     summary: User client signup
@@ -101,7 +109,7 @@ const authRouter = express.Router();
  *                 error:
  *                   type: string
  *                   description: Error message
- * 
+ *
  * /signup/api-client:
  *   post:
  *     summary: API client signup
@@ -160,14 +168,14 @@ const authRouter = express.Router();
  *                   type: string
  *                   description: Error message
  */
-authRouter.post("/login", login);
-authRouter.post("/oauth",Oauthlogin)
-authRouter.post("/session",getUserSession)
-authRouter.post("/register", signup("userClient"));
-authRouter.post("/signup/api-client", signup("APIClient"));
+authRouter.post('/login', login);
+authRouter.post('/oauth', Oauthlogin);
+authRouter.post('/session', getUserSession);
+authRouter.post('/register', signup('userClient'));
+authRouter.post('/signup/api-client', signup('APIClient'));
 
-authRouter.get("/resend-email",verifyAuth, resendVerificationEmail);
-authRouter.get("/verify-email/:token",verifyAuth, verifyEmail);
-
-
+authRouter.get('/resend-email', verifyAuth, resendVerificationEmail);
+authRouter.get('/verifyEmail/:token', verifyAuth, verifyEmail);
+authRouter.post('/verifyEmail', verifyAuth, verifyEmail);
+authRouter.patch('/resetPassword', verifyAuth, resetPassword);
 export default authRouter;
