@@ -74,6 +74,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     endpointsGroup := router.Group("/endpoints")
     {
         endpointsGroup.POST("/", EndpointsHandler.CreateApiEndpoints)
+        endpointsGroup.POST("/multi", EndpointsHandler.CreateMultiApiEndpoints)
         endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpoints)
         endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints)
         endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)

@@ -135,12 +135,9 @@ type  EndpointsDto struct {
 	Parameters []EndpointsParameterDto
 	// Add other fields as needed...
 }
-
-
-type EndpointsGroupDto struct {
-	Group string
-	ApiID  int
-	Description string
+type  EndpointsMultiDto struct {
+	Endpoints []EndpointsDto
+	// Add other fields as needed...
 }
 
 type EndpointsParameterDto struct {
@@ -151,6 +148,14 @@ type EndpointsParameterDto struct {
 	Required bool
 	ExampleValue string
 }
+
+type EndpointsGroupDto struct {
+	Group string
+	ApiID  int
+	Description string
+}
+
+
 // BodyParamDto represents the data transfer object for a body parameter.
 type BodyParamDto struct {
 	EndpointID  int                  `json:"endpoint_id"`

@@ -165,6 +165,53 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Endpoi
     return &newEndpoints, nil
 }
 
+func (s *Service) CreateMultiApiEndpoints(ctx context.Context, endpoints []types.EndpointsDto) ([]models.EndpointsEntity, error) {
+    var createdEndpoints []models.EndpointsEntity
+
+
+    defaultGroup, err := s.getDefaultGroupByApiID(ctx, endpoints[0].ApiID)
+    if err != nil {
+        return nil, err
+    }
+
+    for _, endpoint := range endpoints {
+        newEndpoint := models.EndpointsEntity{
+            Name:        endpoint.Name,
+            Methode:     endpoint.Methode,
+            Url:         endpoint.Url,
+            Description: endpoint.Description,
+        }
+
+        // If GroupID is not provided, fetch the default GroupID based on ApiID
+        if endpoint.GroupID == 0 {
+           
+            newEndpoint.GroupID = defaultGroup.ID
+        }
+
+        var params []models.EndpointsParameterEntity
+        for _, paramDto := range endpoint.Parameters {
+            param := models.EndpointsParameterEntity{
+                Key:           paramDto.Key,
+                ValueType:     paramDto.ValueType,
+                ExampleValue:  paramDto.ExampleValue,
+                Required:      paramDto.Required,
+                ParameterType: paramDto.ParameterType,
+            }
+            params = append(params, param)
+        }
+
+        newEndpoint.Parameters = params
+
+        createdEndpoints = append(createdEndpoints, newEndpoint)
+    }
+
+    if err := s.gormDB.Create(&createdEndpoints).Error; err != nil {
+        return nil, err
+    }
+
+    return createdEndpoints, nil
+}
+
 // ...
 
 

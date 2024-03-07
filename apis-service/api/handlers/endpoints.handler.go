@@ -47,6 +47,26 @@ func (h *EndpointsHandler) CreateApiEndpoints(c *gin.Context) {
     c.JSON(http.StatusCreated, result)
 }
 
+
+
+func (h * EndpointsHandler) CreateMultiApiEndpoints (c *gin.Context) {
+    var endpoint types.EndpointsMultiDto
+    if err := c.ShouldBindJSON(&endpoint); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    result, err := h.service.CreateMultiApiEndpoints(c, endpoint.Endpoints)
+    if err != nil {
+        log.Println("Error ", err)
+        
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Endpoints"})
+        return
+    }
+
+    c.JSON(http.StatusCreated, result)
+}
+
 // @Summary Get API Endpointss by API ID
 // @Description Retrieves endpointss for a specific API
 // @Tags API Endpoints Operations
