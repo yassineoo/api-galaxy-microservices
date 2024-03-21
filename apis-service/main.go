@@ -1,6 +1,13 @@
 package main
 
 import (
+	"net"
+	"os"
+    "strings"
+
+	"fmt"
+	"log"
+	"net/http"
 	"local_packages/api"
 	"local_packages/api/services"
 	"local_packages/database"
@@ -18,7 +25,7 @@ import (
 
 // @title API Title
 // @description This is a sample server for a pet store.
-// @version 1.0
+// @version 1.0"os"
 // @termsOfService http://terms-of-service-url.com
 // @contact name Developer Support email support@email.com
 // @license name Apache 2.0 url http://www.apache.org/licenses/LICENSE-2.0.html
@@ -26,6 +33,32 @@ import (
 // @BasePath /
 // @schemes http https
 func main() {
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
+	log.Println(" serevet starting ....")
 	var gorm *gorm.DB
 	var dbpool *pgxpool.Pool
 	dbpool, gorm = database.InitDB()
@@ -42,10 +75,95 @@ func main() {
 	swaggerURL := ginSwagger.URL("http://localhost:5000/swagger/doc.json")
 
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
-
+		// Retrieve IP address and port of the server
+		ip, port := getServerAddress()
+		log.Println("Server IP: %s, Port: %d\n", ip, port)
+		fmt.Printf("Server IP: %s, Port: %d\n", ip, port)
+		
+		// Register service with Kong API Gateway
+		/*
+		err := registerServiceWithKong("echo-server", "192.168.43.10", 7000)
+		if err != nil {
+			log.Fatal(err)
+		}
+		*/
+		
 	router.Run(":7000")
 }
 
 
 
+// Function to retrieve the IP address and port of the server
+
+func getServerAddress() (string, int) {
+    // Get the hostname or IP address of the machine
+    hostname, err := os.Hostname()
+    if err != nil {
+        log.Fatalf("Unable to get hostname: %v", err)
+    }
+
+    // Resolve the hostname to an IP address
+    addrs, err := net.LookupIP(hostname)
+    if err != nil {
+        log.Fatalf("Unable to resolve hostname: %v", err)
+    }
+
+    // Use the first non-loopback IP address
+    var ip string
+    for _, addr := range addrs {
+        if !addr.IsLoopback() {
+            ip = addr.String()
+            break
+        }
+    }
+
+    if ip == "" {
+        log.Fatal("No non-loopback IP address found")
+    }
+
+    // Get the port number from the running server
+    ln, err := net.Listen("tcp", ":0") // Use a random available port
+    if err != nil {
+        log.Fatalf("Unable to get available port: %v", err)
+    }
+    defer ln.Close()
+
+    port := ln.Addr().(*net.TCPAddr).Port
+
+    return ip, port
+}
+// Function to register the service with the Kong API Gateway
+// Function to register the service with the Kong API Gateway
+func registerServiceWithKong(name string, ip string, port int) error {
+	// Construct the PUT request to the Kong API Gateway's services endpoint
+	payload := fmt.Sprintf(`{"name": "%sno", "url": "http://%s:%d"}`, name, ip, port)
+	req, err := http.NewRequest("PATCH", "http://192.168.43.10:8001/services/example_service", strings.NewReader(payload))
+	//req , err := http.NewRequest("GET", "http://192.168.43.10:8001/services" ,nil)
+	if err != nil {
+		return fmt.Errorf("error creating HTTP request: %v", err)
+	}
+	//log.Println(req)172.17.0.2
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending HTTP request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		
+		fmt.Println(resp.Body)
+		fmt.Println("Service registered successfully with the Kong API Gateway")
+	} else {
+		fmt.Println("Failed to register service with the Kong API Gateway")
+		// Log the response body for more information
+		log.Printf("Response Body: %s\n", resp.Body)
+		return fmt.Errorf("failed to register service with Kong, status code: %d", resp.StatusCode)
+	}
+
+	return nil
+}
 
