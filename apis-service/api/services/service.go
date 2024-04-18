@@ -226,7 +226,7 @@ func (s *Service) Subscribe(ctx context.Context, apiID int) ([]models.ApiCollect
 
 
 
-
+/*
 func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
     client := &http.Client{}
 
@@ -240,6 +240,93 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
         return nil, err
     }
 
+    // Set request headers
+    for key, value := range data.Headers {
+        req.Header.Set(key, value)
+    }
+
+    // Set query parameters
+    q := req.URL.Query()
+    for key, value := range data.Params {
+        q.Add(key, value)
+    }
+    req.URL.RawQuery = q.Encode()
+
+    // Set request body if data is provided
+    if len(data.Data) > 0 {
+        req.Header.Set("Content-Type", "application/json")
+        jsonData, err := json.Marshal(data.Data)
+        if err != nil {
+            return nil, err
+        }
+        req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
+    }
+
+    // Send the request and get the response
+    startTime := time.Now() // Start time measurement
+
+    resp, err := client.Do(req)
+    if err != nil {
+        return nil, err
+    }
+
+      // Calculate response time based on content length and potential header information
+  endTime := time.Now()
+  contentLength, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+  if err != nil {
+    // Handle error or use another method for response time estimation
+    contentLength = 0
+  }
+  responseTime := endTime.Sub(startTime) - time.Duration(contentLength) * time.Nanosecond / 1024 / 1024
+
+  // Create log entity with all info after receiving response
+  newLog := models.UsageLogEntity {
+    // Set fields from request data: EndpointID, SubscriptionID (if applicable)
+    EndpointID:  data.EndpointID,
+    SubscriptionID: 2,
+    Timestamp:    startTime,
+    Status:      resp.StatusCode,
+    ResponseTime: int(responseTime.Milliseconds()),
+  }
+
+  go func() {
+
+    log.Println("newLog ============================= ")
+    if err := s.gormDB.Create(&newLog).Error; err != nil {
+        return ;
+    }
+  }()   
+    
+
+    return resp, nil
+}
+*/
+
+func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
+    client := &http.Client{}
+/*
+    if err := s.checkSubscriptionAndQuota(ctx, data.EndpointID ,123, data.ApiID); err != nil {
+        return nil, err // Return appropriate error for plan/quota issues
+    }
+    */
+    var api models.ApiEntity
+    if err := s.gormDB.Where("id = ?", data.ApiID).First(&api).Error; err != nil {
+        return nil, err
+    }
+
+
+
+
+ 
+    log.Println("api.ApiUrl ============================= " ,api.ApiUrl+data.URL )
+    log.Println("api.ApiUrl ============================= " ,api.ApiUrl+data.URL )
+
+
+       
+    req, err := http.NewRequest(data.Method, api.ApiUrl+data.URL, bytes.NewBufferString(""))
+    if err != nil {
+        return nil, err
+    }
     // Set request headers
     for key, value := range data.Headers {
         req.Header.Set(key, value)

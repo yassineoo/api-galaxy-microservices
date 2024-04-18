@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -298,4 +300,105 @@ func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
 		"statusCode":    response.StatusCode,
 		"RequestBody":          string(body),
 	})
+}
+
+
+func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
+    // Extract API ID and Endpoint URL from the request path
+	path := c.Param("path")
+    apiID, _ := strconv.Atoi(c.Param("api-id"))
+    //endpointURL := c.Param("endpointsUrl")
+
+    // Extract HTTP method from the incoming request
+    method := c.Request.Method
+
+	// Extract headers from the incoming request
+	headers := make(map[string]string)
+	for k, v := range c.Request.Header {
+		headers[k] = strings.Join(v, ", ")
+	}
+
+	
+    // Access a specific header value
+    XEndpointKey, ok := headers["X-Endpoint-Key"]
+    if ok {
+        // Header found, do something with specificHeaderValue
+        log.Println("Specific header value:", XEndpointKey)
+    }
+    // Delete a specific header
+    delete(headers, "X-Endpoint-Key")
+
+   
+
+	// Extract query parameters from the incoming request
+	params := make(map[string]string)
+	for k, v := range c.Request.URL.Query() {
+		params[k] = strings.Join(v, ", ")
+	}
+
+	log.Println("result ",path )
+	log.Println("result ",apiID )
+	log.Println("result ",method)
+	log.Println("result ",headers )
+	log.Println("result ",params )
+
+    // Extract request body (if present)
+    var requestBody map[string]string
+    if c.Request.Body != nil {
+        body, _ := ioutil.ReadAll(c.Request.Body)
+        c.Request.Body.Close()
+        json.Unmarshal(body, &requestBody)
+    }
+	log.Println("result ", requestBody)
+	
+
+    // Create a RequestData struct with the extracted information
+    
+	endpointID, _ := strconv.Atoi(XEndpointKey)
+	requestData := types.RequestData{
+		Method:     method,
+		URL:        path,
+		Headers:    headers,
+		Params:     params,
+		Data:       requestBody,
+		EndpointID: endpointID,
+		ApiID:      apiID,
+	}
+
+	log.Println("result ", requestData)
+
+	
+
+   // Pass the RequestData struct to your service
+   response, err := h.service.SendRequest(c, requestData)
+   if err != nil {
+	   // Handle the error
+	   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	   return
+   }
+
+   // Copy the headers from the response to the Gin context
+ // Copy the headers from the response to the Gin context, replacing existing headers if needed
+for key, values := range response.Header {
+    // Remove existing header with the same key
+    c.Writer.Header().Del(key)
+    // Add or set the new header value(s)
+    for _, value := range values {
+        c.Writer.Header().Set(key, value)
+    }
+}
+
+   // Set the status code
+   c.Writer.WriteHeader(response.StatusCode)
+
+   // Copy the response body to the Gin context
+   _, err = io.Copy(c.Writer, response.Body)
+   if err != nil {
+	   // Handle the error
+	   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	   return
+   }
+
+   // Close the response body
+   response.Body.Close()
 }

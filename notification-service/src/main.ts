@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice(AppModule, {
     transport: Transport.GRPC,
     options: {
-      url: 'localhost:5000', // Replace with the appropriate host and port
+      url: 'localhost:8088', // Replace with the appropriate host and port
       package: 'sms',
       protoPath: './src/proto/sms.proto', // Path to your .proto file
     },

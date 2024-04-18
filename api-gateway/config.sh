@@ -56,5 +56,5 @@ add_route() {
 
 
 # Example usage
-add_service "api-service" "localhost" 7000
+add_service "api-service" "localhost" 8088
 add_route "api-service" "/apis" "GET"

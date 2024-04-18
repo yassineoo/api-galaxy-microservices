@@ -146,21 +146,24 @@ func (s *Service) CreateApiEndpoints(ctx context.Context, endpoints types.Endpoi
 
     // Create Parameters for each element in the array
     var params []models.EndpointsParameterEntity
-    for _, paramDto := range endpoints.Parameters {
-        param := models.EndpointsParameterEntity{
-            Key:           paramDto.Key,
-            ValueType:     paramDto.ValueType,
-            ExampleValue:  paramDto.ExampleValue,
-            Required:      paramDto.Required,
-            EndpointID:    newEndpoints.ID, // Set the EndpointID to the newly created endpoint's ID
-            ParameterType: paramDto.ParameterType,
+    if len(endpoints.Parameters) != 0  {
+        for _, paramDto := range endpoints.Parameters {
+            param := models.EndpointsParameterEntity{
+                Key:           paramDto.Key,
+                ValueType:     paramDto.ValueType,
+                ExampleValue:  paramDto.ExampleValue,
+                Required:      paramDto.Required,
+                EndpointID:    newEndpoints.ID, // Set the EndpointID to the newly created endpoint's ID
+                ParameterType: paramDto.ParameterType,
+            }
+            params = append(params, param)
         }
-        params = append(params, param)
+    
+        if err := s.gormDB.Create(&params).Error; err != nil {
+            return nil, err
+        }
     }
-
-    if err := s.gormDB.Create(&params).Error; err != nil {
-        return nil, err
-    }
+ 
 
     return &newEndpoints, nil
 }

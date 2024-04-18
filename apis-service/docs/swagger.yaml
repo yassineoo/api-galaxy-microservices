@@ -22,7 +22,8 @@ definitions:
   models.HealthCheckEntity:
     properties:
       alertsEnabled:
-        description: NextCheckAt    time.Time // The timestamp of the next scheduled
+        description:
+          NextCheckAt    time.Time // The timestamp of the next scheduled
           health check
         type: boolean
       apiID:
@@ -42,7 +43,7 @@ definitions:
           CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
           UpdatedAt      time.Time
         items:
-          $ref: '#/definitions/models.HealthCheckResultEntity'
+          $ref: "#/definitions/models.HealthCheckResultEntity"
         type: array
       schedule:
         description: Cron schedule string for when to run the check
@@ -157,9 +158,9 @@ definitions:
         description: The URL to be checked
         type: string
     required:
-    - apiId
-    - schedule
-    - url
+      - apiId
+      - schedule
+      - url
     type: object
   types.PlanDto:
     properties:
@@ -202,7 +203,7 @@ definitions:
       name:
         type: string
     type: object
-host: localhost:5000
+host: localhost:8088
 info:
   contact: {}
   description: This is a sample server for a pet store.
@@ -213,17 +214,17 @@ paths:
   /Subscription:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new API Subscription
       parameters:
-      - description: API Subscription Data
-        in: body
-        name: Subscription
-        required: true
-        schema:
-          $ref: '#/definitions/types.SubscriptionDto'
+        - description: API Subscription Data
+          in: body
+          name: Subscription
+          required: true
+          schema:
+            $ref: "#/definitions/types.SubscriptionDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -238,18 +239,18 @@ paths:
             type: object
       summary: Create an API Subscription
       tags:
-      - API Subscription Operations
+        - API Subscription Operations
   /Subscription/:api-id:
     get:
       description: Retrieves Subscriptions for a specific API
       parameters:
-      - description: API ID
-        in: path
-        name: api-id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: api-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -264,18 +265,18 @@ paths:
             type: object
       summary: Get API Subscriptions by API ID
       tags:
-      - API Subscription Operations
+        - API Subscription Operations
   /Subscription/:id:
     delete:
       description: Deletes a specific API Subscription
       parameters:
-      - description: Subscription ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Subscription ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -303,25 +304,25 @@ paths:
             type: object
       summary: Delete an API Subscription
       tags:
-      - API Subscription Operations
+        - API Subscription Operations
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing API Subscription
       parameters:
-      - description: Subscription ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: API Subscription Data
-        in: body
-        name: Subscription
-        required: true
-        schema:
-          $ref: '#/definitions/types.SubscriptionDto'
+        - description: Subscription ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: API Subscription Data
+          in: body
+          name: Subscription
+          required: true
+          schema:
+            $ref: "#/definitions/types.SubscriptionDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -342,21 +343,21 @@ paths:
             type: object
       summary: Update an API Subscription
       tags:
-      - API Subscription Operations
+        - API Subscription Operations
   /apis:
     get:
       description: Retrieves a paginated list of APIs
       parameters:
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Results per page
-        in: query
-        name: limit
-        type: integer
+        - description: Page number
+          in: query
+          name: page
+          type: integer
+        - description: Results per page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -371,20 +372,20 @@ paths:
             type: object
       summary: Get all APIs
       tags:
-      - Apis Operations
+        - Apis Operations
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new API from the provided data
       parameters:
-      - description: API Data
-        in: body
-        name: api
-        required: true
-        schema:
-          $ref: '#/definitions/types.ApiDto'
+        - description: API Data
+          in: body
+          name: api
+          required: true
+          schema:
+            $ref: "#/definitions/types.ApiDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -405,18 +406,18 @@ paths:
             type: object
       summary: Create API
       tags:
-      - Apis Operations
+        - Apis Operations
   /apis/{id}:
     delete:
       description: Deletes the API with the provided ID
       parameters:
-      - description: API ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -444,18 +445,18 @@ paths:
             type: object
       summary: Delete API by ID
       tags:
-      - Apis Operations
+        - Apis Operations
     get:
       description: Retrieve API details based on the provided ID.
       operationId: get-api-by-id
       parameters:
-      - description: API ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -467,25 +468,25 @@ paths:
           schema: {}
       summary: Get API by ID
       tags:
-      - Apis Operations
+        - Apis Operations
     put:
       consumes:
-      - application/json
+        - application/json
       description: Updates the API with the given ID
       parameters:
-      - description: API ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: API Data
-        in: body
-        name: api
-        required: true
-        schema:
-          $ref: '#/definitions/types.UpdateApiDto'
+        - description: API ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: API Data
+          in: body
+          name: api
+          required: true
+          schema:
+            $ref: "#/definitions/types.UpdateApiDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -506,21 +507,21 @@ paths:
             type: object
       summary: Update API by ID
       tags:
-      - Apis Operations
+        - Apis Operations
   /categories:
     get:
       description: Retrieves a paginated list of categories
       parameters:
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Results per page
-        in: query
-        name: limit
-        type: integer
+        - description: Page number
+          in: query
+          name: page
+          type: integer
+        - description: Results per page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -535,20 +536,20 @@ paths:
             type: object
       summary: Get all categories
       tags:
-      - Category Operations
+        - Category Operations
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new category from the provided data
       parameters:
-      - description: Category Data
-        in: body
-        name: category
-        required: true
-        schema:
-          $ref: '#/definitions/types.CategoryDto'
+        - description: Category Data
+          in: body
+          name: category
+          required: true
+          schema:
+            $ref: "#/definitions/types.CategoryDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -569,18 +570,18 @@ paths:
             type: object
       summary: Create a new category
       tags:
-      - Category Operations
+        - Category Operations
   /categories/{id}:
     delete:
       description: Deletes the category with the provided ID
       parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -608,25 +609,25 @@ paths:
             type: object
       summary: Delete a category
       tags:
-      - Category Operations
+        - Category Operations
     put:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing category with the given ID
       parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Category Data
-        in: body
-        name: category
-        required: true
-        schema:
-          $ref: '#/definitions/types.CategoryDto'
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Category Data
+          in: body
+          name: category
+          required: true
+          schema:
+            $ref: "#/definitions/types.CategoryDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -647,21 +648,21 @@ paths:
             type: object
       summary: Update a category
       tags:
-      - Category Operations
+        - Category Operations
   /endpoints:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new API Endpoints
       parameters:
-      - description: API Endpoints Data
-        in: body
-        name: endpoints
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsDto'
+        - description: API Endpoints Data
+          in: body
+          name: endpoints
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -676,21 +677,21 @@ paths:
             type: object
       summary: Create an API Endpoints
       tags:
-      - API Endpoints Operations
+        - API Endpoints Operations
   /endpoints-group:
     get:
       description: Retrieves all Endpoints Groups
       parameters:
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Number of items per page
-        in: query
-        name: limit
-        type: integer
+        - description: Page number
+          in: query
+          name: page
+          type: integer
+        - description: Number of items per page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -705,20 +706,20 @@ paths:
             type: object
       summary: Get All Endpoints Groups
       tags:
-      - Endpoints Group Operations
+        - Endpoints Group Operations
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new Endpoints Group
       parameters:
-      - description: Endpoints Group Data
-        in: body
-        name: endpoints-group
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsGroupDto'
+        - description: Endpoints Group Data
+          in: body
+          name: endpoints-group
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsGroupDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -733,18 +734,18 @@ paths:
             type: object
       summary: Create an Endpoints Group
       tags:
-      - Endpoints Group Operations
+        - Endpoints Group Operations
   /endpoints-group/:id:
     delete:
       description: Deletes a specific Endpoints Group
       parameters:
-      - description: Endpoints Group ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Endpoints Group ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -772,25 +773,25 @@ paths:
             type: object
       summary: Delete an Endpoints Group
       tags:
-      - Endpoints Group Operations
+        - Endpoints Group Operations
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing Endpoints Group
       parameters:
-      - description: Endpoints Group ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Endpoints Group Data
-        in: body
-        name: endpoints-group
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsGroupDto'
+        - description: Endpoints Group ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Endpoints Group Data
+          in: body
+          name: endpoints-group
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsGroupDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -811,26 +812,26 @@ paths:
             type: object
       summary: Update an Endpoints Group
       tags:
-      - Endpoints Group Operations
+        - Endpoints Group Operations
   /endpoints-parameter:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new Endpoints Parameter
       parameters:
-      - description: Endpoints Parameter Data
-        in: body
-        name: endpoints-parameter
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsParameterDto'
+        - description: Endpoints Parameter Data
+          in: body
+          name: endpoints-parameter
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsParameterDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.EndpointsParameterEntity'
+            $ref: "#/definitions/models.EndpointsParameterEntity"
         "400":
           description: Bad Request
           schema:
@@ -839,24 +840,24 @@ paths:
             type: object
       summary: Create an Endpoints Parameter
       tags:
-      - Endpoints Parameter Operations
+        - Endpoints Parameter Operations
   /endpoints-parameter/{endpoint-id}:
     get:
       description: Retrieves all Endpoints Parameters for a specific Endpoint
       parameters:
-      - description: Endpoint ID
-        in: path
-        name: endpoint-id
-        required: true
-        type: integer
+        - description: Endpoint ID
+          in: path
+          name: endpoint-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.EndpointsParameterEntity'
+              $ref: "#/definitions/models.EndpointsParameterEntity"
             type: array
         "400":
           description: Bad Request
@@ -866,18 +867,18 @@ paths:
             type: object
       summary: Get All Endpoints Parameters
       tags:
-      - Endpoints Parameter Operations
+        - Endpoints Parameter Operations
   /endpoints-parameter/{id}:
     delete:
       description: Deletes a specific Endpoints Parameter
       parameters:
-      - description: Endpoints Parameter ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Endpoints Parameter ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -905,30 +906,30 @@ paths:
             type: object
       summary: Delete an Endpoints Parameter
       tags:
-      - Endpoints Parameter Operations
+        - Endpoints Parameter Operations
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing Endpoints Parameter
       parameters:
-      - description: Endpoints Parameter ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Endpoints Parameter Data
-        in: body
-        name: endpoints-parameter
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsParameterDto'
+        - description: Endpoints Parameter ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Endpoints Parameter Data
+          in: body
+          name: endpoints-parameter
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsParameterDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.EndpointsParameterEntity'
+            $ref: "#/definitions/models.EndpointsParameterEntity"
         "400":
           description: Bad Request
           schema:
@@ -943,18 +944,18 @@ paths:
             type: object
       summary: Update an Endpoints Parameter
       tags:
-      - Endpoints Parameter Operations
+        - Endpoints Parameter Operations
   /endpoints/:api-id:
     get:
       description: Retrieves endpointss for a specific API
       parameters:
-      - description: API ID
-        in: path
-        name: api-id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: api-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -969,18 +970,18 @@ paths:
             type: object
       summary: Get API Endpointss by API ID
       tags:
-      - API Endpoints Operations
+        - API Endpoints Operations
   /endpoints/:id:
     delete:
       description: Deletes a specific API Endpoints
       parameters:
-      - description: Endpoints ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Endpoints ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1008,25 +1009,25 @@ paths:
             type: object
       summary: Delete an API Endpoints
       tags:
-      - API Endpoints Operations
+        - API Endpoints Operations
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing API Endpoints
       parameters:
-      - description: Endpoints ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: API Endpoints Data
-        in: body
-        name: endpoints
-        required: true
-        schema:
-          $ref: '#/definitions/types.EndpointsDto'
+        - description: Endpoints ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: API Endpoints Data
+          in: body
+          name: endpoints
+          required: true
+          schema:
+            $ref: "#/definitions/types.EndpointsDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1047,26 +1048,26 @@ paths:
             type: object
       summary: Update an API Endpoints
       tags:
-      - API Endpoints Operations
+        - API Endpoints Operations
   /health-checks:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new Health Check for an API
       parameters:
-      - description: Health Check Data
-        in: body
-        name: health-check
-        required: true
-        schema:
-          $ref: '#/definitions/types.HealthCheckDto'
+        - description: Health Check Data
+          in: body
+          name: health-check
+          required: true
+          schema:
+            $ref: "#/definitions/types.HealthCheckDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.HealthCheckEntity'
+            $ref: "#/definitions/models.HealthCheckEntity"
         "400":
           description: Bad Request
           schema:
@@ -1075,23 +1076,23 @@ paths:
             type: object
       summary: Create a Health Check
       tags:
-      - Health Checks
+        - Health Checks
   /health-checks/{api-id}:
     get:
       description: Retrieves a Health Check for a specific API
       parameters:
-      - description: API ID
-        in: path
-        name: api-id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: api-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.HealthCheckEntity'
+            $ref: "#/definitions/models.HealthCheckEntity"
         "400":
           description: Bad Request
           schema:
@@ -1100,18 +1101,18 @@ paths:
             type: object
       summary: Get Health Check by API ID
       tags:
-      - Health Checks
+        - Health Checks
   /health-checks/{api-id}/success-percentage:
     get:
       description: Get the success percentage of health checks for a specific API
       parameters:
-      - description: API ID
-        in: path
-        name: api-id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: api-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1133,18 +1134,18 @@ paths:
             type: object
       summary: Get Health Check Success Percentage
       tags:
-      - Health Checks
+        - Health Checks
   /health-checks/{id}:
     delete:
       description: Deletes a specific Health Check for an API
       parameters:
-      - description: Health Check ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Health Check ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1166,30 +1167,30 @@ paths:
             type: object
       summary: Delete a Health Check
       tags:
-      - Health Checks
+        - Health Checks
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing Health Check for an API
       parameters:
-      - description: Health Check ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Health Check Data
-        in: body
-        name: health-check
-        required: true
-        schema:
-          $ref: '#/definitions/types.HealthCheckDto'
+        - description: Health Check ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Health Check Data
+          in: body
+          name: health-check
+          required: true
+          schema:
+            $ref: "#/definitions/types.HealthCheckDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.HealthCheckEntity'
+            $ref: "#/definitions/models.HealthCheckEntity"
         "400":
           description: Bad Request
           schema:
@@ -1198,21 +1199,21 @@ paths:
             type: object
       summary: Update a Health Check
       tags:
-      - Health Checks
+        - Health Checks
   /plan:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new API Plan
       parameters:
-      - description: API Plan Data
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/types.PlanDto'
+        - description: API Plan Data
+          in: body
+          name: plan
+          required: true
+          schema:
+            $ref: "#/definitions/types.PlanDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -1227,18 +1228,18 @@ paths:
             type: object
       summary: Create an API Plan
       tags:
-      - API Plan Operations
+        - API Plan Operations
   /plan/:api-id:
     get:
       description: Retrieves plans for a specific API
       parameters:
-      - description: API ID
-        in: path
-        name: api-id
-        required: true
-        type: integer
+        - description: API ID
+          in: path
+          name: api-id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1253,18 +1254,18 @@ paths:
             type: object
       summary: Get API Plans by API ID
       tags:
-      - API Plan Operations
+        - API Plan Operations
   /plan/:id:
     delete:
       description: Deletes a specific API Plan
       parameters:
-      - description: Plan ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Plan ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1292,25 +1293,25 @@ paths:
             type: object
       summary: Delete an API Plan
       tags:
-      - API Plan Operations
+        - API Plan Operations
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Updates an existing API Plan
       parameters:
-      - description: Plan ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: API Plan Data
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/types.PlanDto'
+        - description: Plan ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: API Plan Data
+          in: body
+          name: plan
+          required: true
+          schema:
+            $ref: "#/definitions/types.PlanDto"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1331,8 +1332,8 @@ paths:
             type: object
       summary: Update an API Plan
       tags:
-      - API Plan Operations
+        - API Plan Operations
 schemes:
-- http
-- https
+  - http
+  - https
 swagger: "2.0"

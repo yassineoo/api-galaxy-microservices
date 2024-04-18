@@ -13,11 +13,11 @@ COPY . .
 RUN go build -o main
 
 # Expose the port on which your application will listen
-EXPOSE 7000
+EXPOSE 8088
 
 # Command to run the executable
 CMD ["./main"]
 
 #sudo docker build -t api_service_image .
-#sudo docker run -p 7000:7000 api_service_image
+#sudo docker run -p 8088:8088 api_service_image
 

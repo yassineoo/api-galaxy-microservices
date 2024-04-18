@@ -1,2000 +1,1825 @@
 {
-    "schemes": [
-        "http",
-        "https"
-    ],
-    "swagger": "2.0",
-    "info": {
-        "description": "This is a sample server for a pet store.",
-        "title": "API Title",
-        "termsOfService": "http://terms-of-service-url.com",
-        "contact": {},
-        "version": "1.0"
-    },
-    "host": "localhost:5000",
-    "basePath": "/",
-    "paths": {
-        "/Subscription": {
-            "post": {
-                "description": "Creates a new API Subscription",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Subscription Operations"
-                ],
-                "summary": "Create an API Subscription",
-                "parameters": [
-                    {
-                        "description": "API Subscription Data",
-                        "name": "Subscription",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.SubscriptionDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+  "schemes": ["http", "https"],
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a sample server for a pet store.",
+    "title": "API Title",
+    "termsOfService": "http://terms-of-service-url.com",
+    "contact": {},
+    "version": "1.0"
+  },
+  "host": "localhost:8088",
+  "basePath": "/",
+  "paths": {
+    "/Subscription": {
+      "post": {
+        "description": "Creates a new API Subscription",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Subscription Operations"],
+        "summary": "Create an API Subscription",
+        "parameters": [
+          {
+            "description": "API Subscription Data",
+            "name": "Subscription",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.SubscriptionDto"
             }
-        },
-        "/Subscription/:api-id": {
-            "get": {
-                "description": "Retrieves Subscriptions for a specific API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Subscription Operations"
-                ],
-                "summary": "Get API Subscriptions by API ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "api-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
             }
-        },
-        "/Subscription/:id": {
-            "delete": {
-                "description": "Deletes a specific API Subscription",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Subscription Operations"
-                ],
-                "summary": "Delete an API Subscription",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Subscription ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing API Subscription",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Subscription Operations"
-                ],
-                "summary": "Update an API Subscription",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Subscription ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "API Subscription Data",
-                        "name": "Subscription",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.SubscriptionDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
-        },
-        "/apis": {
-            "get": {
-                "description": "Retrieves a paginated list of APIs",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Apis Operations"
-                ],
-                "summary": "Get all APIs",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Results per page",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new API from the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Apis Operations"
-                ],
-                "summary": "Create API",
-                "parameters": [
-                    {
-                        "description": "API Data",
-                        "name": "api",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.ApiDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/apis/{id}": {
-            "get": {
-                "description": "Retrieve API details based on the provided ID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Apis Operations"
-                ],
-                "summary": "Get API by ID",
-                "operationId": "get-api-by-id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "description": "Updates the API with the given ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Apis Operations"
-                ],
-                "summary": "Update API by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "API Data",
-                        "name": "api",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.UpdateApiDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes the API with the provided ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Apis Operations"
-                ],
-                "summary": "Delete API by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/categories": {
-            "get": {
-                "description": "Retrieves a paginated list of categories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Category Operations"
-                ],
-                "summary": "Get all categories",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Results per page",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new category from the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Category Operations"
-                ],
-                "summary": "Create a new category",
-                "parameters": [
-                    {
-                        "description": "Category Data",
-                        "name": "category",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.CategoryDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/categories/{id}": {
-            "put": {
-                "description": "Updates an existing category with the given ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Category Operations"
-                ],
-                "summary": "Update a category",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Category ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Category Data",
-                        "name": "category",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.CategoryDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes the category with the provided ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Category Operations"
-                ],
-                "summary": "Delete a category",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Category ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints": {
-            "post": {
-                "description": "Creates a new API Endpoints",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Endpoints Operations"
-                ],
-                "summary": "Create an API Endpoints",
-                "parameters": [
-                    {
-                        "description": "API Endpoints Data",
-                        "name": "endpoints",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints-group": {
-            "get": {
-                "description": "Retrieves all Endpoints Groups",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Group Operations"
-                ],
-                "summary": "Get All Endpoints Groups",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Number of items per page",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new Endpoints Group",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Group Operations"
-                ],
-                "summary": "Create an Endpoints Group",
-                "parameters": [
-                    {
-                        "description": "Endpoints Group Data",
-                        "name": "endpoints-group",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsGroupDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints-group/:id": {
-            "delete": {
-                "description": "Deletes a specific Endpoints Group",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Group Operations"
-                ],
-                "summary": "Delete an Endpoints Group",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints Group ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing Endpoints Group",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Group Operations"
-                ],
-                "summary": "Update an Endpoints Group",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints Group ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Endpoints Group Data",
-                        "name": "endpoints-group",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsGroupDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints-parameter": {
-            "post": {
-                "description": "Creates a new Endpoints Parameter",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Parameter Operations"
-                ],
-                "summary": "Create an Endpoints Parameter",
-                "parameters": [
-                    {
-                        "description": "Endpoints Parameter Data",
-                        "name": "endpoints-parameter",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsParameterDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.EndpointsParameterEntity"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints-parameter/{endpoint-id}": {
-            "get": {
-                "description": "Retrieves all Endpoints Parameters for a specific Endpoint",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Parameter Operations"
-                ],
-                "summary": "Get All Endpoints Parameters",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoint ID",
-                        "name": "endpoint-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.EndpointsParameterEntity"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints-parameter/{id}": {
-            "delete": {
-                "description": "Deletes a specific Endpoints Parameter",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Parameter Operations"
-                ],
-                "summary": "Delete an Endpoints Parameter",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints Parameter ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing Endpoints Parameter",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Endpoints Parameter Operations"
-                ],
-                "summary": "Update an Endpoints Parameter",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints Parameter ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Endpoints Parameter Data",
-                        "name": "endpoints-parameter",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsParameterDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.EndpointsParameterEntity"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints/:api-id": {
-            "get": {
-                "description": "Retrieves endpointss for a specific API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Endpoints Operations"
-                ],
-                "summary": "Get API Endpointss by API ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "api-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/endpoints/:id": {
-            "delete": {
-                "description": "Deletes a specific API Endpoints",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Endpoints Operations"
-                ],
-                "summary": "Delete an API Endpoints",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing API Endpoints",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Endpoints Operations"
-                ],
-                "summary": "Update an API Endpoints",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Endpoints ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "API Endpoints Data",
-                        "name": "endpoints",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.EndpointsDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/health-checks": {
-            "post": {
-                "description": "Creates a new Health Check for an API",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health Checks"
-                ],
-                "summary": "Create a Health Check",
-                "parameters": [
-                    {
-                        "description": "Health Check Data",
-                        "name": "health-check",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.HealthCheckDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.HealthCheckEntity"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/health-checks/{api-id}": {
-            "get": {
-                "description": "Retrieves a Health Check for a specific API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health Checks"
-                ],
-                "summary": "Get Health Check by API ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "api-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.HealthCheckEntity"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/health-checks/{api-id}/success-percentage": {
-            "get": {
-                "description": "Get the success percentage of health checks for a specific API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health Checks"
-                ],
-                "summary": "Get Health Check Success Percentage",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "api-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "number"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid API ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/health-checks/{id}": {
-            "delete": {
-                "description": "Deletes a specific Health Check for an API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health Checks"
-                ],
-                "summary": "Delete a Health Check",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Health Check ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing Health Check for an API",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health Checks"
-                ],
-                "summary": "Update a Health Check",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Health Check ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Health Check Data",
-                        "name": "health-check",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.HealthCheckDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.HealthCheckEntity"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/plan": {
-            "post": {
-                "description": "Creates a new API Plan",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Plan Operations"
-                ],
-                "summary": "Create an API Plan",
-                "parameters": [
-                    {
-                        "description": "API Plan Data",
-                        "name": "plan",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.PlanDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/plan/:api-id": {
-            "get": {
-                "description": "Retrieves plans for a specific API",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Plan Operations"
-                ],
-                "summary": "Get API Plans by API ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "API ID",
-                        "name": "api-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/plan/:id": {
-            "delete": {
-                "description": "Deletes a specific API Plan",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Plan Operations"
-                ],
-                "summary": "Delete an API Plan",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Plan ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates an existing API Plan",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "API Plan Operations"
-                ],
-                "summary": "Update an API Plan",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Plan ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "API Plan Data",
-                        "name": "plan",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.PlanDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
+          }
         }
+      }
     },
-    "definitions": {
-        "models.EndpointsParameterEntity": {
-            "type": "object",
-            "properties": {
-                "endpointID": {
-                    "type": "integer"
-                },
-                "exampleValue": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "parameterType": {
-                    "description": "e.g., Query, Header,",
-                    "type": "string"
-                },
-                "required": {
-                    "type": "boolean"
-                },
-                "valueType": {
-                    "description": "e.g., string, int, boolean",
-                    "type": "string"
-                }
+    "/Subscription/:api-id": {
+      "get": {
+        "description": "Retrieves Subscriptions for a specific API",
+        "produces": ["application/json"],
+        "tags": ["API Subscription Operations"],
+        "summary": "Get API Subscriptions by API ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "api-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
             }
-        },
-        "models.HealthCheckEntity": {
-            "type": "object",
-            "properties": {
-                "alertsEnabled": {
-                    "description": "NextCheckAt    time.Time // The timestamp of the next scheduled health check",
-                    "type": "boolean"
-                },
-                "apiID": {
-                    "description": "Foreign key to the ApiEntity, unique to ensure one-to-one relation",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "lastCheckedAt": {
-                    "description": "The timestamp of the last health check",
-                    "type": "string"
-                },
-                "lastStatus": {
-                    "description": "Last status of the health check",
-                    "type": "string"
-                },
-                "results": {
-                    "description": "AlertEndpoints string    `gorm:\"size:2048\"` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)\nCreatedAt      time.Time `gorm:\"default:CURRENT_TIMESTAMP\"`\nUpdatedAt      time.Time",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.HealthCheckResultEntity"
-                    }
-                },
-                "schedule": {
-                    "description": "Cron schedule string for when to run the check",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "The URL to be checked",
-                    "type": "string"
-                }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
-        },
-        "models.HealthCheckResultEntity": {
-            "type": "object",
-            "properties": {
-                "checkedAt": {
-                    "description": "The timestamp of when the check was performed",
-                    "type": "string"
-                },
-                "healthCheckID": {
-                    "description": "Foreign key to the HealthCheckEntity",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "responseTime": {
-                    "description": "Response time in milliseconds",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "Status of the check (success, failure)",
-                    "type": "string"
-                },
-                "statusMessage": {
-                    "description": "A message describing the status (error message, success, etc.)",
-                    "type": "string"
-                }
-            }
-        },
-        "types.ApiDto": {
-            "type": "object",
-            "properties": {
-                "categoryID": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "imagePath": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "providerID": {
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "Add other fields as needed...",
-                    "type": "string"
-                }
-            }
-        },
-        "types.CategoryDto": {
-            "type": "object",
-            "properties": {
-                "categoryName": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.EndpointsDto": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "group": {
-                    "type": "string"
-                },
-                "groupID": {
-                    "type": "integer"
-                },
-                "methode": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.EndpointsGroupDto": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "group": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.EndpointsParameterDto": {
-            "type": "object",
-            "properties": {
-                "endpointID": {
-                    "type": "integer"
-                },
-                "exampleValue": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "parameterType": {
-                    "type": "string"
-                },
-                "required": {
-                    "type": "boolean"
-                },
-                "valueType": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.HealthCheckDto": {
-            "type": "object",
-            "required": [
-                "apiId",
-                "schedule",
-                "url"
-            ],
-            "properties": {
-                "alertsEnabled": {
-                    "description": "Whether alerts are enabled for this health check",
-                    "type": "boolean"
-                },
-                "apiId": {
-                    "description": "The ID of the API for which the health check is being set up",
-                    "type": "integer"
-                },
-                "lastCheckedAt": {
-                    "description": "The timestamp of the last health check",
-                    "type": "string"
-                },
-                "lastStatus": {
-                    "description": "The last status of the health check",
-                    "type": "string"
-                },
-                "nextCheckAt": {
-                    "description": "The timestamp of the next scheduled health check",
-                    "type": "string"
-                },
-                "schedule": {
-                    "description": "Cron schedule string for when to run the check",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "The URL to be checked",
-                    "type": "string"
-                }
-            }
-        },
-        "types.PlanDto": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "features": {
-                    "type": "string"
-                },
-                "limiteAmount": {
-                    "type": "integer"
-                },
-                "limiteTimeUnit": {
-                    "type": "string"
-                },
-                "limiteType": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "recomonded": {
-                    "type": "boolean"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "visibility": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.SubscriptionDto": {
-            "type": "object",
-            "properties": {
-                "apiID": {
-                    "type": "integer"
-                },
-                "planId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "types.UpdateApiDto": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "imagePath": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
+          }
         }
+      }
+    },
+    "/Subscription/:id": {
+      "delete": {
+        "description": "Deletes a specific API Subscription",
+        "produces": ["application/json"],
+        "tags": ["API Subscription Operations"],
+        "summary": "Delete an API Subscription",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Subscription ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing API Subscription",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Subscription Operations"],
+        "summary": "Update an API Subscription",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Subscription ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "API Subscription Data",
+            "name": "Subscription",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.SubscriptionDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apis": {
+      "get": {
+        "description": "Retrieves a paginated list of APIs",
+        "produces": ["application/json"],
+        "tags": ["Apis Operations"],
+        "summary": "Get all APIs",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Results per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new API from the provided data",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Apis Operations"],
+        "summary": "Create API",
+        "parameters": [
+          {
+            "description": "API Data",
+            "name": "api",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.ApiDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apis/{id}": {
+      "get": {
+        "description": "Retrieve API details based on the provided ID.",
+        "produces": ["application/json"],
+        "tags": ["Apis Operations"],
+        "summary": "Get API by ID",
+        "operationId": "get-api-by-id",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {}
+          }
+        }
+      },
+      "put": {
+        "description": "Updates the API with the given ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Apis Operations"],
+        "summary": "Update API by ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "API Data",
+            "name": "api",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.UpdateApiDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes the API with the provided ID",
+        "produces": ["application/json"],
+        "tags": ["Apis Operations"],
+        "summary": "Delete API by ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "description": "Retrieves a paginated list of categories",
+        "produces": ["application/json"],
+        "tags": ["Category Operations"],
+        "summary": "Get all categories",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Results per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new category from the provided data",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Category Operations"],
+        "summary": "Create a new category",
+        "parameters": [
+          {
+            "description": "Category Data",
+            "name": "category",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.CategoryDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{id}": {
+      "put": {
+        "description": "Updates an existing category with the given ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Category Operations"],
+        "summary": "Update a category",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Category ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Category Data",
+            "name": "category",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.CategoryDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes the category with the provided ID",
+        "produces": ["application/json"],
+        "tags": ["Category Operations"],
+        "summary": "Delete a category",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Category ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints": {
+      "post": {
+        "description": "Creates a new API Endpoints",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Endpoints Operations"],
+        "summary": "Create an API Endpoints",
+        "parameters": [
+          {
+            "description": "API Endpoints Data",
+            "name": "endpoints",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints-group": {
+      "get": {
+        "description": "Retrieves all Endpoints Groups",
+        "produces": ["application/json"],
+        "tags": ["Endpoints Group Operations"],
+        "summary": "Get All Endpoints Groups",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new Endpoints Group",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Endpoints Group Operations"],
+        "summary": "Create an Endpoints Group",
+        "parameters": [
+          {
+            "description": "Endpoints Group Data",
+            "name": "endpoints-group",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsGroupDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints-group/:id": {
+      "delete": {
+        "description": "Deletes a specific Endpoints Group",
+        "produces": ["application/json"],
+        "tags": ["Endpoints Group Operations"],
+        "summary": "Delete an Endpoints Group",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints Group ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing Endpoints Group",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Endpoints Group Operations"],
+        "summary": "Update an Endpoints Group",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints Group ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Endpoints Group Data",
+            "name": "endpoints-group",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsGroupDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints-parameter": {
+      "post": {
+        "description": "Creates a new Endpoints Parameter",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Endpoints Parameter Operations"],
+        "summary": "Create an Endpoints Parameter",
+        "parameters": [
+          {
+            "description": "Endpoints Parameter Data",
+            "name": "endpoints-parameter",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsParameterDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/models.EndpointsParameterEntity"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints-parameter/{endpoint-id}": {
+      "get": {
+        "description": "Retrieves all Endpoints Parameters for a specific Endpoint",
+        "produces": ["application/json"],
+        "tags": ["Endpoints Parameter Operations"],
+        "summary": "Get All Endpoints Parameters",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoint ID",
+            "name": "endpoint-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/models.EndpointsParameterEntity"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints-parameter/{id}": {
+      "delete": {
+        "description": "Deletes a specific Endpoints Parameter",
+        "produces": ["application/json"],
+        "tags": ["Endpoints Parameter Operations"],
+        "summary": "Delete an Endpoints Parameter",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints Parameter ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing Endpoints Parameter",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Endpoints Parameter Operations"],
+        "summary": "Update an Endpoints Parameter",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints Parameter ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Endpoints Parameter Data",
+            "name": "endpoints-parameter",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsParameterDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/models.EndpointsParameterEntity"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/:api-id": {
+      "get": {
+        "description": "Retrieves endpointss for a specific API",
+        "produces": ["application/json"],
+        "tags": ["API Endpoints Operations"],
+        "summary": "Get API Endpointss by API ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "api-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/:id": {
+      "delete": {
+        "description": "Deletes a specific API Endpoints",
+        "produces": ["application/json"],
+        "tags": ["API Endpoints Operations"],
+        "summary": "Delete an API Endpoints",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing API Endpoints",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Endpoints Operations"],
+        "summary": "Update an API Endpoints",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Endpoints ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "API Endpoints Data",
+            "name": "endpoints",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.EndpointsDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health-checks": {
+      "post": {
+        "description": "Creates a new Health Check for an API",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Health Checks"],
+        "summary": "Create a Health Check",
+        "parameters": [
+          {
+            "description": "Health Check Data",
+            "name": "health-check",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.HealthCheckDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/models.HealthCheckEntity"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health-checks/{api-id}": {
+      "get": {
+        "description": "Retrieves a Health Check for a specific API",
+        "produces": ["application/json"],
+        "tags": ["Health Checks"],
+        "summary": "Get Health Check by API ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "api-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/models.HealthCheckEntity"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health-checks/{api-id}/success-percentage": {
+      "get": {
+        "description": "Get the success percentage of health checks for a specific API",
+        "produces": ["application/json"],
+        "tags": ["Health Checks"],
+        "summary": "Get Health Check Success Percentage",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "api-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid API ID",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health-checks/{id}": {
+      "delete": {
+        "description": "Deletes a specific Health Check for an API",
+        "produces": ["application/json"],
+        "tags": ["Health Checks"],
+        "summary": "Delete a Health Check",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Health Check ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing Health Check for an API",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Health Checks"],
+        "summary": "Update a Health Check",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Health Check ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Health Check Data",
+            "name": "health-check",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.HealthCheckDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/models.HealthCheckEntity"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plan": {
+      "post": {
+        "description": "Creates a new API Plan",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Plan Operations"],
+        "summary": "Create an API Plan",
+        "parameters": [
+          {
+            "description": "API Plan Data",
+            "name": "plan",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.PlanDto"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plan/:api-id": {
+      "get": {
+        "description": "Retrieves plans for a specific API",
+        "produces": ["application/json"],
+        "tags": ["API Plan Operations"],
+        "summary": "Get API Plans by API ID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "API ID",
+            "name": "api-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plan/:id": {
+      "delete": {
+        "description": "Deletes a specific API Plan",
+        "produces": ["application/json"],
+        "tags": ["API Plan Operations"],
+        "summary": "Delete an API Plan",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Plan ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Updates an existing API Plan",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["API Plan Operations"],
+        "summary": "Update an API Plan",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Plan ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "API Plan Data",
+            "name": "plan",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types.PlanDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "models.EndpointsParameterEntity": {
+      "type": "object",
+      "properties": {
+        "endpointID": {
+          "type": "integer"
+        },
+        "exampleValue": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        },
+        "parameterType": {
+          "description": "e.g., Query, Header,",
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "valueType": {
+          "description": "e.g., string, int, boolean",
+          "type": "string"
+        }
+      }
+    },
+    "models.HealthCheckEntity": {
+      "type": "object",
+      "properties": {
+        "alertsEnabled": {
+          "description": "NextCheckAt    time.Time // The timestamp of the next scheduled health check",
+          "type": "boolean"
+        },
+        "apiID": {
+          "description": "Foreign key to the ApiEntity, unique to ensure one-to-one relation",
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "lastCheckedAt": {
+          "description": "The timestamp of the last health check",
+          "type": "string"
+        },
+        "lastStatus": {
+          "description": "Last status of the health check",
+          "type": "string"
+        },
+        "results": {
+          "description": "AlertEndpoints string    `gorm:\"size:2048\"` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)\nCreatedAt      time.Time `gorm:\"default:CURRENT_TIMESTAMP\"`\nUpdatedAt      time.Time",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/models.HealthCheckResultEntity"
+          }
+        },
+        "schedule": {
+          "description": "Cron schedule string for when to run the check",
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL to be checked",
+          "type": "string"
+        }
+      }
+    },
+    "models.HealthCheckResultEntity": {
+      "type": "object",
+      "properties": {
+        "checkedAt": {
+          "description": "The timestamp of when the check was performed",
+          "type": "string"
+        },
+        "healthCheckID": {
+          "description": "Foreign key to the HealthCheckEntity",
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "responseTime": {
+          "description": "Response time in milliseconds",
+          "type": "integer"
+        },
+        "status": {
+          "description": "Status of the check (success, failure)",
+          "type": "string"
+        },
+        "statusMessage": {
+          "description": "A message describing the status (error message, success, etc.)",
+          "type": "string"
+        }
+      }
+    },
+    "types.ApiDto": {
+      "type": "object",
+      "properties": {
+        "categoryID": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imagePath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "providerID": {
+          "type": "integer"
+        },
+        "status": {
+          "description": "Add other fields as needed...",
+          "type": "string"
+        }
+      }
+    },
+    "types.CategoryDto": {
+      "type": "object",
+      "properties": {
+        "categoryName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "types.EndpointsDto": {
+      "type": "object",
+      "properties": {
+        "apiID": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "groupID": {
+          "type": "integer"
+        },
+        "methode": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "types.EndpointsGroupDto": {
+      "type": "object",
+      "properties": {
+        "apiID": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        }
+      }
+    },
+    "types.EndpointsParameterDto": {
+      "type": "object",
+      "properties": {
+        "endpointID": {
+          "type": "integer"
+        },
+        "exampleValue": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "parameterType": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "valueType": {
+          "type": "string"
+        }
+      }
+    },
+    "types.HealthCheckDto": {
+      "type": "object",
+      "required": ["apiId", "schedule", "url"],
+      "properties": {
+        "alertsEnabled": {
+          "description": "Whether alerts are enabled for this health check",
+          "type": "boolean"
+        },
+        "apiId": {
+          "description": "The ID of the API for which the health check is being set up",
+          "type": "integer"
+        },
+        "lastCheckedAt": {
+          "description": "The timestamp of the last health check",
+          "type": "string"
+        },
+        "lastStatus": {
+          "description": "The last status of the health check",
+          "type": "string"
+        },
+        "nextCheckAt": {
+          "description": "The timestamp of the next scheduled health check",
+          "type": "string"
+        },
+        "schedule": {
+          "description": "Cron schedule string for when to run the check",
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL to be checked",
+          "type": "string"
+        }
+      }
+    },
+    "types.PlanDto": {
+      "type": "object",
+      "properties": {
+        "apiID": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "features": {
+          "type": "string"
+        },
+        "limiteAmount": {
+          "type": "integer"
+        },
+        "limiteTimeUnit": {
+          "type": "string"
+        },
+        "limiteType": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "recomonded": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string"
+        }
+      }
+    },
+    "types.SubscriptionDto": {
+      "type": "object",
+      "properties": {
+        "apiID": {
+          "type": "integer"
+        },
+        "planId": {
+          "type": "integer"
+        }
+      }
+    },
+    "types.UpdateApiDto": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "imagePath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  }
 }
