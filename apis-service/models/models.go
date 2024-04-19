@@ -50,6 +50,7 @@ type ApiEntity struct {
 	ObjectPlan	  []ObjectPlanEntity  `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	Groups 	  	  []EndpointsGroupEntity     `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	ApiDocs   ApiDocsEntity           `gorm:"foreignKey:ApiID;onDelete:CASCADE"` // One-to-one relationship with foreign key
+	HealthCheck   HealthCheckEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"` // One-to-many relationship with foreign key
 
 	Category    CategoryEntity  `gorm:"foreignKey:CategoryID"`
 }
@@ -70,15 +71,19 @@ type ApiDocsEntity struct {
 type HealthCheckEntity struct {
 	ID             int       `gorm:"primaryKey;autoIncrement"`
 	ApiID          int       `gorm:"unique;not null"` // Foreign key to the ApiEntity, unique to ensure one-to-one relation
-	URL            string    `gorm:"size:2048;not null"` // The URL to be checked
-	Schedule       string    `gorm:"size:50;not null"` // Cron schedule string for when to run the check
+	//URL            string    `gorm:"size:2048;not null"` // The URL to be checked
+	//Schedule       string    `gorm:"size:50;not null"` // Cron schedule string for when to run the check
 	LastStatus     string    `gorm:"type:varchar(20);default:'pending'"` // Last status of the health check
 	LastCheckedAt  time.Time // The timestamp of the last health check
 	//NextCheckAt    time.Time // The timestamp of the next scheduled health check
 	AlertsEnabled  bool      // Whether alerts are enabled for this health check
 //	AlertEndpoints string    `gorm:"size:2048"` // JSON array of endpoints to send alerts to (email, SMS, webhook, etc.)
+	EndpointID	int `gorm:"not null"`
+	Endpoint		EndpointsEntity `gorm:"foreignKey:EndpointID"`
 	//CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	//UpdatedAt      time.Time
+	Email 		string
+	//Api		 ApiEntity `gorm:"foreignKey:ApiID"`
 	Results        []HealthCheckResultEntity `gorm:"foreignKey:HealthCheckID;onDelete:CASCADE"` // One-to-many relation to store results of health checks
 }
 
@@ -115,6 +120,7 @@ type EndpointsEntity struct {
 	Parameters  []EndpointsParameterEntity `gorm:"foreignKey:EndpointID;onDelete:CASCADE"` // query, header,Path ,  body
     BodyParam   BodyParamEntity           `gorm:"foreignKey:EndpointID;onDelete:CASCADE"` 
 	Logs 		[]UsageLogEntity		`gorm:"foreignKey:EndpointID;onDelete:CASCADE"`
+	HealthCheck []HealthCheckEntity 		`gorm:"foreignKey:EndpointID;onDelete:CASCADE"`
 	// One-to-one relationship with foreign key
 //	Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
 	// Add other fields as needed...

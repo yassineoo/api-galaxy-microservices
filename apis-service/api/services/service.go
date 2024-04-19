@@ -44,7 +44,7 @@ func (s *Service) GetOne(ctx context.Context, id int) (*models.ApiEntity, error)
     // Replace the placeholder logic with your actual database query.
 
     var api models.ApiEntity
-    if err := s.gormDB.Preload("ApiDocs").Preload("Category").Where("id = ?", id).First(&api).Error; err != nil {
+    if err := s.gormDB.Preload("HealthCheck").Preload("ApiDocs").Preload("Category").Where("id = ?", id).First(&api).Error; err != nil {
         return nil, err
     }
 
@@ -148,49 +148,75 @@ func (s *Service) Create(ctx context.Context, item types.ApiDto) (*models.ApiEnt
 	}
 	return &newApi, nil
 }
-
 func (s *Service) Update(ctx context.Context, id int, item types.ApiDto) (*models.ApiEntity, error) {
 	// Implement the logic to edit an existing item in the database.
 	// You can use s.db and s.gormDB to interact with the database.
 	// Replace the placeholder logic with your actual database update.
+
+	// Preload HealthCheck entity when fetching the API to update
 	var api models.ApiEntity
-	if err := s.gormDB.Where("id = ?", id).First(&api).Error; err != nil {
+	if err := s.gormDB.Preload("HealthCheck").Where("id = ?", id).First(&api).Error; err != nil {
 		return nil, err
 	}
 
 	// Update fields based on item
-
-	if  item.Name != "" {
+	if item.Name != "" {
 		api.Name = item.Name
 	}
-	
-	if  item.Description != "" {
+
+	if item.Description != "" {
 		api.Description = item.Description
 	}
-	
+
 	if item.ImagePath != "" {
 		api.ImagePath = item.ImagePath
 	}
-	
 
-	
 	if item.Status == "active" {
-	    api.Status = typesglobale.StatusActive
+		api.Status = typesglobale.StatusActive
 	} else {
 		api.Status = typesglobale.StatusInactive
 	}
-		
-    api.Visibility = item.Visibility
 
+	api.Visibility = item.Visibility
 
+	// Check if HealthCheckEndpointId is provided in the item
+	if item.HealthCheckEndpointId != 0 {
+		// Check if HealthCheck already exists for this API
+		if api.HealthCheck.ID != 0 {
 
-	// Update other fields as needed
+			// Update existing HealthCheck
+			api.HealthCheck.EndpointID = item.HealthCheckEndpointId
+			api.HealthCheck.Email = item.EmailNotifcation
+			api.HealthCheck.AlertsEnabled = item.EmailNotifcation != ""
+			// Update other fields of HealthCheck as needed
+			if err := s.gormDB.Save(&api.HealthCheck).Error; err != nil {
+				return nil, err
+			}
+		} else {
+			// Create new HealthCheck
+			healthCheck := models.HealthCheckEntity{
+                ApiID:         id,
+				EndpointID:    item.HealthCheckEndpointId,
+				Email:         item.EmailNotifcation,
+				AlertsEnabled: item.EmailNotifcation != "",
+				// Set other fields of HealthCheck as needed
+			}
+			if err := s.gormDB.Create(&healthCheck).Error; err != nil {
+				return nil, err
+			}
+			// Assign the newly created HealthCheck to the API
+			api.HealthCheck = healthCheck
+		}
+	}
 
+	// Save the updated API entity to the database
 	if err := s.gormDB.Save(&api).Error; err != nil {
 		return nil, err
 	}
 	return &api, nil
 }
+
 
 func (s *Service) Delete(ctx context.Context, id int) error {
    // Check if the item exists before attempting to delete it
@@ -390,7 +416,7 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
 
 
 
-
+/*
 func (s *Service) checkSubscriptionAndQuota(ctx context.Context, endpointID int , userID int , ApiID int ) error {
 
 
@@ -463,6 +489,67 @@ func (s *Service) checkSubscriptionAndQuota(ctx context.Context, endpointID int 
 
     return nil
 }
+*/
+
+
+
+func (s *Service) HealthCheackSendRequest(ctx context.Context, apiID int, endpointID int) (int, error) {
+    // Fetch API entity from the database
+    var api models.ApiEntity
+    if err := s.gormDB.Where("id = ?", apiID).First(&api).Error; err != nil {
+        return 0, err
+    }
+
+    // Fetch endpoint entity from the database
+    var endpoint models.EndpointsEntity
+    if err := s.gormDB.Where("id = ?", endpointID).First(&endpoint).Error; err != nil {
+        return 0, err
+    }
+
+    // Construct the full endpoint URL
+    endpointURL := api.ApiUrl +"/"+ endpoint.Url
+
+    // Create a new HTTP request with the specified method
+    req, err := http.NewRequest(endpoint.Methode, endpointURL, nil)
+    if err != nil {
+        return 0, err
+    }
+
+    // Set request headers
+    for _, param := range endpoint.Parameters {
+        if param.ParameterType == "Header" {
+            req.Header.Set(param.Key, param.ExampleValue)
+        }
+    }
+
+    // Set query parameters
+    q := req.URL.Query()
+    for _, param := range endpoint.Parameters {
+        if param.ParameterType == "Query" {
+            q.Add(param.Key, param.ExampleValue)
+        }
+    }
+    req.URL.RawQuery = q.Encode()
+
+    // Set request body
+    if endpoint.BodyParam.ContentType != "" {
+        req.Header.Set("Content-Type", endpoint.BodyParam.ContentType)
+        if endpoint.BodyParam.ContentType == "application/json" {
+            req.Body = ioutil.NopCloser(bytes.NewBufferString(endpoint.BodyParam.TextBody))
+        }
+    }
+
+    // Send the request and get the response
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return 0, err
+    }
+    defer resp.Body.Close()
+
+    // Return the status code
+    return resp.StatusCode, nil
+}
 
 
 
@@ -471,220 +558,130 @@ func (s *Service) checkSubscriptionAndQuota(ctx context.Context, endpointID int 
 
 
 
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
-// ----------------------------- category crud -----------------------------
 
 
-func (s *Service) CreateCategory(ctx context.Context, category types.CategoryDto) (*models.CategoryEntity, error) {
-    newCategory := models.CategoryEntity{ 
-		CategoryName: category.CategoryName ,
-		Description: category.Description,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (s *Service) CronJobHealthCheck()  error {
+	// Fetch all HealthCheckEntities from the database
+	var healthChecks []models.HealthCheckEntity
+	if err := s.gormDB.Find(&healthChecks).Error; err != nil {
+		log.Printf("Error fetching health checks: %v\n", err)
+		return err
 	}
 
-	if err := s.gormDB.Create(&newCategory).Error; err != nil {
-        return nil, err
-    }
-    return &newCategory, nil
-}
+	// Iterate through each HealthCheckEntity and send requests
+	for _, healthCheck := range healthChecks {
+		statusCode,responseTime, err := s.HealthCheackJobSendRequest( healthCheck.ApiID, healthCheck.EndpointID)
+		if err != nil {
+			log.Printf("Error sending request for HealthCheckID %d: %v\n", healthCheck.ID, err)
+			continue
+		}
 
-func (s *Service) GetAllCategories(ctx context.Context, page int, limit int) ([]models.CategoryEntity, error) {
-    var categories []models.CategoryEntity
+		// Save the response status code and other information in HealthCheckResultEntity
+		result := models.HealthCheckResultEntity{
+			HealthCheckID: healthCheck.ID,
+			Status:        getStatusFromCode(statusCode), // Implement your status code to status string conversion logic
+			ResponseTime:  responseTime, // Update with actual response time if needed
+			StatusMessage: "", // Update with relevant message if needed
+			CheckedAt:     time.Now(),
+		}
 
-  
-
-    offset := (page - 1) * limit
-
-    if err := s.gormDB.Offset(offset).Limit(limit).Find(&categories).Error; err != nil {
-        return nil, err
-    }
-
-    return categories, nil
-}
-
-
-func (s *Service) UpdateCategory(ctx context.Context, id int, category types.CategoryDto) (*models.CategoryEntity, error) {
-    var existingCategory models.CategoryEntity
-    if err := s.gormDB.First(&existingCategory, id).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("category not found")
-        }
-        return nil, err
-    }
-
-    // Update fields
-	if (category.CategoryName  != "") {
-    existingCategory.CategoryName = category.CategoryName 
+		if err := s.gormDB.Create(&result).Error; err != nil {
+			log.Printf("Error saving result for HealthCheckID %d: %v\n", healthCheck.ID, err)
+            return err
+		}
 	}
-	if (category.Description != "") {
 
-    existingCategory.Description = category.Description
-    }// Add other fields as needed
-
-    if err := s.gormDB.Save(&existingCategory).Error; err != nil {
-        return nil, err
-    }
-
-    return &existingCategory, nil
-}
-
-
-func (s *Service) DeleteCategory(ctx context.Context, id int) error {
-
-
-
-	   // Check if the item exists before attempting to delete it
-	   var category models.ApiEntity
-	   if err := s.gormDB.First(&models.CategoryEntity{}, id).Error; err != nil {
-		   if errors.Is(err, gorm.ErrRecordNotFound) {
-			   return fmt.Errorf("category with id %d not found", id)
-		   }
-		   return err
-	   }
-   
-	   // Delete the item from the database
-	   if err := s.gormDB.Delete(&category).Error; err != nil {
-		   return err
-	   }
-	   return nil
-}
-
-
-// ----------------------------- API Subscription CRUD -----------------------------
-
-func (s *Service) CreateApiSubscription(ctx context.Context, subscription types.SubscriptionDto) (*models.SubscriptionEntity, error) {
-    newSubscription := models.SubscriptionEntity{
-        UserID: subscription.UserID,
-        PlanID: subscription.PlanId,
-        StartDate : time.Now() ,
-      
-        // Populate with fields from subscription
-        // Example: SubscriptionName: subscription.SubscriptionName
-    }
-
-    if err := s.gormDB.Create(&newSubscription).Error; err != nil {
-        return nil, err
-    }
-    return &newSubscription, nil
-}
-
-func (s *Service) GetApiSubscriptions(ctx context.Context, apiID int) ([]models.SubscriptionEntity, error) {
-    var subscriptions []models.SubscriptionEntity
-
-    if err := s.gormDB.Where("id = ?", apiID).Find(&subscriptions).Error; err != nil {
-        return nil, err
-    }
-
-    return subscriptions, nil
-}
-
-func (s *Service) UpdateApiSubscription(ctx context.Context, subscriptionID int, subscriptionDto types.SubscriptionDto) (*models.SubscriptionEntity, error) {
-    var existingSubscription models.SubscriptionEntity
-    if err := s.gormDB.First(&existingSubscription, subscriptionID).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("api subscription not found")
-        }
-        return nil, err
-    }
-
-    // Update fields from subscriptionDto
-    // Example: existingSubscription.SubscriptionName = subscriptionDto.SubscriptionName if subscriptionDto.SubscriptionName != ""
-    // Add other fields as needed
-
-    if err := s.gormDB.Save(&existingSubscription).Error; err != nil {
-        return nil, err
-    }
-
-    return &existingSubscription, nil
-}
-
-func (s *Service) DeleteApiSubscription(ctx context.Context, subscriptionID int) error {
-    // Check if the item exists before attempting to delete it
-    var subscription models.SubscriptionEntity
-    if err := s.gormDB.First(&subscription, subscriptionID).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return fmt.Errorf("api subscription with id %d not found", subscriptionID)
-        }
-        return err
-    }
-
-    // Delete the item from the database
-    if err := s.gormDB.Delete(&subscription).Error; err != nil {
-        return err
-    }
     return nil
 }
 
 
 
 
+func (s *Service) HealthCheackJobSendRequest( apiID int, endpointID int) (int,int, error) {
+    // Fetch API entity from the database
+    var api models.ApiEntity
+    if err := s.gormDB.Where("id = ?", apiID).First(&api).Error; err != nil {
+        return 0,0, err
+    }
 
+    // Fetch endpoint entity from the database
+    var endpoint models.EndpointsEntity
+    if err := s.gormDB.Where("id = ?", endpointID).First(&endpoint).Error; err != nil {
+        return 0,0, err
+    }
 
+    // Construct the full endpoint URL
+    endpointURL := api.ApiUrl +"/"+ endpoint.Url
 
+    // Create a new HTTP request with the specified method
+    req, err := http.NewRequest(endpoint.Methode, endpointURL, nil)
+    if err != nil {
+        return 0,0, err
+    }
 
+    // Set request headers
+    for _, param := range endpoint.Parameters {
+        if param.ParameterType == "Header" {
+            req.Header.Set(param.Key, param.ExampleValue)
+        }
+    }
 
+    // Set query parameters
+    q := req.URL.Query()
+    for _, param := range endpoint.Parameters {
+        if param.ParameterType == "Query" {
+            q.Add(param.Key, param.ExampleValue)
+        }
+    }
+    req.URL.RawQuery = q.Encode()
 
+    // Set request body
+    if endpoint.BodyParam.ContentType != "" {
+        req.Header.Set("Content-Type", endpoint.BodyParam.ContentType)
+        if endpoint.BodyParam.ContentType == "application/json" {
+            req.Body = ioutil.NopCloser(bytes.NewBufferString(endpoint.BodyParam.TextBody))
+        }
+    }
 
-
-// ===================== API Logs  =====================
-// ===================== API Logs  =====================
-// ===================== API Logs  =====================
-// ===================== API Logs  =====================
-// ===================== API Logs  =====================
-// GetApiLogs retrieves API logs with pagination based on the provided parameters.
-func (s *Service) GetApiLogs(ctx context.Context, apiID int, page int, limit int) (types.ApiLogsResponse, error) {
-	// Set a default limit if it's not specified or if it's <= 0.
-	if limit <= 0 {
-		limit = 10 // You can choose a suitable default value.
-	}
-
-	// Set a default page if it's not specified or if it's <= 0.
-	if page <= 0 {
-		page = 1 // Default to the first page.
-	}
-
-	// Calculate the offset based on the page and limit.
-	offset := (page - 1) * limit
-
-	var totalItems int64
-	if err := s.gormDB.Model(&models.UsageLogEntity{}).
-		Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
-		Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
-		Where("endpoints_group_entities.api_id = ?", apiID).
-		Count(&totalItems).Error; err != nil {
-		return types.ApiLogsResponse{}, err
-	}
-
-	var apiLogs []models.UsageLogEntity
-	if err := s.gormDB.
-		Preload("Endpoint").
-		Joins("JOIN endpoints_entities ON endpoints_entities.id = usage_log_entities.endpoint_id").
-		Joins("JOIN endpoints_group_entities ON endpoints_group_entities.id = endpoints_entities.group_id").
-		Where("endpoints_group_entities.api_id = ?", apiID).
-		Offset(offset).Limit(limit).
-		Find(&apiLogs).Error; err != nil {
-		return types.ApiLogsResponse{}, err
-	}
-
-	totalPages := (int(totalItems) + limit - 1) / limit // Calculate total pages.
-
-	response := types.ApiLogsResponse{
-		Logs: apiLogs,
-		Meta: types.PaginationMeta{
-			TotalItems:   int(totalItems),
-			ItemCount:    len(apiLogs),
-			ItemsPerPage: limit,
-			TotalPages:   totalPages,
-			CurrentPage:  page,
-		},
-	}
-
-	return response, nil
+     // Send the request and get the response
+     client := &http.Client{}
+     startTime := time.Now()
+     resp, err := client.Do(req)
+     if err != nil {
+         return 0,0, err
+     }
+     defer resp.Body.Close()
+ 
+     // Calculate the actual response time
+     endTime := time.Now()
+     responseTime := int(endTime.Sub(startTime).Milliseconds())
+ 
+     // Return the status code and response time
+     return resp.StatusCode, responseTime ,nil
 }
+
+// getStatusFromCode is a placeholder function, replace it with your actual implementation
+func getStatusFromCode(code int) string {
+	// Implement logic to map status code to status string
+	if code >= 200 && code < 300 {
+        return "success"
+    }
+    return "failed"
+}
+

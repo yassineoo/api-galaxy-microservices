@@ -16,6 +16,7 @@ import (
 	//"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/robfig/cron"
 	gorm "gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -37,29 +38,8 @@ func main() {
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
-	log.Println(" serevet starting ....")
+
+
 	var gorm *gorm.DB
 	var dbpool *pgxpool.Pool
 	dbpool, gorm = database.InitDB()
@@ -88,10 +68,32 @@ func main() {
 			log.Fatal(err)
 		}
 		*/
+
+	// Start the cron job
+	startCronJob(svc)
 		
 	router.Run(":8088")
 }
 
+
+
+
+func startCronJob(svc *services.Service) {
+    c := cron.New()
+
+    // Define your cron job
+    c.AddFunc("@every 59m", func() {
+        // Call the cron job function from your service
+        err := svc.CronJobHealthCheck()
+		log.Println("cron job running ....")
+        if err != nil {
+            log.Println("Error running cron job:", err)
+        }
+    })
+
+    // Start the cron scheduler
+    c.Start()
+}
 
 
 // Function to retrieve the IP address and port of the server

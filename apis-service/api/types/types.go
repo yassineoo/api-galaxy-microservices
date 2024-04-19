@@ -41,6 +41,10 @@ type ApiDto struct {
 	CategoryID  int
 	Status		string	// Add other fields as needed...
 	Visibility  bool
+
+	
+	HealthCheckEndpointId int
+	EmailNotifcation string
 }
 
 
@@ -199,6 +203,8 @@ type UpdateApiDto struct {
 	ImagePath   string
 	Description string
 	
+	HealthCheckEndpointId int
+	EmailNotifcation string
 	// Add other fields as needed...
 }
 
@@ -256,4 +262,31 @@ type ApiPlansResponse struct {
 type ObjectPlanResponse struct {
     models.ObjectPlanEntity
     Cross []models.CrossObjectEntity
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// tests  
+
+type HealthRequestData struct {
+	ApiID      int    `json:"ApiID"`
+	EndpointID int    `json:"EndpointID"`
+	Email      string `json:"Email,omitempty"`
 }

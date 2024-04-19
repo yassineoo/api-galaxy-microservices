@@ -14,9 +14,9 @@ import (
 // HealthCheck CRUD operations
 func (s *Service) CreateHealthCheck(ctx context.Context, healthCheck types.HealthCheckDto) (*models.HealthCheckEntity, error) {
 	newHealthCheck := models.HealthCheckEntity{ 
-		ApiID:          healthCheck.ApiID,
-		URL:            healthCheck.URL,
-		Schedule:       healthCheck.Schedule,
+		//ApiID:          healthCheck.ApiID,
+		//URL:            healthCheck.URL,
+		//Schedule:       healthCheck.Schedule,
 		LastStatus:     "pending",
 		LastCheckedAt:  time.Now(),
 		//NextCheckAt:    healthCheck.NextCheckAt,
@@ -48,12 +48,7 @@ func (s *Service) UpdateHealthCheck(ctx context.Context, id int, HealthCheckDto 
 		}
 		return nil, err
 	}
-	if (HealthCheckDto.URL != "") {
-		healthCheck.URL = HealthCheckDto.URL
-	}
-	if (HealthCheckDto.Schedule != "") {
-		healthCheck.Schedule = HealthCheckDto.Schedule
-	}
+
 
 	if (!HealthCheckDto.AlertsEnabled ) {
 		healthCheck.AlertsEnabled = HealthCheckDto.AlertsEnabled

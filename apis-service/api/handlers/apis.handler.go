@@ -402,3 +402,34 @@ for key, values := range response.Header {
    // Close the response body
    response.Body.Close()
 }
+
+
+
+
+
+
+
+func (h* ApiHandler) HandleHealthCheackSendRequest(c *gin.Context) {
+
+	var requestData types.HealthRequestData
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	// Handle the health check request logic here
+	log.Printf("Received health check request: %+v", requestData)
+
+
+
+	response, err := h.service.HealthCheackSendRequest(c, requestData.ApiID, requestData.EndpointID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": response })
+
+
+
+}

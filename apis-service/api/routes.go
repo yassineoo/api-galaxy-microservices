@@ -28,6 +28,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     router.GET("/", ApiHandler.HandleRequest)
     router.GET("/hi", ApiHandler.HandleRequest)
     router.POST("/send-request", ApiHandler.HandleSendRequest)
+    router.POST("/services-test", ApiHandler.HandleHealthCheackSendRequest)
     router.POST("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
     router.GET("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
     router.PUT("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
