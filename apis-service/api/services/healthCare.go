@@ -157,3 +157,78 @@ func (s *Service) GetHealthCheckSuccessPercentage(ctx context.Context, apiID int
 
 	return successPercentage, nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (s *Service) GetApiHealthCheck(ctx context.Context, apiID int, page int, limit int) (types.ApiHealthCheckResponse, error) {
+    // Set a default limit if it's not specified or if it's <= 0.
+    if limit <= 0 {
+        limit = 10 // You can choose a suitable default value.
+    }
+
+    // Set a default page if it's not specified or if it's <= 0.
+    if page <= 0 {
+        page = 1 // Default to the first page.
+    }
+
+    // Calculate the offset based on the page and limit.
+    offset := (page - 1) * limit
+
+
+	var HealthCheckEntity models.HealthCheckEntity;
+	if err := s.gormDB.Where("api_id = ?", apiID).First(&HealthCheckEntity).Error; err != nil {
+		return types.ApiHealthCheckResponse{}, err
+	}
+	
+    var totalItems int64
+    if err := s.gormDB.Model(&models.HealthCheckResultEntity{}).
+        Where("health_check_id = ?", HealthCheckEntity.ID).
+        Count(&totalItems).Error; err != nil {
+        return types.ApiHealthCheckResponse{}, err
+    }
+
+    var apiLogs []models.HealthCheckResultEntity
+    if err := s.gormDB.
+        Preload("HealthCheck"). // Preload the related HealthCheck
+        Where("health_check_id = ?",  HealthCheckEntity.ID).
+        Offset(offset).Limit(limit).
+       // Order("checked_at DESC"). // Order by the latest checked_at first
+        Find(&apiLogs).Error; err != nil {
+        return types.ApiHealthCheckResponse{}, err
+    }
+
+    totalPages := (int(totalItems) + limit - 1) / limit // Calculate total pages.
+
+    response := types.ApiHealthCheckResponse{
+        HealthCheck: apiLogs,
+        Meta: types.PaginationMeta{
+            TotalItems:   int(totalItems),
+            ItemCount:    len(apiLogs),
+            ItemsPerPage: limit,
+            TotalPages:   totalPages,
+            CurrentPage:  page,
+        },
+    }
+
+    return response, nil
+}
+
+

@@ -93,6 +93,7 @@ type HealthCheckResultEntity struct {
 	HealthCheckID   int       `gorm:"not null"` // Foreign key to the HealthCheckEntity
 	Status          string    `gorm:"type:varchar(20);not null"` // Status of the check (success, failure)
 	ResponseTime    int       // Response time in milliseconds
+	HealthCheck     HealthCheckEntity `gorm:"foreignKey:HealthCheckID"` // Add this line
 	StatusMessage   string    // A message describing the status (error message, success, etc.)
 	CheckedAt       time.Time `gorm:"default:CURRENT_TIMESTAMP"` // The timestamp of when the check was performed
 }

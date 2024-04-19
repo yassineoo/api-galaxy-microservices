@@ -55,6 +55,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
         apisDocsGroup.DELETE("/:id", ApiDocsHandler.DeleteApiDocs)
     }
     // apiLogs routes
+    //apis-healthcheck
     apiLogsGroup := router.Group("/apis-logs")
 
            {
@@ -105,10 +106,11 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     }
 
     // Health Check routes
-    healthCheckGroup := router.Group("/health-checks")
+    healthCheckGroup := router.Group("/apis-healthcheck")
     {
+
         healthCheckGroup.POST("/", HealthCheckHandler.CreateHealthCheck)
-        healthCheckGroup.GET("/:api-id", HealthCheckHandler.GetHealthCheck)
+        healthCheckGroup.GET("/:api-id", HealthCheckHandler.GetApiHealthCheck)
         healthCheckGroup.PATCH("/:id", HealthCheckHandler.UpdateHealthCheck)
         healthCheckGroup.DELETE("/:id", HealthCheckHandler.DeleteHealthCheck)
         healthCheckGroup.GET("/:api-id/success-percentage", HealthCheckHandler.GetHealthCheckSuccessPercentage)

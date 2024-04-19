@@ -42,7 +42,7 @@ type ApiDto struct {
 	Status		string	// Add other fields as needed...
 	Visibility  bool
 
-	
+
 	HealthCheckEndpointId int
 	EmailNotifcation string
 }
@@ -222,6 +222,10 @@ type ApiLogsResponse struct {
 	Meta PaginationMeta     `json:"meta"`
 }
 
+type ApiHealthCheckResponse struct {
+	HealthCheck []models.HealthCheckResultEntity `json:"logs"`
+	Meta PaginationMeta     `json:"meta"`
+}
 type PaginationMeta struct {
 	TotalItems   int `json:"totalItems"`
 	ItemCount    int `json:"itemCount"`

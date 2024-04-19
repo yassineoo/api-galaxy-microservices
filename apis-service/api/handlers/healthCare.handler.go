@@ -149,3 +149,46 @@ func (h *HealthCheckHandler) GetHealthCheckSuccessPercentage(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"successPercentage": successPercentage})
 }
+
+
+
+
+
+
+
+
+
+
+
+func (h *HealthCheckHandler) GetApiHealthCheck(c *gin.Context) {
+	// Default values for pagination
+	defaultPage := 1
+	defaultLimit := 10
+
+	// Extract query parameters
+	page, err := strconv.Atoi(c.DefaultQuery("page", strconv.Itoa(defaultPage)))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", strconv.Itoa(defaultLimit)))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		return
+	}
+
+    apiID, err := strconv.Atoi(c.Param("api-id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID"})
+        return
+    }
+
+    plans, err := h.service.GetApiHealthCheck(c, apiID , page, limit)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching API Plans"})
+        return
+    }
+
+    c.JSON(http.StatusOK, plans)
+}
