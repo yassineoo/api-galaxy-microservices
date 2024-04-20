@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"local_packages/api/services"
 	"local_packages/api/types"
@@ -191,4 +192,46 @@ func (h *HealthCheckHandler) GetApiHealthCheck(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, plans)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// stat 
+
+
+func (h *HealthCheckHandler) GetApiHealthStats(c *gin.Context) {
+    apiIDsParam := c.Query("apiIds")
+    if apiIDsParam == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "apiIds parameter is required"})
+        return
+    }
+
+    apiIDs := strings.Split(apiIDsParam, ",")
+    parsedAPIIDs := make([]int, 0, len(apiIDs))
+    for _, idStr := range apiIDs {
+        id, err := strconv.Atoi(idStr)
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID format"})
+            return
+        }
+        parsedAPIIDs = append(parsedAPIIDs, id)
+    }
+
+    stats, err := h.service.GetApiHealthStats(c.Request.Context(), parsedAPIIDs)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, stats)
 }

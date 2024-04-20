@@ -108,7 +108,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     // Health Check routes
     healthCheckGroup := router.Group("/apis-healthcheck")
     {
-
+        router.GET("/health-stats", HealthCheckHandler.GetApiHealthStats)
         healthCheckGroup.POST("/", HealthCheckHandler.CreateHealthCheck)
         healthCheckGroup.GET("/:api-id", HealthCheckHandler.GetApiHealthCheck)
         healthCheckGroup.PATCH("/:id", HealthCheckHandler.UpdateHealthCheck)

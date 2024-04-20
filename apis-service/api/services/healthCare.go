@@ -232,3 +232,68 @@ func (s *Service) GetApiHealthCheck(ctx context.Context, apiID int, page int, li
 }
 
 
+
+// stat function 
+
+
+type ApiHealthStat struct {
+    ApiID            int
+    AverageResponseTime int
+    Availability     float64
+}
+
+
+
+
+
+func (s *Service) GetApiHealthStats(ctx context.Context, apiIDs []int) ([]ApiHealthStat, error) {
+    var stats []ApiHealthStat
+
+    for _, apiID := range apiIDs {
+        var healthCheckEntity models.HealthCheckEntity
+        if err := s.gormDB.Where("api_id = ?", apiID).First(&healthCheckEntity).Error; err != nil {
+            if err == gorm.ErrRecordNotFound {
+                // Handle the case where no HealthCheckEntity exists for the given apiID
+                stats = append(stats, ApiHealthStat{
+                    ApiID:            apiID,
+                    AverageResponseTime: 0,
+                    Availability:     0,
+                })
+                continue
+            }
+            return nil, err
+        }
+
+        var results []models.HealthCheckResultEntity
+        if err := s.gormDB.Where("health_check_id = ?", healthCheckEntity.ID).Find(&results).Error; err != nil {
+            return nil, err
+        }
+
+        var totalResponseTime int
+        var successCount int
+        for _, result := range results {
+            totalResponseTime += result.ResponseTime
+            if result.Status == "success" {
+                successCount++
+            }
+        }
+
+        averageResponseTime := 0
+        if len(results) > 0 {
+            averageResponseTime = totalResponseTime / len(results)
+        }
+
+        availability := 0.0
+        if len(results) > 0 {
+            availability = float64(successCount) / float64(len(results))
+        }
+
+        stats = append(stats, ApiHealthStat{
+            ApiID:            apiID,
+            AverageResponseTime: averageResponseTime,
+            Availability:     availability,
+        })
+    }
+
+    return stats, nil
+}
