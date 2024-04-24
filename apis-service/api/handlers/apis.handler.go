@@ -62,6 +62,7 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 	}
 	search := c.Query("search")
 
+
 	// Call the GetAll service method
 	data, err := h.service.GetAll(c, page, limit,filter,search)
 	if err != nil {
@@ -171,6 +172,27 @@ func (h *ApiHandler) GetUserAPIs(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, gin.H{"data": userAPIs})
+}
+
+
+
+
+
+func (h *ApiHandler) GetSearchApis(c *gin.Context) {
+      // Extract the search query parameter from the URL query string.
+	  search := c.Query("search")
+	  apis, err := h.service.SearchByName(c, search)
+
+	  // Call the SearchByName method to search for APIs.
+	  if err != nil {
+		  // Return a customized error message to the client
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user Searched APIs"})
+		  return
+	  }
+
+   
+
+    c.JSON(http.StatusOK, gin.H{"data": apis})
 }
 
 

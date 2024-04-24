@@ -38,6 +38,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
     // API routes
     apisGroup := router.Group("/apis")
     {
+        apisGroup.GET("/search", ApiHandler.GetSearchApis)
         apisGroup.POST("/", ApiHandler.CreateApi)
         apisGroup.GET("/", ApiHandler.GetAllApis)
         apisGroup.GET("/:id", ApiHandler.GetApi)
