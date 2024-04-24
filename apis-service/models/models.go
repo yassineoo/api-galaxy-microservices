@@ -18,6 +18,8 @@ type ApiCollectionEntity struct {
     ID          int    `gorm:"primaryKey;autoIncrement"`
     Name        string `gorm:"size:255;not null"`
     Description string
+	ImagePath   string
+
     Apis        []ApiEntity `gorm:"many2many:api_collections_apis;"` // many-to-many relationship
 }
 

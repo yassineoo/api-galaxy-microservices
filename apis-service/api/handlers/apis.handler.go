@@ -55,8 +55,12 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
 		return
 	}
+	filter, err := strconv.Atoi(c.DefaultQuery("filter", strconv.Itoa(defaultLimit)))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filter parameter"})
+		return
+	}
 	search := c.Query("search")
-    filter := c.Query("filter")
 
 	// Call the GetAll service method
 	data, err := h.service.GetAll(c, page, limit,filter,search)

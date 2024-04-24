@@ -51,7 +51,7 @@ func (s *Service) GetOne(ctx context.Context, id int) (*models.ApiEntity, error)
     return &api, nil
 }
 
-func (s *Service) GetAll(ctx context.Context, page int, limit int) (types.ApiResponse, error) {
+func (s *Service) GetAll(ctx context.Context, page int, limit int , filter int ,search string) (types.ApiResponse, error) {
 	// Set a default limit if it's not specified or if it's <= 0.
 	//limit := query.Limit
 	//page := query.Page
@@ -73,9 +73,17 @@ func (s *Service) GetAll(ctx context.Context, page int, limit int) (types.ApiRes
 	}
 
 	var apis []models.ApiEntity
-	if err := s.gormDB.Offset(offset).Limit(limit).Find(&apis).Error; err != nil {
-		return types.ApiResponse{}, err
-	}
+        if filter > 0 { 
+            if err := s.gormDB.Offset(offset).Limit(limit).Where("category_id = ?", filter).Find(&apis).Error; err != nil {
+            return types.ApiResponse{}, err
+        }
+        } else {
+        if err := s.gormDB.Offset(offset).Limit(limit).Find(&apis).Error; err != nil {
+            return types.ApiResponse{}, err
+        }
+        }
+
+  
 
 
 	totalPages := (int(totalItems) + limit - 1) / limit // Calculate total pages.
