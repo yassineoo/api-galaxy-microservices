@@ -201,6 +201,12 @@ func (s *Service) Update(ctx context.Context, id int, item types.ApiDto) (*model
 	} else {
 		api.Status = typesglobale.StatusInactive
 	}
+    if item.Keywords != "" {
+        api.Keywords = item.Keywords
+    }
+    if item.CategoryID != 0 {
+        api.CategoryID = item.CategoryID
+    }
 
 	api.Visibility = item.Visibility
 

@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"local_packages/api/services"
 	"local_packages/api/types"
@@ -209,22 +209,25 @@ func (h *HealthCheckHandler) GetApiHealthCheck(c *gin.Context) {
 /// stat 
 
 
+
 func (h *HealthCheckHandler) GetApiHealthStats(c *gin.Context) {
-    apiIDsParam := c.Query("apiIds")
-    if apiIDsParam == "" {
+    apiIDsParam := c.QueryArray("apiIds[]") // Use QueryArray to directly get an array of values
+
+	log.Println("apiIDsParam", apiIDsParam)
+    if len(apiIDsParam) == 0 {
         c.JSON(http.StatusBadRequest, gin.H{"error": "apiIds parameter is required"})
         return
     }
 
-    apiIDs := strings.Split(apiIDsParam, ",")
-    parsedAPIIDs := make([]int, 0, len(apiIDs))
-    for _, idStr := range apiIDs {
+    parsedAPIIDs := make([]int, len(apiIDsParam)) // Avoid using append, preallocate the slice
+
+    for i, idStr := range apiIDsParam {
         id, err := strconv.Atoi(idStr)
         if err != nil {
             c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API ID format"})
             return
         }
-        parsedAPIIDs = append(parsedAPIIDs, id)
+        parsedAPIIDs[i] = id
     }
 
     stats, err := h.service.GetApiHealthStats(c.Request.Context(), parsedAPIIDs)
