@@ -373,11 +373,12 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
     // Extract request body (if present)
     var requestBody map[string]string
     if c.Request.Body != nil {
-        body, _ := ioutil.ReadAll(c.Request.Body)
+        body, _ := ioutil.ReadAll(
+			c.Request.Body)
         c.Request.Body.Close()
         json.Unmarshal(body, &requestBody)
     }
-	log.Println("result ", requestBody)
+	log.Println("result ", requestBody) 
 	
 
     // Create a RequestData struct with the extracted information
