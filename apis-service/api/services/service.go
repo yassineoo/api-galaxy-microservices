@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -537,7 +538,10 @@ func (s *Service) HealthCheackSendRequest(ctx context.Context, apiID int, endpoi
     }
 
     // Construct the full endpoint URL
-    endpointURL := api.ApiUrl +"/"+ endpoint.Url
+    endpointURL := api.ApiUrl + endpoint.Url
+    if !strings.HasSuffix(api.ApiUrl, "/") && !strings.HasPrefix(endpoint.Url, "/") {
+    endpointURL = api.ApiUrl + "/" + endpoint.Url
+}
 
     // Create a new HTTP request with the specified method
     req, err := http.NewRequest(endpoint.Methode, endpointURL, nil)

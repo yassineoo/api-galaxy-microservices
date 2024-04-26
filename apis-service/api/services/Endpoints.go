@@ -247,7 +247,7 @@ func (s *Service) GetApiEndpoints(ctx context.Context, apiID int) ([]models.Endp
 
     return endpoints, nil
 }
-
+/*
 func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpointsDto types.EndpointsDto) (*models.EndpointsEntity, error) {
     var existingEndpoints models.EndpointsEntity
     if err := s.gormDB.First(&existingEndpoints, endpointsID).Error; err != nil {
@@ -287,6 +287,67 @@ func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpo
 
     return &existingEndpoints, nil
 }
+*/
+
+func (s *Service) UpdateApiEndpoints(ctx context.Context, endpointsID int, endpointsDto types.EndpointsDto) (*models.EndpointsEntity, error) {
+    var existingEndpoints models.EndpointsEntity
+    if err := s.gormDB.First(&existingEndpoints, endpointsID).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("api endpoints not found")
+        }
+        return nil, err
+    }
+
+    // Delete all parameters related to the endpoint
+    if err := s.gormDB.Where("endpoint_id = ?", existingEndpoints.ID).Delete(&models.EndpointsParameterEntity{}).Error; err != nil {
+        return nil, err
+    }
+
+    // Update fields from endpointsDto
+    if endpointsDto.Url != "" {
+        existingEndpoints.Url = endpointsDto.Url
+    }
+    if endpointsDto.Name != "" {
+        existingEndpoints.Name = endpointsDto.Name
+    }
+    if endpointsDto.Methode != "" {
+        existingEndpoints.Methode = endpointsDto.Methode
+    }
+    if endpointsDto.Description != "" {
+        existingEndpoints.Description = endpointsDto.Description
+    }
+    if endpointsDto.GroupID != 0 {
+        existingEndpoints.GroupID = endpointsDto.GroupID
+    }
+
+    // Add other fields as needed
+
+    // Save the updated endpoint
+    if err := s.gormDB.Save(&existingEndpoints).Error; err != nil {
+        return nil, err
+    }
+
+    // Create new parameters based on the provided data
+    var params []models.EndpointsParameterEntity
+    for _, paramDto := range endpointsDto.Parameters {
+        param := models.EndpointsParameterEntity{
+            Key:           paramDto.Key,
+            ValueType:     paramDto.ValueType,
+            ExampleValue:  paramDto.ExampleValue,
+            Required:      paramDto.Required,
+            EndpointID:    existingEndpoints.ID, // Set the EndpointID to the updated endpoint's ID
+            ParameterType: paramDto.ParameterType,
+        }
+        params = append(params, param)
+    }
+
+    if err := s.gormDB.Create(&params).Error; err != nil {
+        return nil, err
+    }
+
+    return &existingEndpoints, nil
+}
+
 
 func (s *Service) DeleteApiEndpoints(ctx context.Context, endpointsID int) error {
     // Check if the item exists before attempting to delete it
