@@ -269,6 +269,8 @@ type UsageLogEntity struct {
 }
 
 
+
+
 // ApiKeyEntity represents the ApiKeys table
 type ApiKeyEntity struct {
 	ID int `gorm:"primaryKey;autoIncrement"`

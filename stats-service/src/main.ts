@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { DataSource } from 'typeorm';
 import { seedUsers } from './database/seeders';
+import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const cors = ['https://localhost:3000', '*'];
@@ -28,6 +29,9 @@ async function bootstrap() {
     origin: cors,
     methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
+  const configService = app.get<ConfigService>(ConfigService);
+
+  console.log('HOST?', configService.getOrThrow('POSTGRES_HOST'));
 
   app.setGlobalPrefix('api');
   app.use(cookieParser());
@@ -44,7 +48,7 @@ async function bootstrap() {
 
   const datasource = app.get(DataSource);
 
-  await app.listen(3000);
+  await app.listen(6000);
   await seedUsers(datasource, app);
 }
 bootstrap();
