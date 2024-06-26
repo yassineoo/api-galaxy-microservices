@@ -1,101 +1,84 @@
 import {
   checkPassword,
   decodeEmailToken,
+  generateAuthToken,
   generateEmailToken,
   hashPassword,
-} from '../utils/token';
-import userModel from '../models/userModel';
-import { Role } from '../models/enum';
+} from "../utils/token";
+import userModel from "../models/userModel";
+import { Role } from "../models/enum";
 import {
   SendVerificationEmail,
   sendPasswordResetEmail,
   verifyPhoneNumber,
-} from './grpcClient/notifService';
-import userService from './UAMService';
-import { sendEMail } from '../utils/email';
-import otpModel from '../models/otp';
+} from "./grpcClient/notifService";
+import userService from "./UAMService";
+import { sendEMail } from "../utils/email";
+import otpModel from "../models/otp";
+import { STATUS_CODES } from "http";
 
-require('dotenv').config();
+require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
 
 type register = {
-  Username: string;
-  Email: string;
+  username: string;
+  email: string;
   password: string;
-  phoneNumber: string;
-  FullName: string;
-  DateOfBirth: string;
+  //PhoneNumber: string;
+  //FullName: string;
+  //DateOfBirth: string;
 };
+
+class ApiError extends Error {
+  statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = Number(statusCode) || 500;
+  }
+}
 
 export default class authService {
   static register = async (data: register, role: Role) => {
     try {
-      const userEmail = await userModel.getUserByEmail(data.Email);
+      const userEmail = await userModel.getUserByEmail(data.email);
       if (userEmail) {
-        throw new Error('Email already exists');
+        throw new ApiError("Email already exists", 409);
       }
-      /*const userPhoneNumber = await userModel.getUserByPhoneNumber(data.phoneNumber);
-        if (userPhoneNumber) {
-            throw new Error('Phone number already exists');
-        }*/
+
       const hashedPassword = (await hashPassword(data.password)).toString();
       const user = await userModel.AddUser({
-        Username: data.Username,
-        Email: data.Email,
+        Username: data.username,
+        Email: data.email,
         PasswordHash: hashedPassword,
-        PhoneNumber: data.phoneNumber,
         role: role,
+        image: "",
       });
 
       if (!user) {
-        throw new Error('User could not be created');
+        throw new ApiError("User could not be created", 500);
       }
 
-      /*const token = generateAuthToken(user.UserID, user.Email, tokenSecret || "", expiresIn || "");
-
-        if (!token) {
-            throw new Error('Token could not be generated');
-        }
-
-        const profile = profileModel.addProfile(
-            user.UserID
-            , {
-                FullName: data.FullName,
-                DateOfBirth: data.DateOfBirth || "",
-            });
-
-        if (!profile) {
-            userModel.deleteUser(user.UserID);
-            throw new Error('Profile could not be created');
-        }
-
-        return token;*/
-      //send confirmation Mail
+      // Send confirmation email
       const token = generateEmailToken(
         user.Email,
-        emailTokenSecret || '',
-        emailTokenExpiry || ''
+        user.UserID,
+        emailTokenSecret || "",
+        emailTokenExpiry || ""
       );
-
       const redirect_url = `http://localhost:3000/confirmRegistration?token=${token}`;
-      sendEMail('confirmation of registration', redirect_url, user.Email);
+      sendEMail("confirmation of registration", redirect_url, user.Email);
 
-      return {
-        id: user.UserID,
-      };
+      return { id: user.UserID, message: "User created successfully" };
     } catch (error: any) {
-      return {
-        message: error.message,
-      };
+      throw error;
     }
   };
-
-  static login = async (data: { Email: string; password: string }) => {
+  static login = async (data: { email: string; password: string }) => {
     try {
-      const user = await userModel.getUserByEmail(data.Email);
+      const user = await userModel.getUserByEmail(data.email);
       if (!user || !user.IsActive) {
-        throw new Error('Email or password is incorrect ');
+        throw new Error("Email or password is incorrect");
       }
       const dbHashedPassword = (
         await userModel.getHashedPassword(user.UserID)
@@ -103,24 +86,30 @@ export default class authService {
 
       const isMatch = await checkPassword(
         data.password,
-        dbHashedPassword?.toString() || ''
+        dbHashedPassword?.toString() || ""
       );
 
       if (!isMatch) {
-        throw new Error('Email or password is incorrect ');
+        throw new Error("Email or password is incorrect");
       }
 
-      /* if (user.IsTwoFactor && (user.PhoneNumber!=null)) {
-            const randomNumber = Math.floor(1000 + Math.random() * 9000);
-            verifyPhoneNumber({phoneNumber: user.PhoneNumber, otp: randomNumber.toString()});
-            const otp = otpModel.addOtp(user.UserID,randomNumber);
-        }
-*/
+      // Generate the token
+      const tokenSecret = "your_secret_key"; // Replace with your actual secret key
+      const tokenExpiry = "1h"; // Replace with your desired token expiry time
+      const { token, expiry } = generateAuthToken(
+        user.UserID,
+        user.Email,
+        tokenSecret,
+        tokenExpiry
+      );
+
       return {
         email: user?.Email,
         name: user?.Username,
         id: user?.UserID,
         verified: user?.Verified,
+        token,
+        tokenExpiry: expiry,
       };
     } catch (error: any) {
       return {
@@ -133,6 +122,7 @@ export default class authService {
     Email: string;
     Username: string;
     role: string;
+    image: string;
   }) => {
     let user;
     try {
@@ -141,18 +131,27 @@ export default class authService {
         user = await userModel.AddUser({
           Username: data.Username,
           Email: data.Email,
-          role: data.role,
+          role: data.role || "Client",
+          image: data.image,
         });
-        userModel.updateUser(user.UserID, { Verified: 1 });
-      }
+        userModel.updateUser(user.UserID, { Verified: true });
+      } // Generate the token
 
-      /*const token = generateAuthToken(user?.UserID, user?.Email!, tokenSecret || "", expiresIn || "");
-        userModel.setLastLogin(user?.UserID!);*/
+      const tokenSecret = "your_secret_key"; // Replace with your actual secret key
+      const tokenExpiry = "1h"; // Replace with your desired token expiry time
+
+      const token = generateAuthToken(
+        user?.UserID,
+        user?.Email!,
+        tokenSecret || "",
+        tokenExpiry || ""
+      );
+      userModel.setLastLogin(user?.UserID!);
       return {
         email: user?.Email,
         name: user?.Username,
         userId: user?.UserID,
-        verified: user?.Verified,
+        token,
       };
     } catch (error: any) {
       return {
@@ -178,8 +177,9 @@ export default class authService {
     }
     const token = generateEmailToken(
       Email,
-      emailTokenSecret || '',
-      emailTokenExpiry || ''
+      user.UserID,
+      emailTokenSecret || "",
+      emailTokenExpiry || ""
     );
     const message = SendVerificationEmail({
       email: Email,
@@ -195,12 +195,13 @@ export default class authService {
   static sendPasswordResetEmail = async (Email: string) => {
     const user = await userModel.getUserByEmail(Email);
     if (!user) {
-      throw new Error('Email does not exist');
+      throw new Error("Email does not exist");
     }
     const token = generateEmailToken(
       Email,
-      emailTokenSecret || '',
-      emailTokenExpiry || ''
+      user.UserID,
+      emailTokenSecret || "",
+      emailTokenExpiry || ""
     );
     const message = sendPasswordResetEmail({
       email: Email,
@@ -216,34 +217,30 @@ export default class authService {
   static resendVerificationEmail = async (userId: number) => {
     const user = await userService.getUserById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
     return this.sendVerificationEmail(user.Email);
   };
 
-  static verifyEmail = async (
-    userId: number,
-    data: any,
-    isEmailProvided: boolean
-  ) => {
+  static verifyEmail = async (data: any, isEmailProvided: boolean) => {
     try {
-      if (isEmailProvided){
-        const user = await userModel.getUserByEmail(data.email)
-      if (!user) {
-        throw new Error('Unknown email');
-      }
-      return true
+      if (isEmailProvided) {
+        const user = await userModel.getUserByEmail(data.email);
+        if (!user) {
+          throw new Error("Unknown email");
+        }
+        return true;
       } else {
-        const user = await userService.getUserById(userId);
-      if (!user) {
-        throw new Error('Unknown error');
-      }
-        const decodedToken = decodeEmailToken(data, emailTokenSecret || '');
-        if (!decodedToken || typeof decodedToken === 'string') {
-          throw new Error('Invalid token');
+        const decodedToken = decodeEmailToken(data, emailTokenSecret || "");
+        if (!decodedToken || typeof decodedToken === "string") {
+          throw new Error("Invalid token");
+        }
+        const user = await userService.getUserById(decodedToken.id);
+        if (!user) {
+          throw new Error("Unknown error");
         }
         if (user.Email === decodedToken.email) {
-          await userModel.updateUser(userId, { Verified: true });
+          await userModel.updateUser(decodedToken.id, { Verified: true });
           return true;
         }
         return false;

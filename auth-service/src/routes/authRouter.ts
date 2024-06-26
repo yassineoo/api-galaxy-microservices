@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 import {
   Oauthlogin,
   getUserSession,
@@ -7,8 +7,8 @@ import {
   signup,
   verifyEmail,
   resetPassword,
-} from '../controllers/authController';
-import { verifyAuth } from '../controllers/permissionController';
+} from "../controllers/authController";
+import { verifyAuth } from "../controllers/permissionController";
 
 const authRouter = express.Router();
 
@@ -168,14 +168,15 @@ const authRouter = express.Router();
  *                   type: string
  *                   description: Error message
  */
-authRouter.post('/login', login);
-authRouter.post('/oauth', Oauthlogin);
-authRouter.post('/session', getUserSession);
-authRouter.post('/register', signup('userClient'));
-authRouter.post('/signup/api-client', signup('APIClient'));
+authRouter.post("/login", login);
+authRouter.post("/oauth", Oauthlogin);
+authRouter.post("/session", getUserSession);
+authRouter.post("/register", signup("userClient"));
+authRouter.post("/signup/api-client", signup("APIClient"));
 
-authRouter.get('/resend-email', verifyAuth, resendVerificationEmail);
-authRouter.get('/verifyEmail/:token', verifyAuth, verifyEmail);
-authRouter.post('/verifyEmail',verifyEmail);
-authRouter.patch('/resetPassword', verifyAuth, resetPassword);
+authRouter.get("/resend-email", verifyAuth, resendVerificationEmail);
+authRouter.post("/verifyEmail/:token", verifyEmail);
+authRouter.post("/verifyEmail", verifyEmail);
+authRouter.patch("/resetPassword", verifyAuth, resetPassword);
+
 export default authRouter;

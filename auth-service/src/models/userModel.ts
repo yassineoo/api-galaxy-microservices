@@ -1,4 +1,4 @@
-import { prismaClientSingleton } from '../utils/prismaClient';
+import { prismaClientSingleton } from "../utils/prismaClient";
 const currentDate: Date = new Date();
 
 export default class userModel {
@@ -6,8 +6,9 @@ export default class userModel {
     Username: string;
     Email: string;
     PasswordHash?: string;
-    PhoneNumber?: string;
+    // PhoneNumber?: string;
     role?: string;
+    image: string;
   }) => {
     try {
       const user = await prismaClientSingleton.users.create({
@@ -20,7 +21,7 @@ export default class userModel {
       });
       return user;
     } catch (error) {
-      console.error('Error in AddUser:', error);
+      console.error("Error in AddUser:", error);
       throw error;
     }
   };
@@ -35,7 +36,7 @@ export default class userModel {
       });
       return updatedUser;
     } catch (error) {
-      console.error('Error in updateUser:', error);
+      console.error("Error in updateUser:", error);
       throw error;
     }
   };
@@ -48,11 +49,11 @@ export default class userModel {
         },
       });
       if (!user) {
-        console.log('No data found for getUserById');
+        console.log("No data found for getUserById");
       }
       return user;
     } catch (error) {
-      console.error('Error in getUserById:', error);
+      console.error("Error in getUserById:", error);
       throw error;
     }
   };
@@ -60,7 +61,7 @@ export default class userModel {
   static getUserByEmail = async (email: string) => {
     try {
       if (!email) {
-        throw new Error('Email parameter is undefined');
+        throw new Error("Email parameter is undefined");
       }
       const user = await prismaClientSingleton.users.findUnique({
         where: {
@@ -69,7 +70,7 @@ export default class userModel {
       });
       return user;
     } catch (error) {
-      console.error('Error in getUserByEmail:', error);
+      console.error("Error in getUserByEmail:", error);
       throw error;
     }
   };
@@ -77,7 +78,7 @@ export default class userModel {
   static getUserByPhoneNumber = async (phoneNumber: string) => {
     try {
       if (!phoneNumber) {
-        throw new Error('PhoneNumber parameter is undefined');
+        throw new Error("PhoneNumber parameter is undefined");
       }
       const user = await prismaClientSingleton.users.findUnique({
         where: {
@@ -87,7 +88,7 @@ export default class userModel {
 
       return user;
     } catch (error) {
-      console.error('Error in getUserByPhoneNumber:', error);
+      console.error("Error in getUserByPhoneNumber:", error);
       throw error;
     }
   };
@@ -96,11 +97,11 @@ export default class userModel {
     try {
       const users = await prismaClientSingleton.users.findMany();
       if (users.length === 0) {
-        console.log('No data found for getAllUsers');
+        console.log("No data found for getAllUsers");
       }
       return users;
     } catch (error) {
-      console.error('Error in getAllUsers:', error);
+      console.error("Error in getAllUsers:", error);
       throw error;
     }
   };
@@ -115,7 +116,7 @@ export default class userModel {
       );
       return transaction;
     } catch (error) {
-      console.error('Error in deleteUser transaction:', error);
+      console.error("Error in deleteUser transaction:", error);
       throw error;
     }
   };
@@ -132,7 +133,7 @@ export default class userModel {
       });
       return user;
     } catch (error) {
-      console.error('Error in setLastLogin:', error);
+      console.error("Error in setLastLogin:", error);
       throw error;
     }
   };
@@ -148,12 +149,12 @@ export default class userModel {
         },
       });
       if (!user) {
-        console.log('No data found for getHashedPassword');
-        throw new Error('No data found');
+        console.log("No data found for getHashedPassword");
+        throw new Error("No data found");
       }
       return user ? user.PasswordHash : null;
     } catch (error) {
-      console.error('Error in getHashedPassword:', error);
+      console.error("Error in getHashedPassword:", error);
       throw error;
     }
   };
