@@ -8,7 +8,7 @@ export default class userModel {
     PasswordHash?: string;
     // PhoneNumber?: string;
     role?: string;
-    image: string;
+    Image?:string
   }) => {
     try {
       const user = await prismaClientSingleton.users.create({

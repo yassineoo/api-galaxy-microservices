@@ -11,14 +11,7 @@ export const signup = (role: string) => {
   return async (req: Request, res: Response) => {
     try {
       const tokenData = await authService.register(req.body, role as Role);
-
-      if (tokenData.id) {
         return res.status(statusCodes.ok).json(tokenData);
-      } else {
-        return res
-          .status(statusCodes.badRequest)
-          .json({ message: tokenData?.message });
-      }
     } catch (error: any) {
       const { message, statusCode = statusCodes.badRequest } = error;
       return res.status(statusCode).json({ message });
@@ -38,8 +31,6 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const token = await authService.login(req.body);
-    console.log("tokennn", token);
-
     if (!token.message) {
       return res.status(statusCodes.ok).send({ ...token });
     } else {
@@ -60,16 +51,10 @@ export const Oauthlogin = async (req: Request, res: Response) => {
 */
 
   try {
-    console.log("req body", req.body);
-
     const token = await authService.OathUser(req.body);
-    if (!token.message) {
       return res.status(statusCodes.ok).send({ ...token });
-    } else {
-      res.status(statusCodes.badRequest).send({ error: token?.message });
-    }
   } catch (error: any) {
-    res.status(statusCodes.badRequest).send({ error: error.message });
+    res.status(statusCodes.badRequest).send({ message: error.message });
   }
 };
 
@@ -102,11 +87,6 @@ export const verifyEmail = async (req: Request, res: Response) => {
   try {
     const data = req.params.token ?? req.body;
     const isEmailProvided = !Boolean(req.params.token);
-    console.log(
-      "----------------------------        verify       ------------------------"
-    );
-
-    console.log(isEmailProvided, data);
     const result = (await authService.verifyEmail(
       data,
       isEmailProvided

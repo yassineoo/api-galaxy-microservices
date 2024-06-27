@@ -10,13 +10,9 @@ import { Role } from "../models/enum";
 import {
   SendVerificationEmail,
   sendPasswordResetEmail,
-  verifyPhoneNumber,
 } from "./grpcClient/notifService";
 import userService from "./UAMService";
 import { sendEMail } from "../utils/email";
-import otpModel from "../models/otp";
-import { STATUS_CODES } from "http";
-
 require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
@@ -41,18 +37,18 @@ class ApiError extends Error {
 export default class authService {
   static register = async (data: register, role: Role) => {
     try {
-      const userEmail = await userModel.getUserByEmail(data.email);
+      const {email,password,username} = data
+      const userEmail = await userModel.getUserByEmail(email);
       if (userEmail) {
         throw new ApiError("Email already exists", 409);
       }
 
-      const hashedPassword = (await hashPassword(data.password)).toString();
+      const hashedPassword = (await hashPassword(password)).toString();
       const user = await userModel.AddUser({
-        Username: data.username,
-        Email: data.email,
+        Username: username,
+        Email: email,
         PasswordHash: hashedPassword,
-        role: role,
-        image: "",
+        role: role
       });
 
       if (!user) {
@@ -69,7 +65,7 @@ export default class authService {
       const redirect_url = `http://localhost:3000/confirmRegistration?token=${token}`;
       sendEMail("confirmation of registration", redirect_url, user.Email);
 
-      return { id: user.UserID, message: "User created successfully" };
+      return { id: user.UserID };
     } catch (error: any) {
       throw error;
     }
@@ -106,7 +102,7 @@ export default class authService {
       return {
         email: user?.Email,
         name: user?.Username,
-        id: user?.UserID,
+        userId: user?.UserID,
         verified: user?.Verified,
         token,
         tokenExpiry: expiry,
@@ -132,7 +128,7 @@ export default class authService {
           Username: data.Username,
           Email: data.Email,
           role: data.role || "Client",
-          image: data.image,
+          Image: data.image,
         });
         userModel.updateUser(user.UserID, { Verified: true });
       } // Generate the token
@@ -140,7 +136,7 @@ export default class authService {
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
 
-      const token = generateAuthToken(
+      const {expiry,token} = generateAuthToken(
         user?.UserID,
         user?.Email!,
         tokenSecret || "",
@@ -152,11 +148,10 @@ export default class authService {
         name: user?.Username,
         userId: user?.UserID,
         token,
+        tokenExpiry
       };
     } catch (error: any) {
-      return {
-        message: error.message,
-      };
+      throw error
     }
   };
 
