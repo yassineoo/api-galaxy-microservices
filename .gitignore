@@ -1,2 +1,6 @@
 notification-service/node_modules
 apis-service/pkg
+api-gateway/node_modules
+auth-service/node_modules
+service_registry/node_modules
+stats-service/node_modules
