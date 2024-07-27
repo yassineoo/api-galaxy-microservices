@@ -32,9 +32,13 @@ async function fetchServiceUrlFromRegistry(servicename, serviceversion) {
 // Define the list of services
 const services = [
   { name: "auth-service", version: "v1", path: "/auth" },
-  { name: "offres", version: "v1", path: "/offres" },
-  { name: "candidatures", version: "v1", path: "/candidatures" },
-  { name: "emplois", version: "v1", path: "/emplois" },
+  { name: "apis-service", version: "v1", path: "/apis-service" },
+  {
+    name: "notifications-service",
+    version: "v1",
+    path: "/notifications-service",
+  },
+  { name: "stats-service", version: "v1", path: "/stats-service" },
   { name: "users", version: "v1", path: "/users" },
   { name: "notifications", version: "v1", path: "/notifications" },
   { name: "abonnements", version: "v1", path: "/abonnements" },

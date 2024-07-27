@@ -1,9 +1,13 @@
 package main
 
 import (
-	"os"
-
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"local_packages/api"
 	"local_packages/api/services"
 	"local_packages/database"
@@ -13,7 +17,6 @@ import (
 	//"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/robfig/cron"
 	gorm "gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -53,39 +56,122 @@ func main() {
 	swaggerURL := ginSwagger.URL("http://localhost:8088/swagger/doc.json")
 
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
-		// Retrieve IP address and port of the server
-		ip, port := getServerAddress()
-		log.Println("Server IP: %s, Port: %d\n", ip, port)
-		fmt.Printf("Server IP: %s, Port: %d\n", ip, port)
+	
 		
 
+	// Start the server
+	
+	// Start the server in a separate goroutine
+	port := ":8088"
+	go func() {
+		if err := router.Run(port); err != nil {
+			log.Fatalf("Failed to run server: %v", err)
+		}
+	}()
+
+	// Register service with API Gateway
+	serviceName := "apis-service"
+	serviceVersion := "v1"
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	log.Println("Starting service registration...")
+	registerService(serviceName, serviceVersion, port)
+	log.Println("Starting service registrationstooooop")
 
 	// Start the cron job
-	startCronJob(svc)
-		
-	router.Run(":8088")
+	//startCronJob(svc)
+
+	// Handle graceful shutdown
+	handleShutdown(serviceName, serviceVersion, port)
 }
 
+func registerService(serviceName, serviceVersion, port string) {
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    
+    client := &http.Client{
+        Timeout: 10 * time.Second, // Setting a timeout for the request
+    }
 
-
-
-func startCronJob(svc *services.Service) {
-    c := cron.New()
-
-    // Define your cron job
-    c.AddFunc("@every 59m", func() {
-        // Call the cron job function from your service
-        err := svc.CronJobHealthCheck()
-		log.Println("cron job running ....")
+    for {
+        req, err := http.NewRequest(http.MethodPut, url, nil)
         if err != nil {
-            log.Println("Error running cron job:", err)
+            log.Printf("Failed to create request: %v", err)
+            time.Sleep(15 * time.Second)
+            continue
         }
-    })
 
-    // Start the cron scheduler
-    c.Start()
+        resp, err := client.Do(req)
+        if err != nil {
+            log.Printf("Failed to register service: %v", err)
+            time.Sleep(15 * time.Second)
+            continue
+        }
+        
+        defer resp.Body.Close()
+        
+        if resp.StatusCode == http.StatusOK {
+            log.Println("Service registered successfully")
+            break
+        } else {
+            log.Printf("Failed to register service. Status code: %d", resp.StatusCode)
+        }
+        
+        time.Sleep(15 * time.Second)
+    }
+}
+func unregisterService(serviceName, serviceVersion, port string) {
+    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    // Create a new request
+    req, err := http.NewRequest(http.MethodDelete, url, nil)
+    if err != nil {
+        log.Printf("Failed to create request for unregistering service: %v", err)
+        return
+    }
+
+    // Create a new HTTP client and send the request
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        log.Printf("Failed to unregister service: %v", err)
+        return
+    }
+    defer resp.Body.Close() // Ensure the response body is closed
+
+    // Now you can check the StatusCode of the response
+    if resp.StatusCode == http.StatusOK {
+        log.Println("Service unregistered successfully")
+    } else {
+        // It's a good practice to handle unexpected status codes
+        log.Printf("Failed to unregister service, status code: %d", resp.StatusCode)
+    }
 }
 
 
-// Function to retrieve the IP address and port of the server
-
+func handleShutdown(serviceName, serviceVersion, port string) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-c
+		unregisterService(serviceName, serviceVersion, port)
+		os.Exit(0)
+	}()
+}
