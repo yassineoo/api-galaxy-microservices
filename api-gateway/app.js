@@ -4,7 +4,7 @@ const cors = require("cors");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const axios = require("axios");
 
-const PORT = 3000;
+const PORT = 5000;
 
 app.use(cors({ origin: "*" }));
 app.use(cors({ origin: true, credentials: true }));
@@ -52,13 +52,31 @@ async function createServiceProxy(service) {
     service.version
   );
   if (serviceInfo) {
-    const serviceUrl = `http://${serviceInfo.ip}:${serviceInfo.port}/${service.name}`;
+    let serviceIp = serviceInfo.ip;
+    // if (serviceIp === "[::1]") {
+    //  serviceIp = "127.0.0.1";
+    //  }
+    const serviceUrl = `http://${serviceIp}:${serviceInfo.port}`;
     const serviceProxy = createProxyMiddleware({
       target: serviceUrl,
-      changeOrigin: false,
+      changeOrigin: true,
+      logLevel: "debug",
+      pathRewrite: (path) => path, // Preserve the full path
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`Forwarding request to: ${serviceUrl}${req.url}`);
+      },
+      onError: (err, req, res) => {
+        console.error(`Proxy error: ${err.message}`);
+        res.status(500).send("Proxy Error");
+      },
     });
-    console.log(`Service ${service.name} URL:`, serviceUrl);
-    app.use(service.path, serviceProxy);
+    console.log(`Creating proxy for ${service.name} at ${serviceUrl}`);
+    app.use(service.path, (req, res, next) => {
+      console.log(
+        `Incoming request to ${service.name}: ${req.method} ${req.url}`
+      );
+      serviceProxy(req, res, next);
+    });
   } else {
     console.log(`Service ${service.name} not found in registry.`);
   }

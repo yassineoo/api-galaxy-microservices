@@ -62,7 +62,7 @@ func main() {
 	// Start the server
 	
 	// Start the server in a separate goroutine
-	port := ":8088"
+	port := ":8000"
 	go func() {
 		if err := router.Run(port); err != nil {
 			log.Fatalf("Failed to run server: %v", err)
@@ -73,16 +73,7 @@ func main() {
 	serviceName := "apis-service"
 	serviceVersion := "v1"
 	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
-	log.Println("Starting service registration...")
+
 	registerService(serviceName, serviceVersion, port)
 	log.Println("Starting service registrationstooooop")
 
