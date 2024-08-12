@@ -35,6 +35,16 @@ import (
 // @BasePath /
 // @schemes http https
 func main() {
+
+     // Create a log file
+     logFile, err := os.OpenFile("service.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+     if err != nil {
+         log.Fatalf("Failed to open log file: %v", err)
+     }
+     defer logFile.Close()
+ 
+     // Set log output to the file
+     log.SetOutput(logFile) 
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
@@ -58,24 +68,25 @@ func main() {
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
 	
 		
-
-	// Start the server
-	
-	// Start the server in a separate goroutine
+// Start the server in a separate goroutine
 	port := ":8000"
-	go func() {
-		if err := router.Run(port); err != nil {
-			log.Fatalf("Failed to run server: %v", err)
-		}
-	}()
-
-	// Register service with API Gateway
+	// Start the server
+    // Register service with API Gateway
 	serviceName := "apis-service"
 	serviceVersion := "v1"
 	log.Println("Starting service registration...")
 
 	registerService(serviceName, serviceVersion, port)
 	log.Println("Starting service registrationstooooop")
+	
+	
+	//go func() {
+		if err := router.Run(port); err != nil {
+			log.Fatalf("Failed to run server: %v", err)
+		}
+	//}()
+
+	
 
 	// Start the cron job
 	//startCronJob(svc)
@@ -85,15 +96,7 @@ func main() {
 }
 
 func registerService(serviceName, serviceVersion, port string) {
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
-    log.Println("Starting service registration...")
+   
     log.Println("Starting service registration...")
     log.Println("Starting service registration...")
     url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)

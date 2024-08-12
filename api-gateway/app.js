@@ -53,10 +53,14 @@ async function createServiceProxy(service) {
   );
   if (serviceInfo) {
     let serviceIp = serviceInfo.ip;
+    const port = serviceInfo.port !== ":8000" ? serviceInfo.port : "8000";
+
     // if (serviceIp === "[::1]") {
     //  serviceIp = "127.0.0.1";
     //  }
-    const serviceUrl = `http://${serviceIp}:${serviceInfo.port}`;
+    console.log(`serviceIp: ${serviceIp}`, `port: ${port}`);
+
+    const serviceUrl = `http://${serviceIp}:${port}`;
     const serviceProxy = createProxyMiddleware({
       target: serviceUrl,
       changeOrigin: true,
