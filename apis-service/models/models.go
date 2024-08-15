@@ -25,6 +25,27 @@ type ApiCollectionEntity struct {
 
 
 
+// UserEntity represents the Users table
+type UserEntity struct {
+	ID            int       `gorm:"primaryKey;autoIncrement"`
+	Username      string    `gorm:"size:255;not null"`
+	Email         string    `gorm:"size:255;unique;not null"`
+	PasswordHash  string    `gorm:"size:60"` // Optional, so no `not null`
+	DateCreated   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	LastLogin     time.Time
+	IsActive      bool      `gorm:"default:true"`
+	IsTwoFactor   bool      `gorm:"default:false"`
+	Role          string    `gorm:"size:50"`
+	PhoneNumber   string    `gorm:"size:20;unique"`
+	Verified      bool      `gorm:"default:false"`
+	Image         string    `gorm:"size:255"`
+	// Add the billinghistory relation when it's defined
+	 Apis []ApiEntity `gorm:"foreignKey:ProviderID"`
+}
+
+
+
+
 // ApiEntity represents the Apis table
 type ApiEntity struct {
 	ID          int    `gorm:"primaryKey;autoIncrement"`
@@ -45,7 +66,7 @@ type ApiEntity struct {
 	DateDeleted time.Time
 
 	ApiVersions   []ApiVersionEntity   `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
-	ApiRatings    []ApiRatingEntity    `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
+	ApiReviews    []ApiReviewEntity    `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	//Subscriptionss []SubscriptionEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	//Endpoints     []EndpointsEntity    `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	Plans         []PlanEntity         `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
@@ -55,6 +76,8 @@ type ApiEntity struct {
 	HealthCheck   HealthCheckEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"` // One-to-many relationship with foreign key
 
 	Category    CategoryEntity  `gorm:"foreignKey:CategoryID"`
+	User        UserEntity `gorm:"foreignKey:ProviderID"`
+
 }
 
 type ApiDocsEntity struct {
@@ -125,7 +148,7 @@ type EndpointsEntity struct {
 	Logs 		[]UsageLogEntity		`gorm:"foreignKey:EndpointID;onDelete:CASCADE"`
 	HealthCheck []HealthCheckEntity 		`gorm:"foreignKey:EndpointID;onDelete:CASCADE"`
 	// One-to-one relationship with foreign key
-//	Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
+	//Objects		[]EndpointObjectEntity	`gorm:"foreignKey:EndpointID"` 
 	// Add other fields as needed...
 }
 
@@ -175,7 +198,7 @@ type ApiVersionEntity struct {
 }
 
 // ApiRatingEntity represents the ApiRatings table
-type ApiRatingEntity struct {
+type ApiReviewEntity struct {
 	ID int `gorm:"primaryKey;autoIncrement"`
 	//RatingID   int              `gorm:"primaryKey;autoIncrement"`
 	ApiID     int `gorm:"not null"`
@@ -183,6 +206,8 @@ type ApiRatingEntity struct {
 	Rating    int `gorm:"not null"`
 	Comment   string
 	DateRated time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Api       ApiEntity `gorm:"foreignKey:ApiID"`
+	User      UserEntity `gorm:"foreignKey:UserID"`
 }
 
 
@@ -200,7 +225,7 @@ type PlanEntity struct {
 	RateUnite      string
 	RecomndedPlan  bool
 	Price          float64 `gorm:"type:decimal(10,2)"`
-//	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
+	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
 }
 
 
@@ -269,14 +294,83 @@ type UsageLogEntity struct {
 }
 
 
+type InvoiceEntity struct {
+	ID      uint                 `gorm:"primaryKey;autoIncrement"`
+	SubscriptionID uint
+	TotalAmount    float64              `gorm:"type:decimal(10,2)"`
+	DateIssued     time.Time            `gorm:"default:current_timestamp"`
+	DueDate        time.Time
+	Status         string               `gorm:"type:varchar(50)"`
+	BillingHistory []BillingHistoryEntity `gorm:"foreignKey:InvoiceID"`
+	Subscription   SubscriptionEntity     `gorm:"foreignKey:SubscriptionID;constraint:OnUpdate:RESTRICT"`
+	Transactions   []TransactionEntity    `gorm:"foreignKey:InvoiceID"`
+}
+
+type PaymentMethodEntity struct {
+	ID uint                 `gorm:"primaryKey;autoIncrement"`
+	UserID          uint
+	Provider        string               `gorm:"type:varchar(255)"`
+	AccountDetails  string               `gorm:"type:text"`
+	IsDefault       bool                 `gorm:"default:false"`
+	User            UserEntity           `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
+	Transactions    []TransactionEntity  `gorm:"foreignKey:PaymentMethodID"`
+}
+
+type BillingHistoryEntity struct {
+	
+	ID   uint              `gorm:"primaryKey;autoIncrement"`
+	UserID      uint
+	InvoiceID   uint
+	PaymentDate time.Time
+	Amount      float64           `gorm:"type:decimal(10,2)"`
+	User        UserEntity        `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
+	Invoice     InvoiceEntity     `gorm:"foreignKey:InvoiceID;constraint:OnUpdate:RESTRICT"`
+}
+
+type ProfileEntity struct {
+	ID      uint              `gorm:"primaryKey;autoIncrement"`
+	UserID         uint
+	FullName       string            `gorm:"type:varchar(255)"`
+	Bio            string            `gorm:"type:text"`
+	ProfilePicture string            `gorm:"type:varchar(255)"`
+	DateOfBirth    time.Time         `gorm:"type:date"`
+	Location       string            `gorm:"type:varchar(255)"`
+	User           UserEntity        `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
+}
+
+type TransactionEntity struct {
+	ID   uint               `gorm:"primaryKey;autoIncrement"`
+	InvoiceID       uint
+	Amount          float64            `gorm:"type:decimal(10,2)"`
+	TransactionDate time.Time          `gorm:"default:current_timestamp"`
+	PaymentMethodID uint
+	Status          string             `gorm:"type:varchar(50)"`
+	Invoice         InvoiceEntity      `gorm:"foreignKey:InvoiceID;constraint:OnUpdate:RESTRICT"`
+	PaymentMethod   PaymentMethodEntity `gorm:"foreignKey:PaymentMethodID"`
+}
+
+type PermissionEntity struct {
+	ID         uint                    `gorm:"primaryKey;autoIncrement"`
+	Name                 string                  `gorm:"type:varchar(255)"`
+	Description          string                  `gorm:"type:text"`
+	ModeratorPermissions []ModeratorPermissionEntity `gorm:"foreignKey:PermissionID"`
+}
+
+type ModeratorPermissionEntity struct {
+	ID uint                 `gorm:"primaryKey;autoIncrement"`
+	UserID                uint
+	PermissionID          uint
+	User                  UserEntity            `gorm:"foreignKey:UserID"`
+	Permission            PermissionEntity      `gorm:"foreignKey:PermissionID"`
+}
 
 
-// ApiKeyEntity represents the ApiKeys table
 type ApiKeyEntity struct {
-	ID int `gorm:"primaryKey;autoIncrement"`
-	//ApiKeyID       int            `gorm:"primaryKey;autoIncrement"`
-	SubscriptionID int       `gorm:"not null"`
-	ApiKey         string    `gorm:"size:255;unique;not null"`
-	CreationDate   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive       bool      `gorm:"default:true"`
+	ID       uint          `gorm:"primaryKey;autoIncrement"`
+	UserID uint
+	ApiKey         string        `gorm:"type:varchar(255);unique"`
+	CreationDate   time.Time    `gorm:"default:current_timestamp"`
+	IsActive       bool         `gorm:"default:true"`
+	User 		 UserEntity `gorm:"foreignKey:UserID"`
+
 }

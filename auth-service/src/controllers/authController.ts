@@ -63,12 +63,20 @@ export const Oauthlogin = async (req: Request, res: Response) => {
     console.log("req body", req.body);
 
     const token = await authService.OathUser(req.body);
+    log("token", token);
+    log("token bool ", !token.message);
     if (!token.message) {
-      return res.status(statusCodes.ok).send({ ...token });
+      log("token enter here");
+      return res
+        .status(statusCodes.ok)
+        .send({ ...token, UserID: Number(token.UserID) });
     } else {
+      log("token enter here 2222222222");
       res.status(statusCodes.badRequest).send({ error: token?.message });
     }
   } catch (error: any) {
+    log("token enter here 3333333333333333333333");
+    log("error", error.message);
     res.status(statusCodes.badRequest).send({ error: error.message });
   }
 };
