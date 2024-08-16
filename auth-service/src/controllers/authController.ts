@@ -71,12 +71,9 @@ export const Oauthlogin = async (req: Request, res: Response) => {
         .status(statusCodes.ok)
         .send({ ...token, UserID: Number(token.UserID) });
     } else {
-      log("token enter here 2222222222");
       res.status(statusCodes.badRequest).send({ error: token?.message });
     }
   } catch (error: any) {
-    log("token enter here 3333333333333333333333");
-    log("error", error.message);
     res.status(statusCodes.badRequest).send({ error: error.message });
   }
 };
