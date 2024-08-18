@@ -70,7 +70,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
            }
 
     // Category routes
-    categoriesGroup := router.Group("/categories")
+    categoriesGroup := router.Group("/categoriesk")
     {
         categoriesGroup.POST("/", CategoryHandler.CreateCategory)
         categoriesGroup.GET("/", CategoryHandler.GetAllCategories)

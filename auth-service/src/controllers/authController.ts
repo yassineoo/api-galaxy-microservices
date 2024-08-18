@@ -27,18 +27,8 @@ export const signup = (role: string) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  /*const { error } = UAuthValidator.loginSchema.validate(req.body);
-    if (error) {
-        console.log(error)
-        res.status(statusCodes.badRequest).send(error.details[0].message);
-        return;
-    }
-    console.log(req.body)
-*/
-
   try {
     const token = await authService.login(req.body);
-    console.log("tokennn", token);
 
     if (!token.message) {
       return res.status(statusCodes.ok).send({ ...token });
@@ -51,20 +41,13 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const Oauthlogin = async (req: Request, res: Response) => {
-  /* const { error } = UAuthValidator.loginSchema.validate(req.body);
-    if (error) {
-        console.log(error)
-        res.status(statusCodes.badRequest).send(error.details[0].message);
-        return;
-    }
-*/
-
   try {
-    console.log("req body", req.body);
-
     const token = await authService.OathUser(req.body);
+
     if (!token.message) {
-      return res.status(statusCodes.ok).send({ ...token });
+      return res
+        .status(statusCodes.ok)
+        .send({ ...token, UserID: Number(token.UserID) });
     } else {
       res.status(statusCodes.badRequest).send({ error: token?.message });
     }

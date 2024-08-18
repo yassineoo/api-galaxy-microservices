@@ -38,6 +38,16 @@ func MigrateDatabase(db *gorm.DB) error {
 		&models.ObjectPlanEntity{},
 		&models.CrossObjectEntity{},
 		&models.EndpointObjectEntity{},
+		&models.UserEntity{},
+		&models.ProfileEntity{},
+		&models.PermissionEntity{},
+		&models.ModeratorPermissionEntity{},
+		&models.InvoiceEntity{},
+		&models.PaymentMethodEntity{},
+		&models.BillingHistoryEntity{},
+		&models.TransactionEntity{},
+
+
 
 
 
