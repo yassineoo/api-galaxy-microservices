@@ -122,7 +122,11 @@ func (s *Service) GetAll(ctx context.Context, page int, limit int , filter int ,
 func (s *Service) GetUserAPIs(ctx context.Context, userID int) ([]models.ApiEntity, error) {
     // Retrieve the APIs associated with the specified user ID as the provider
     var userApis []models.ApiEntity
-    if err := s.gormDB.Where("provider_id = ?", userID).Find(&userApis).Error; err != nil {
+    // if err := s.gormDB.Where("provider_id = ?", userID).Find(&userApis).Error; err != nil {
+    //     return nil, err
+    // }
+
+    if err:= s.gormDB.Where(&models.ApiEntity{ProviderID: userID}).Find(&userApis).Error; err != nil {
         return nil, err
     }
 

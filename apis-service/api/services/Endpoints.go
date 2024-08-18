@@ -244,7 +244,6 @@ func (s *Service) GetApiEndpoints(ctx context.Context, apiID int) ([]models.Endp
         Find(&endpoints).Error; err != nil {
         return nil, err
     }
-
     return endpoints, nil
 }
 /*
