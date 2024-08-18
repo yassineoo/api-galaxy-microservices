@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  service-registry:
+    build: ./service_registry
+    container_name: service-registry
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    depends_on:
+      - service-registry
+    ports:
+      - "7000:7000"
+    environment:
+      - NODE_ENV=development
+
+  statistics-service:
+    build: ./stat-service
+    container_name: statistics-service
+    depends_on:
+      - service-registry
+    ports:
+      - "7001:7001"
+    environment:
+      - NODE_ENV=development
+
+  apis-service:
+    build: ./apis-service
+    container_name: apis-service
+    depends_on:
+      - service-registry
+    ports:
+      - "8000:8000"
+    environment:
+      - GIN_MODE=release
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - service-registry
+      - auth-service
+      - statistics-service
+      - api-management-service
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development

@@ -1,0 +1,23 @@
+# Use an official Node.js runtime as a parent image
+FROM node:20.16.0-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy package.json and pnpm-lock.yaml (if you have one)
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN pnpm install
+
+# Copy the rest of the application files
+COPY . .
+
+# Expose the port on which your app will run
+EXPOSE 3001
+
+# Start the Node.js app in development mode
+CMD ["pnpm", "run", "dev"]
