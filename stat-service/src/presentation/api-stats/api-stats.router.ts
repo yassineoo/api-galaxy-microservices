@@ -4,6 +4,6 @@ import controller from "./api-stats.controller"
 
 const router = express.Router()
 
-router.post("/", controller.get_api_stats)
+router.post("/", controller.get_apis_stats)
 
 export default router
