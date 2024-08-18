@@ -25,7 +25,7 @@ func MigrateDatabase(db *gorm.DB) error {
 
 		&models.UsageLogEntity{},
 		&models.ApiKeyEntity{},
-		&models.ApiRatingEntity{},
+		&models.ApiReviewEntity{},
 		&models.ApiVersionEntity{},
 		&models.PlanEntity{},
 		&models.EndpointsGroupEntity{},
