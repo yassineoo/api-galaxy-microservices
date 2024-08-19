@@ -5,7 +5,7 @@ import axios from "axios";
 import http from "http";
 
 import EndpointsStatsRouter from "./presentation/endpoints-stats/endpoints-stats.router";
-import ApisStatsRouter from "./presentation/api-stats/api-stats.router"
+import ApisStatsRouter from "./presentation/api-stats/api-stats.router";
 
 import { specs } from "./utils/swagger";
 require("dotenv").config();
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 app.use("/stats/endpoints", EndpointsStatsRouter);
-app.use("/stats/apis", ApisStatsRouter)
+app.use("/stats/apis", ApisStatsRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 const server = http.createServer(app);
@@ -27,7 +27,7 @@ const log = envConfig.log();
 
 // Important - a service should not have a fixed port but should randomly choose one
 
-server.listen(10001);
+server.listen(7001);
 console.log("log port", process.env.PORT);
 
 server.on("listening", () => {
@@ -35,22 +35,26 @@ server.on("listening", () => {
   const PORT = typeof addr === "string" ? addr : addr?.port;
   console.log(`Listening onnnnn ${PORT}`);
   const registerService = () =>
-    axios.put(
-      `http://localhost:3001/register/${envConfig.serviceName}/${envConfig.version
-      }/${
-      //  server?.address()?.port ||
-      Number(PORT)
-      }`
-    )
+    axios
+      .put(
+        //  `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
+          envConfig.version
+        }/${
+          //  server?.address()?.port ||
+          Number(PORT)
+        }`
+      )
       .catch((err: any) => log.fatal(err));
 
   const unregisterService = () =>
     axios
       .delete(
-        `http://localhost:3001/register/${envConfig.serviceName}/${envConfig.version
+        `http://localhost:3001/register/${envConfig.serviceName}/${
+          envConfig.version
         }/${
-        //  server?.address()?.port ||
-        PORT
+          //  server?.address()?.port ||
+          PORT
         }`
       )
       .catch((err: any) => log.fatal(err));
@@ -84,8 +88,8 @@ server.on("listening", () => {
 
   log.info(
     `Hi there! I'm listening on port ${
-    //  server?.address()?.port ||
-    PORT
+      //  server?.address()?.port ||
+      PORT
     } in ${app.get("env")} mode.`
   );
 });

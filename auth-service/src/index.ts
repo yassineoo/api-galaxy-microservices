@@ -48,7 +48,8 @@ server.on("listening", () => {
   const registerService = () =>
     axios
       .put(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
+        //  `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
           envConfig.version
         }/${
           //  server?.address()?.port ||
