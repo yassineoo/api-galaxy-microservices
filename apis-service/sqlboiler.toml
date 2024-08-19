@@ -1,6 +1,0 @@
-[psql]
-  dbname  = "yassine_apis"
-  host    = "postgresql-yassine.alwaysdata.net"
-  user    = "yassine"
-  pass    = "FZrP@Q3uuRZ*i7L"
-  sslmode = "disable"
