@@ -17,5 +17,4 @@ userApiRouter.get("/myApis/:userId",getUserApis)
 userApiRouter.get("/myFollowingApis/:userId",getUserFollowingsApis)
 userApiRouter.post("/reportAPI/:apiId",reportAnAPI)
 userApiRouter.post("/reportComment/:commentId",reportAnComment)
-
 export {userApiRouter}
