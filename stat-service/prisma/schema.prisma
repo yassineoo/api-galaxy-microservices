@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  UserID                             Int                    @id @default(autoincrement())
+  Username                           String                 @db.VarChar(255)
+  Email                              String                 @unique @db.VarChar(255)
+  PasswordHash                       String?                @db.VarChar(60)
+  DateCreated                        DateTime?              @default(now())
+  LastLogin                          DateTime?
+  IsActive                           Boolean?               @default(true)
+  IsTwoFactor                        Boolean?               @default(false)
+  role                               String?                @db.VarChar(50)
+  PhoneNumber                        String?                @unique @db.VarChar(20)
+  Verified                           Boolean?               @default(false)
+  Image                              String?                @db.VarChar(255)
+  billinghistory                     billinghistory[]
+  comments                           comments[]
+  follows_follows_FollowerIDTousers  follows[]              @relation("follows_FollowerIDTousers")
+  follows_follows_FollowingIDTousers follows[]              @relation("follows_FollowingIDTousers")
+  moderatorpermissions               moderatorpermissions[]
+  paymentmethods                     paymentmethods[]
+  postlikes                          postlikes[]
+  posts                              posts[]
+  profiles                           profiles[]
+  subscriptions                      subscriptions[]
+}
+
+model billinghistory {
+  HistoryID   Int       @id @default(autoincrement())
+  UserID      Int
+  InvoiceID   Int
+  PaymentDate DateTime?
+  Amount      Decimal?  @db.Decimal(10, 2)
+  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+  invoices    invoices  @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict)
+}
+
+model comments {
+  CommentID   Int       @id @default(autoincrement())
+  PostID      Int
+  UserID      Int
+  CommentText String    @db.Text
+  CommentDate DateTime? @default(now())
+  posts       posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict)
+  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+}
+
+model follows {
+  FollowerID                       Int
+  FollowingID                      Int
+  FollowDate                       DateTime? @default(now())
+  users_follows_FollowerIDTousers  users     @relation("follows_FollowerIDTousers", fields: [FollowerID], references: [UserID], onUpdate: Restrict)
+  users_follows_FollowingIDTousers users     @relation("follows_FollowingIDTousers", fields: [FollowingID], references: [UserID], onUpdate: Restrict)
+
+  @@id([FollowerID, FollowingID])
+}
+
+model invoices {
+  InvoiceID      Int              @id @default(autoincrement())
+  SubscriptionID Int
+  TotalAmount    Decimal?         @db.Decimal(10, 2)
+  DateIssued     DateTime?        @default(now())
+  DueDate        DateTime?
+  Status         String?          @db.VarChar(50)
+  billinghistory billinghistory[]
+  subscriptions  subscriptions    @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict)
+  transactions   transactions[]
+}
+
+model paymentmethods {
+  PaymentMethodID Int            @id @default(autoincrement())
+  UserID          Int
+  Provider        String?        @db.VarChar(255)
+  AccountDetails  String?        @db.Text
+  IsDefault       Boolean?       @default(false)
+  users           users          @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+  transactions    transactions[]
+}
+
+model postlikes {
+  PostID   Int
+  UserID   Int
+  LikeDate DateTime? @default(now())
+  posts    posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict)
+  users    users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+
+  @@id([PostID, UserID])
+}
+
+model posts {
+  PostID     Int         @id @default(autoincrement())
+  UserID     Int
+  PostData   String?     @db.Text
+  PostedDate DateTime?   @default(now())
+  comments   comments[]
+  postlikes  postlikes[]
+  users      users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+}
+
+model profiles {
+  ProfileID      Int       @id @default(autoincrement())
+  UserID         Int
+  FullName       String?   @db.VarChar(255)
+  Bio            String?   @db.Text
+  ProfilePicture String?   @db.VarChar(255)
+  DateOfBirth    DateTime? @db.Date
+  Location       String?   @db.VarChar(255)
+  users          users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+}
+
+model subscriptions {
+  SubscriptionID Int         @id @default(autoincrement())
+  UserID         Int
+  ApiID          Int
+  PlanID         Int
+  StartDate      DateTime?
+  EndDate        DateTime?
+  Status         String?     @db.VarChar(50)
+  apikeys        apikeys[]
+  invoices       invoices[]
+  users          users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+}
+
+model transactions {
+  TransactionID   Int             @id @default(autoincrement())
+  InvoiceID       Int
+  Amount          Decimal?        @db.Decimal(10, 2)
+  TransactionDate DateTime?       @default(now())
+  PaymentMethodID Int?
+  Status          String?         @db.VarChar(50)
+  invoices        invoices        @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict)
+  paymentmethods  paymentmethods? @relation(fields: [PaymentMethodID], references: [PaymentMethodID])
+}
+
+model permissions {
+  PermissionID         Int                    @id @default(autoincrement())
+  Name                 String                 @db.VarChar(255)
+  Description          String?                @db.Text
+  moderatorpermissions moderatorpermissions[]
+}
+
+model moderatorpermissions {
+  ModeratorPermissionID Int          @id @default(autoincrement())
+  UserID                Int?
+  PermissionID          Int?
+  users                 users?       @relation(fields: [UserID], references: [UserID])
+  permissions           permissions? @relation(fields: [PermissionID], references: [PermissionID])
+
+  @@index([PermissionID])
+  @@index([UserID])
+}
+
+model apikeys {
+  ApiKeyID       Int            @id @default(autoincrement())
+  SubscriptionID Int
+  ApiKey         String         @unique @db.VarChar(255)
+  CreationDate   DateTime?      @default(now())
+  IsActive       Boolean?       @default(true)
+  subscriptions  subscriptions  @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict)
+}

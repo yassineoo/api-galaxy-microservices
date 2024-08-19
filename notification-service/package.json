@@ -30,6 +30,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/microservices": "^10.3.0",
     "@nestjs/platform-express": "^10.0.0",
+    "axios": "^1.7.2",
     "dotenv": "^16.3.1",
     "ncp": "^2.0.0",
     "nestjs-proto-gen-ts": "^1.0.21",

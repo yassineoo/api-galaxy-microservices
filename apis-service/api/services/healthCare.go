@@ -245,22 +245,23 @@ type ApiHealthStat struct {
 
 
 
-
 func (s *Service) GetApiHealthStats(ctx context.Context, apiIDs []int) ([]ApiHealthStat, error) {
     var stats []ApiHealthStat
 
     for _, apiID := range apiIDs {
         var healthCheckEntity models.HealthCheckEntity
-        if err := s.gormDB.Where("api_id = ?", apiID).First(&healthCheckEntity).Error; err != nil {
-            if err == gorm.ErrRecordNotFound {
+        err := s.gormDB.Where("api_id = ?", apiID).First(&healthCheckEntity).Error
+        if err != nil {
+            if errors.Is(err, gorm.ErrRecordNotFound) {
                 // Handle the case where no HealthCheckEntity exists for the given apiID
                 stats = append(stats, ApiHealthStat{
-                    ApiID:            apiID,
+                    ApiID:              apiID,
                     AverageResponseTime: 0,
-                    Availability:     0,
+                    Availability:       0,
                 })
                 continue
             }
+            // Return any other errors encountered
             return nil, err
         }
 
@@ -289,9 +290,9 @@ func (s *Service) GetApiHealthStats(ctx context.Context, apiIDs []int) ([]ApiHea
         }
 
         stats = append(stats, ApiHealthStat{
-            ApiID:            apiID,
+            ApiID:              apiID,
             AverageResponseTime: averageResponseTime,
-            Availability:     availability,
+            Availability:       availability,
         })
     }
 

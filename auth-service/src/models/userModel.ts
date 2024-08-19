@@ -11,12 +11,18 @@ export default class userModel {
     Image?:string
   }) => {
     try {
-      const user = await prismaClientSingleton.users.create({
+      const user = await prismaClientSingleton.user_entities.create({
         data: {
-          ...data,
-          DateCreated: currentDate.toISOString(),
-          LastLogin: currentDate.toISOString(),
-          IsActive: true,
+          username: data.Username,
+          email: data.Email,
+          password_hash: data.PasswordHash,
+          // phone_number: data.PhoneNumber,
+          image: data.Image,
+
+          date_created: currentDate.toISOString(),
+          last_login: currentDate.toISOString(),
+          is_active: true,
+          role: data.role || "customer",
         },
       });
       return user;
@@ -28,9 +34,9 @@ export default class userModel {
 
   static updateUser = async (id: number, data: any) => {
     try {
-      const updatedUser = await prismaClientSingleton.users.update({
+      const updatedUser = await prismaClientSingleton.user_entities.update({
         where: {
-          UserID: id,
+          id: id,
         },
         data: data,
       });
@@ -43,9 +49,9 @@ export default class userModel {
 
   static getUserById = async (id: number) => {
     try {
-      const user = await prismaClientSingleton.users.findUnique({
+      const user = await prismaClientSingleton.user_entities.findUnique({
         where: {
-          UserID: id,
+          id: id,
         },
       });
       if (!user) {
@@ -63,9 +69,9 @@ export default class userModel {
       if (!email) {
         throw new Error("Email parameter is undefined");
       }
-      const user = await prismaClientSingleton.users.findUnique({
+      const user = await prismaClientSingleton.user_entities.findUnique({
         where: {
-          Email: email,
+          email: email,
         },
       });
       return user;
@@ -80,9 +86,9 @@ export default class userModel {
       if (!phoneNumber) {
         throw new Error("PhoneNumber parameter is undefined");
       }
-      const user = await prismaClientSingleton.users.findUnique({
+      const user = await prismaClientSingleton.user_entities.findUnique({
         where: {
-          PhoneNumber: phoneNumber.toString(),
+          phone_number: phoneNumber.toString(),
         },
       });
 
@@ -95,7 +101,7 @@ export default class userModel {
 
   static getAllUsers = async () => {
     try {
-      const users = await prismaClientSingleton.users.findMany();
+      const users = await prismaClientSingleton.user_entities.findMany();
       if (users.length === 0) {
         console.log("No data found for getAllUsers");
       }
@@ -111,7 +117,7 @@ export default class userModel {
       const transaction = await prismaClientSingleton.$transaction(
         async (prisma: any) => {
           await prisma.profiles.deleteMany({ where: { UserID: id } });
-          await prisma.users.delete({ where: { UserID: id } });
+          await prisma.user_entities.delete({ where: { UserID: id } });
         }
       );
       return transaction;
@@ -123,12 +129,12 @@ export default class userModel {
 
   static setLastLogin = async (id: number) => {
     try {
-      const user = await prismaClientSingleton.users.update({
+      const user = await prismaClientSingleton.user_entities.update({
         where: {
-          UserID: id,
+          id,
         },
         data: {
-          LastLogin: currentDate.toISOString(),
+          last_login: currentDate.toISOString(),
         },
       });
       return user;
@@ -140,19 +146,19 @@ export default class userModel {
 
   static getHashedPassword = async (id: number) => {
     try {
-      const user = await prismaClientSingleton.users.findUnique({
+      const user = await prismaClientSingleton.user_entities.findUnique({
         where: {
-          UserID: id,
+          id,
         },
         select: {
-          PasswordHash: true,
+          password_hash: true,
         },
       });
       if (!user) {
         console.log("No data found for getHashedPassword");
         throw new Error("No data found");
       }
-      return user ? user.PasswordHash : null;
+      return user ? user.password_hash : null;
     } catch (error) {
       console.error("Error in getHashedPassword:", error);
       throw error;

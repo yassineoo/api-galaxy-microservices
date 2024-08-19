@@ -70,7 +70,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
            }
 
     // Category routes
-    categoriesGroup := router.Group("/categories")
+    categoriesGroup := router.Group("/categoriesk")
     {
         categoriesGroup.POST("/", CategoryHandler.CreateCategory)
         categoriesGroup.GET("/", CategoryHandler.GetAllCategories)
@@ -153,7 +153,8 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Println("CORS Middleware");
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+        // I have make a change here from 5000 to 3000
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 
         //c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")

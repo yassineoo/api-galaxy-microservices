@@ -51,8 +51,10 @@ export const Oauthlogin = async (req: Request, res: Response) => {
 */
 
   try {
+    console.log("called from backend")
     const token = await authService.OathUser(req.body);
-      return res.status(statusCodes.ok).send({ ...token });
+    console.log("token",token)
+      return res.status(statusCodes.ok).json({ ...token });
   } catch (error: any) {
     res.status(statusCodes.badRequest).send({ message: error.message });
   }

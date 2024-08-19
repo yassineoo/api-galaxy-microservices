@@ -57,15 +57,15 @@ export default class authService {
 
       // Send confirmation email
       const token = generateEmailToken(
-        user.Email,
-        user.UserID,
+        user.email,
+        Number(user.id),
         emailTokenSecret || "",
         emailTokenExpiry || ""
       );
       const redirect_url = `http://localhost:3000/confirmRegistration?token=${token}`;
-      sendEMail("confirmation of registration", redirect_url, user.Email);
+      sendEMail("confirmation of registration", redirect_url, user.email);
 
-      return { id: user.UserID };
+      return { id: user.id, message: "User created successfully" };
     } catch (error: any) {
       throw error;
     }
@@ -73,11 +73,11 @@ export default class authService {
   static login = async (data: { email: string; password: string }) => {
     try {
       const user = await userModel.getUserByEmail(data.email);
-      if (!user || !user.IsActive) {
+      if (!user || !user.is_active) {
         throw new Error("Email or password is incorrect");
       }
       const dbHashedPassword = (
-        await userModel.getHashedPassword(user.UserID)
+        await userModel.getHashedPassword(Number(user.id))
       )?.toString();
 
       const isMatch = await checkPassword(
@@ -93,17 +93,17 @@ export default class authService {
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
       const { token, expiry } = generateAuthToken(
-        user.UserID,
-        user.Email,
+        Number(user.id),
+        user.email,
         tokenSecret,
         tokenExpiry
       );
 
       return {
-        email: user?.Email,
-        name: user?.Username,
-        userId: user?.UserID,
-        verified: user?.Verified,
+        email: user?.email,
+        name: user?.username,
+        id: user?.id,
+        verified: user?.verified,
         token,
         tokenExpiry: expiry,
       };
@@ -123,30 +123,36 @@ export default class authService {
     let user;
     try {
       user = await userModel.getUserByEmail(data.Email);
-      if (!user || !user.IsActive) {
+      /*console.log("=======================");
+
+      console.log(user);
+      console.log("=======================");
+*/
+      if (!user || !user.is_active) {
         user = await userModel.AddUser({
           Username: data.Username,
           Email: data.Email,
           role: data.role || "Client",
           Image: data.image,
         });
-        userModel.updateUser(user.UserID, { Verified: true });
-      } // Generate the token
+        userModel.updateUser(Number(user.id), { verified: true });
+      }
+       // Generate the token
 
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
-
-      const {expiry,token} = generateAuthToken(
-        user?.UserID,
-        user?.Email!,
+      //console.log( "number is :",Number(user.id))
+      const token = generateAuthToken(
+        Number(user.id),
+        user.email,
         tokenSecret || "",
         tokenExpiry || ""
       );
-      userModel.setLastLogin(user?.UserID!);
+      userModel.setLastLogin(Number(user?.id)!);
       return {
-        email: user?.Email,
-        name: user?.Username,
-        userId: user?.UserID,
+        Email: user?.email,
+        Name: user?.username,
+        userId: Number(user?.id),
         token,
         tokenExpiry
       };
@@ -158,10 +164,10 @@ export default class authService {
   static getSession = async (data: { email: string }) => {
     let user = await userModel.getUserByEmail(data.email);
     return {
-      email: user?.Email,
-      name: user?.Username,
-      id: user?.UserID,
-      verified: user?.Verified,
+      email: user?.email,
+      name: user?.username,
+      id: user?.id,
+      verified: user?.verified,
     };
   };
 
@@ -172,13 +178,13 @@ export default class authService {
     }
     const token = generateEmailToken(
       Email,
-      user.UserID,
+      Number(user.id),
       emailTokenSecret || "",
       emailTokenExpiry || ""
     );
     const message = SendVerificationEmail({
       email: Email,
-      name: user.Username,
+      name: user.username,
       token: token,
     });
     return {
@@ -194,13 +200,13 @@ export default class authService {
     }
     const token = generateEmailToken(
       Email,
-      user.UserID,
+      Number(user.id),
       emailTokenSecret || "",
       emailTokenExpiry || ""
     );
     const message = sendPasswordResetEmail({
       email: Email,
-      name: user.Username,
+      name: user.username,
       token: token,
     });
     return {
@@ -214,7 +220,7 @@ export default class authService {
     if (!user) {
       throw new Error("User not found");
     }
-    return this.sendVerificationEmail(user.Email);
+    return this.sendVerificationEmail(user.email);
   };
 
   static verifyEmail = async (data: any, isEmailProvided: boolean) => {
@@ -234,7 +240,7 @@ export default class authService {
         if (!user) {
           throw new Error("Unknown error");
         }
-        if (user.Email === decodedToken.email) {
+        if (user.email === decodedToken.email) {
           await userModel.updateUser(decodedToken.id, { Verified: true });
           return true;
         }

@@ -1,22 +1,22 @@
 package main
 
 import (
-	"net"
-	"os"
-	"strings"
-
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"local_packages/api"
 	"local_packages/api/services"
 	"local_packages/database"
 	"log"
-	"net/http"
 
 	//"log"
 	//"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/robfig/cron"
 	gorm "gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +35,16 @@ import (
 // @BasePath /
 // @schemes http https
 func main() {
+
+     // Create a log file
+     logFile, err := os.OpenFile("service.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+     if err != nil {
+         log.Fatalf("Failed to open log file: %v", err)
+     }
+     defer logFile.Close()
+ 
+     // Set log output to the file
+     log.SetOutput(logFile) 
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
 	log.Println(" serevet starting ....")
@@ -56,117 +66,111 @@ func main() {
 	swaggerURL := ginSwagger.URL("http://localhost:8088/swagger/doc.json")
 
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
-		// Retrieve IP address and port of the server
-		ip, port := getServerAddress()
-		log.Println("Server IP: %s, Port: %d\n", ip, port)
-		fmt.Printf("Server IP: %s, Port: %d\n", ip, port)
+	
 		
-		// Register service with Kong API Gateway
-		/*
-		err := registerServiceWithKong("echo-server", "192.168.43.10", 8088)
-		if err != nil {
-			log.Fatal(err)
+// Start the server in a separate goroutine
+	port := ":8000"
+	// Start the server
+    // Register service with API Gateway
+	serviceName := "apis-service"
+	serviceVersion := "v1"
+    // I start Comment here 
+    /*
+    serviceName := "apis-service"
+	serviceVersion := "v1"
+	log.Println("Starting service registration...")
+
+	registerService(serviceName, serviceVersion, port)
+	log.Println("Starting service registrationstooooop")
+	*/
+	// I finished here
+	//go func() {
+		if err := router.Run(port); err != nil {
+			log.Fatalf("Failed to run server: %v", err)
 		}
-		*/
+	//}()
+
+	
 
 	// Start the cron job
-	startCronJob(svc)
-		
-	router.Run(":8088")
+	//startCronJob(svc)
+
+	// Handle graceful shutdown
+	handleShutdown(serviceName, serviceVersion, port)
 }
 
+func registerService(serviceName, serviceVersion, port string) {
+   
+    log.Println("Starting service registration...")
+    log.Println("Starting service registration...")
+    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    
+    client := &http.Client{
+        Timeout: 10 * time.Second, // Setting a timeout for the request
+    }
 
-
-
-func startCronJob(svc *services.Service) {
-    c := cron.New()
-
-    // Define your cron job
-    c.AddFunc("@every 59m", func() {
-        // Call the cron job function from your service
-        err := svc.CronJobHealthCheck()
-		log.Println("cron job running ....")
+    for {
+        req, err := http.NewRequest(http.MethodPut, url, nil)
         if err != nil {
-            log.Println("Error running cron job:", err)
+            log.Printf("Failed to create request: %v", err)
+            time.Sleep(15 * time.Second)
+            continue
         }
-    })
 
-    // Start the cron scheduler
-    c.Start()
-}
-
-
-// Function to retrieve the IP address and port of the server
-
-func getServerAddress() (string, int) {
-    // Get the hostname or IP address of the machine
-    hostname, err := os.Hostname()
-    if err != nil {
-        log.Fatalf("Unable to get hostname: %v", err)
-    }
-
-    // Resolve the hostname to an IP address
-    addrs, err := net.LookupIP(hostname)
-    if err != nil {
-        log.Fatalf("Unable to resolve hostname: %v", err)
-    }
-
-    // Use the first non-loopback IP address
-    var ip string
-    for _, addr := range addrs {
-        if !addr.IsLoopback() {
-            ip = addr.String()
+        resp, err := client.Do(req)
+        if err != nil {
+            log.Printf("Failed to register service: %v", err)
+            time.Sleep(15 * time.Second)
+            continue
+        }
+        
+        defer resp.Body.Close()
+        
+        if resp.StatusCode == http.StatusOK {
+            log.Println("Service registered successfully")
             break
+        } else {
+            log.Printf("Failed to register service. Status code: %d", resp.StatusCode)
         }
+        
+        time.Sleep(15 * time.Second)
     }
-
-    if ip == "" {
-        log.Fatal("No non-loopback IP address found")
-    }
-
-    // Get the port number from the running server
-    ln, err := net.Listen("tcp", ":0") // Use a random available port
-    if err != nil {
-        log.Fatalf("Unable to get available port: %v", err)
-    }
-    defer ln.Close()
-
-    port := ln.Addr().(*net.TCPAddr).Port
-
-    return ip, port
 }
-// Function to register the service with the Kong API Gateway
-// Function to register the service with the Kong API Gateway
-func registerServiceWithKong(name string, ip string, port int) error {
-	// Construct the PUT request to the Kong API Gateway's services endpoint
-	payload := fmt.Sprintf(`{"name": "%sno", "url": "http://%s:%d"}`, name, ip, port)
-	req, err := http.NewRequest("PATCH", "http://192.168.43.10:8001/services/example_service", strings.NewReader(payload))
-	//req , err := http.NewRequest("GET", "http://192.168.43.10:8001/services" ,nil)
-	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %v", err)
-	}
-	//log.Println(req)172.17.0.2
+func unregisterService(serviceName, serviceVersion, port string) {
+    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    // Create a new request
+    req, err := http.NewRequest(http.MethodDelete, url, nil)
+    if err != nil {
+        log.Printf("Failed to create request for unregistering service: %v", err)
+        return
+    }
 
-	req.Header.Set("Content-Type", "application/json")
+    // Create a new HTTP client and send the request
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        log.Printf("Failed to unregister service: %v", err)
+        return
+    }
+    defer resp.Body.Close() // Ensure the response body is closed
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %v", err)
-	}
-	defer resp.Body.Close()
+    // Now you can check the StatusCode of the response
+    if resp.StatusCode == http.StatusOK {
+        log.Println("Service unregistered successfully")
+    } else {
+        // It's a good practice to handle unexpected status codes
+        log.Printf("Failed to unregister service, status code: %d", resp.StatusCode)
+    }
+}
 
-	if resp.StatusCode == http.StatusOK {
-		
-		fmt.Println(resp.Body)
-		fmt.Println("Service registered successfully with the Kong API Gateway")
-	} else {
-		fmt.Println("Failed to register service with the Kong API Gateway")
-		// Log the response body for more information
-		log.Printf("Response Body: %s\n", resp.Body)
-		return fmt.Errorf("failed to register service with Kong, status code: %d", resp.StatusCode)
-	}
 
-	return nil
+func handleShutdown(serviceName, serviceVersion, port string) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-c
+		unregisterService(serviceName, serviceVersion, port)
+		os.Exit(0)
+	}()
 }
 
