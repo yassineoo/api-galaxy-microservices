@@ -10,13 +10,9 @@ import { Role } from "../models/enum";
 import {
   SendVerificationEmail,
   sendPasswordResetEmail,
-  verifyPhoneNumber,
 } from "./grpcClient/notifService";
 import userService from "./UAMService";
 import { sendEMail } from "../utils/email";
-import otpModel from "../models/otp";
-import { STATUS_CODES } from "http";
-
 require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
@@ -41,18 +37,18 @@ class ApiError extends Error {
 export default class authService {
   static register = async (data: register, role: Role) => {
     try {
-      const userEmail = await userModel.getUserByEmail(data.email);
+      const {email,password,username} = data
+      const userEmail = await userModel.getUserByEmail(email);
       if (userEmail) {
         throw new ApiError("Email already exists", 409);
       }
 
-      const hashedPassword = (await hashPassword(data.password)).toString();
+      const hashedPassword = (await hashPassword(password)).toString();
       const user = await userModel.AddUser({
-        Username: data.username,
-        Email: data.email,
+        Username: username,
+        Email: email,
         PasswordHash: hashedPassword,
-        role: role,
-        image: "",
+        role: role
       });
 
       if (!user) {
@@ -127,24 +123,25 @@ export default class authService {
     let user;
     try {
       user = await userModel.getUserByEmail(data.Email);
-      console.log("=======================");
+      /*console.log("=======================");
 
       console.log(user);
       console.log("=======================");
-
+*/
       if (!user || !user.is_active) {
         user = await userModel.AddUser({
           Username: data.Username,
           Email: data.Email,
           role: data.role || "Client",
-          image: data.image,
+          Image: data.image,
         });
         userModel.updateUser(Number(user.id), { verified: true });
-      } // Generate the token
+      }
+       // Generate the token
 
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
-
+      //console.log( "number is :",Number(user.id))
       const token = generateAuthToken(
         Number(user.id),
         user.email,
@@ -155,13 +152,12 @@ export default class authService {
       return {
         Email: user?.email,
         Name: user?.username,
-        UserID: user?.id,
+        userId: Number(user?.id),
         token,
+        tokenExpiry
       };
     } catch (error: any) {
-      return {
-        message: error.message,
-      };
+      throw error
     }
   };
 
