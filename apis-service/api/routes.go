@@ -153,12 +153,9 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Println("CORS Middleware");
-<<<<<<< HEAD
         // I have make a change here from 5000 to 3000
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-=======
 		// c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5000")
->>>>>>> main
 
         c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
