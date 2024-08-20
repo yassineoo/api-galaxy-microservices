@@ -37,7 +37,6 @@ type UserEntity struct {
 	Verified      bool                `gorm:"default:false"`
 	Image         string              `gorm:"size:255"`
 	StripeCustomerId         string              `gorm:"size:255"`
-	stripe_customer_id
 	Apis          []ApiEntity         `gorm:"foreignKey:ProviderID"`
 	Likes         []LikeEntity        `gorm:"foreignKey:UserID"`
 	ApiReports    []ApiReportEntity   `gorm:"foreignKey:UserID"`

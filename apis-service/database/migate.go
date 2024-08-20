@@ -12,6 +12,10 @@ import (
 func MigrateDatabase(db *gorm.DB) error {
     log.Println("Migrating database...")
 
+
+
+
+
     err := db.AutoMigrate(
         &models.CategoryEntity{},
         &models.ApiCollectionEntity{},
@@ -42,6 +46,7 @@ func MigrateDatabase(db *gorm.DB) error {
         &models.TransactionEntity{},
         &models.ReviewReportsEntity{},
         &models.ApiReportEntity{},
+        &models.LikeEntity{},
     )
 
     if err != nil {

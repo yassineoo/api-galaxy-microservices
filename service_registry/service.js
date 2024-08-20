@@ -7,7 +7,7 @@ const PORT = 3001;
 const serviceRegisrty = new ServiceRegistry();
 
 service.use((req, res, next) => {
-  console.log(`Hello from service registry: ${req.method} ${req.url}`);
+  //console.log(`Hello from service registry: ${req.method} ${req.url}`);
   next();
 });
 
