@@ -1,6 +1,10 @@
 package models
 
 import (
+<<<<<<< HEAD
+=======
+	"local_packages/typesglobale"
+>>>>>>> main
 	"time"
 	"local_packages/typesglobale"
 )
@@ -36,6 +40,10 @@ type UserEntity struct {
 	PhoneNumber   string              `gorm:"size:20;unique"`
 	Verified      bool                `gorm:"default:false"`
 	Image         string              `gorm:"size:255"`
+<<<<<<< HEAD
+=======
+	StripeCustomerId         string              `gorm:"size:255"`
+>>>>>>> main
 	Apis          []ApiEntity         `gorm:"foreignKey:ProviderID"`
 	Likes         []LikeEntity        `gorm:"foreignKey:UserID"`
 	ApiReports    []ApiReportEntity   `gorm:"foreignKey:UserID"`
@@ -70,6 +78,12 @@ type ApiEntity struct {
 	User                UserEntity            `gorm:"foreignKey:ProviderID"`
 	Likes               []LikeEntity          `gorm:"foreignKey:ApiID"`
 	ApiReports          []ApiReportEntity     `gorm:"foreignKey:ApiID"`
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> main
 }
 
 // LikeEntity represents the LikeEntities table
@@ -212,6 +226,10 @@ type PlanEntity struct {
 	RateUnite      string
 	RecomndedPlan  bool
 	Price          float64               `gorm:"type:decimal(10,2)"`
+<<<<<<< HEAD
+=======
+	StripePriceId string                `gorm:"size:255"`
+>>>>>>> main
 	Subscriptions  []SubscriptionEntity  `gorm:"foreignKey:PlanID"`
 }
 
@@ -255,6 +273,10 @@ type SubscriptionEntity struct {
 	EndDate        time.Time
 	UsedCalls      int                   // Number of calls used
 	Status         string                `gorm:"size:50"`
+<<<<<<< HEAD
+=======
+	StripeSubId string					 `gorm:"size:255"`
+>>>>>>> main
 	UsageLogs      []UsageLogEntity      `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
 	Plan           PlanEntity            `gorm:"foreignKey:PlanID"`
 }
@@ -278,6 +300,10 @@ type InvoiceEntity struct {
 	DateIssued      time.Time               `gorm:"default:current_timestamp"`
 	DueDate         time.Time
 	Status          string                  `gorm:"type:varchar(50)"`
+<<<<<<< HEAD
+=======
+	StripeInvoiceId string                  `gorm:"type:varchar(255)"`
+>>>>>>> main
 	BillingHistory  []BillingHistoryEntity  `gorm:"foreignKey:InvoiceID"`
 	Subscription    SubscriptionEntity      `gorm:"foreignKey:SubscriptionID;constraint:OnUpdate:RESTRICT"`
 	Transactions    []TransactionEntity     `gorm:"foreignKey:InvoiceID"`
@@ -289,6 +315,10 @@ type PaymentMethodEntity struct {
 	UserID          uint
 	Provider        string                  `gorm:"type:varchar(255)"`
 	AccountDetails  string                  `gorm:"type:text"`
+<<<<<<< HEAD
+=======
+	StripePaymentMethodId  string                  `gorm:"type:varchar(255)"`
+>>>>>>> main
 	IsDefault       bool                    `gorm:"default:false"`
 	User            UserEntity              `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
 	Transactions    []TransactionEntity     `gorm:"foreignKey:PaymentMethodID"`

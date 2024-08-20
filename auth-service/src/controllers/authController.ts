@@ -11,7 +11,7 @@ export const signup = (role: string) => {
   return async (req: Request, res: Response) => {
     try {
       const tokenData = await authService.register(req.body, role as Role);
-        return res.status(statusCodes.ok).json(tokenData);
+      return res.status(statusCodes.ok).json(tokenData);
     } catch (error: any) {
       const { message, statusCode = statusCodes.badRequest } = error;
       return res.status(statusCode).json({ message });
@@ -20,15 +20,6 @@ export const signup = (role: string) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  /*const { error } = UAuthValidator.loginSchema.validate(req.body);
-    if (error) {
-        console.log(error)
-        res.status(statusCodes.badRequest).send(error.details[0].message);
-        return;
-    }
-    console.log(req.body)
-*/
-
   try {
     const token = await authService.login(req.body);
     if (!token.message) {
@@ -42,19 +33,11 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const Oauthlogin = async (req: Request, res: Response) => {
-  /* const { error } = UAuthValidator.loginSchema.validate(req.body);
-    if (error) {
-        console.log(error)
-        res.status(statusCodes.badRequest).send(error.details[0].message);
-        return;
-    }
-*/
-
   try {
-    console.log("called from backend")
+    console.log("called from backend");
     const token = await authService.OathUser(req.body);
-    console.log("token",token)
-      return res.status(statusCodes.ok).json({ ...token });
+    console.log("token", token);
+    return res.status(statusCodes.ok).json({ ...token });
   } catch (error: any) {
     res.status(statusCodes.badRequest).send({ message: error.message });
   }

@@ -21,7 +21,8 @@ app.use((req, res, next) => {
 async function fetchServiceUrlFromRegistry(servicename, serviceversion) {
   try {
     const response = await axios.get(
-      `http://localhost:3001/find/${servicename}/${serviceversion}`
+      //   `http://localhost:3001/find/${servicename}/${serviceversion}`
+      `http://service-registry:3001/find/${servicename}/${serviceversion}`
     );
     return response.data; // Assuming the response is a single service URL
   } catch (error) {
@@ -38,7 +39,7 @@ const services = [
     version: "v1",
     path: "/notifications-service",
   },
-  { name: "stats-service", version: "v1", path: "/stats-service" },
+  { name: "statistics-service", version: "v1", path: "/stats-service" },
   { name: "users", version: "v1", path: "/users" },
   { name: "notifications", version: "v1", path: "/notifications" },
   { name: "abonnements", version: "v1", path: "/abonnements" },
@@ -52,7 +53,8 @@ async function createServiceProxy(service) {
     service.version
   );
   if (serviceInfo) {
-    let serviceIp = serviceInfo.ip;
+    //let serviceIp = serviceInfo.ip;
+    let serviceIp = service.name;
     const port = serviceInfo.port !== ":8000" ? serviceInfo.port : "8000";
 
     // if (serviceIp === "[::1]") {

@@ -7,161 +7,330 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  UserID                             Int                    @id @default(autoincrement())
-  Username                           String                 @db.VarChar(255)
-  Email                              String                 @unique @db.VarChar(255)
-  PasswordHash                       String?                @db.VarChar(60)
-  DateCreated                        DateTime?              @default(now())
-  LastLogin                          DateTime?
-  IsActive                           Boolean?               @default(true)
-  IsTwoFactor                        Boolean?               @default(false)
-  role                               String?                @db.VarChar(50)
-  PhoneNumber                        String?                @unique @db.VarChar(20)
-  Verified                           Boolean?               @default(false)
-  Image                              String?                @db.VarChar(255)
-  billinghistory                     billinghistory[]
-  comments                           comments[]
-  follows_follows_FollowerIDTousers  follows[]              @relation("follows_FollowerIDTousers")
-  follows_follows_FollowingIDTousers follows[]              @relation("follows_FollowingIDTousers")
-  moderatorpermissions               moderatorpermissions[]
-  paymentmethods                     paymentmethods[]
-  postlikes                          postlikes[]
-  posts                              posts[]
-  profiles                           profiles[]
-  subscriptions                      subscriptions[]
+model api_collection_entities {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  description          String?
+  image_path           String?
+  api_collections_apis api_collections_apis[]
 }
 
-model billinghistory {
-  HistoryID   Int       @id @default(autoincrement())
-  UserID      Int
-  InvoiceID   Int
-  PaymentDate DateTime?
-  Amount      Decimal?  @db.Decimal(10, 2)
-  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
-  invoices    invoices  @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict)
+model api_collections_apis {
+  api_entity_id            BigInt
+  api_collection_entity_id BigInt
+  api_collection_entities  api_collection_entities @relation(fields: [api_collection_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_collection_entity")
+  api_entities             api_entities            @relation(fields: [api_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_entity")
+
+  @@id([api_entity_id, api_collection_entity_id])
 }
 
-model comments {
-  CommentID   Int       @id @default(autoincrement())
-  PostID      Int
-  UserID      Int
-  CommentText String    @db.Text
-  CommentDate DateTime? @default(now())
-  posts       posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict)
-  users       users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+model api_docs_entities {
+  id           BigInt       @id @default(autoincrement())
+  api_id       BigInt
+  content      String?
+  last_updated DateTime?    @default(now()) @db.Timestamptz(6)
+  api_entities api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_docs")
 }
 
-model follows {
-  FollowerID                       Int
-  FollowingID                      Int
-  FollowDate                       DateTime? @default(now())
-  users_follows_FollowerIDTousers  users     @relation("follows_FollowerIDTousers", fields: [FollowerID], references: [UserID], onUpdate: Restrict)
-  users_follows_FollowingIDTousers users     @relation("follows_FollowingIDTousers", fields: [FollowingID], references: [UserID], onUpdate: Restrict)
-
-  @@id([FollowerID, FollowingID])
+model api_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  provider_id              BigInt
+  name                     String                     @db.VarChar(255)
+  image_path               String?
+  description              String?
+  category_id              BigInt?
+  status                   String?                    @default("active") @db.VarChar(20)
+  date_created             DateTime?                  @default(now()) @db.Timestamptz(6)
+  last_updated             DateTime?                  @db.Timestamptz(6)
+  date_deleted             DateTime?                  @db.Timestamptz(6)
+  keywords                 String?
+  api_url                  String?
+  visibility               Boolean?                   @default(false)
+  api_collections_apis     api_collections_apis[]
+  api_docs_entities        api_docs_entities[]
+  category_entities        category_entities?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_entities_apis")
+  user_entities            user_entities              @relation(fields: [provider_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_entities_apis")
+  api_review_entities      api_review_entities[]
+  api_version_entities     api_version_entities[]
+  endpoints_group_entities endpoints_group_entities[]
+  health_check_entities    health_check_entities?
+  like_entities            like_entities[]
+  object_plan_entities     object_plan_entities[]
+  plan_entities            plan_entities[]
 }
 
-model invoices {
-  InvoiceID      Int              @id @default(autoincrement())
-  SubscriptionID Int
-  TotalAmount    Decimal?         @db.Decimal(10, 2)
-  DateIssued     DateTime?        @default(now())
-  DueDate        DateTime?
-  Status         String?          @db.VarChar(50)
-  billinghistory billinghistory[]
-  subscriptions  subscriptions    @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict)
-  transactions   transactions[]
+model api_key_entities {
+  id              BigInt        @id @default(autoincrement())
+  subscription_id BigInt
+  api_key         String        @unique @db.VarChar(255)
+  creation_date   DateTime?     @default(now()) @db.Timestamptz(6)
+  is_active       Boolean?      @default(true)
+  user_id         BigInt
+  api_key_id      BigInt        @default(autoincrement())
+  user_entities   user_entities @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_key_entities_user")
 }
 
-model paymentmethods {
-  PaymentMethodID Int            @id @default(autoincrement())
-  UserID          Int
-  Provider        String?        @db.VarChar(255)
-  AccountDetails  String?        @db.Text
-  IsDefault       Boolean?       @default(false)
-  users           users          @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
-  transactions    transactions[]
+model api_version_entities {
+  id             BigInt       @id @default(autoincrement())
+  api_id         BigInt
+  version_number String       @db.VarChar(255)
+  release_date   DateTime?    @db.Timestamptz(6)
+  whats_new      String?
+  api_entities   api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_versions")
 }
 
-model postlikes {
-  PostID   Int
-  UserID   Int
-  LikeDate DateTime? @default(now())
-  posts    posts     @relation(fields: [PostID], references: [PostID], onDelete: Cascade, onUpdate: Restrict)
-  users    users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
-
-  @@id([PostID, UserID])
+model body_param_entities {
+  id                 BigInt             @id @default(autoincrement())
+  endpoint_id        BigInt
+  content_type       String             @db.VarChar(255)
+  text_body          String?
+  media_file_id      BigInt?
+  endpoints_entities endpoints_entities @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_body_param")
 }
 
-model posts {
-  PostID     Int         @id @default(autoincrement())
-  UserID     Int
-  PostData   String?     @db.Text
-  PostedDate DateTime?   @default(now())
-  comments   comments[]
-  postlikes  postlikes[]
-  users      users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+model category_entities {
+  id            BigInt         @id @default(autoincrement())
+  category_name String         @db.VarChar(255)
+  description   String?
+  api_entities  api_entities[]
 }
 
-model profiles {
-  ProfileID      Int       @id @default(autoincrement())
-  UserID         Int
-  FullName       String?   @db.VarChar(255)
-  Bio            String?   @db.Text
-  ProfilePicture String?   @db.VarChar(255)
-  DateOfBirth    DateTime? @db.Date
-  Location       String?   @db.VarChar(255)
-  users          users     @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+model cross_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  limit_fee            BigInt?
+  limit_type           String?
+  price                Decimal?             @db.Decimal(10, 2)
+  quota_type           String?
+  quota_value          BigInt?
+  add                  Boolean?             @default(false)
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_cross")
 }
 
-model subscriptions {
-  SubscriptionID Int         @id @default(autoincrement())
-  UserID         Int
-  ApiID          Int
-  PlanID         Int
-  StartDate      DateTime?
-  EndDate        DateTime?
-  Status         String?     @db.VarChar(50)
-  apikeys        apikeys[]
-  invoices       invoices[]
-  users          users       @relation(fields: [UserID], references: [UserID], onUpdate: Restrict)
+model endpoint_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  endpoints_id         BigInt
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_endpoint_list")
 }
 
-model transactions {
-  TransactionID   Int             @id @default(autoincrement())
-  InvoiceID       Int
-  Amount          Decimal?        @db.Decimal(10, 2)
-  TransactionDate DateTime?       @default(now())
-  PaymentMethodID Int?
-  Status          String?         @db.VarChar(50)
-  invoices        invoices        @relation(fields: [InvoiceID], references: [InvoiceID], onUpdate: Restrict)
-  paymentmethods  paymentmethods? @relation(fields: [PaymentMethodID], references: [PaymentMethodID])
+model endpoints_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  group_id                     BigInt
+  methode                      String                         @db.VarChar(255)
+  url                          String                         @db.VarChar(255)
+  description                  String?
+  name                         String?                        @db.VarChar(255)
+  body_param_entities          body_param_entities[]
+  endpoints_group_entities     endpoints_group_entities       @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_group_entities_endpoints")
+  endpoints_parameter_entities endpoints_parameter_entities[]
+  health_check_entities        health_check_entities[]
+  usage_log_entities           usage_log_entities[]
 }
 
-model permissions {
-  PermissionID         Int                    @id @default(autoincrement())
-  Name                 String                 @db.VarChar(255)
-  Description          String?                @db.Text
-  moderatorpermissions moderatorpermissions[]
+model endpoints_group_entities {
+  id                 BigInt               @id @default(autoincrement())
+  group              String?
+  api_id             BigInt
+  description        String?
+  endpoints_entities endpoints_entities[]
+  api_entities       api_entities         @relation(fields: [api_id], references: [id], onDelete: Cascade, map: "fk_api_entities_groups")
 }
 
-model moderatorpermissions {
-  ModeratorPermissionID Int          @id @default(autoincrement())
-  UserID                Int?
-  PermissionID          Int?
-  users                 users?       @relation(fields: [UserID], references: [UserID])
-  permissions           permissions? @relation(fields: [PermissionID], references: [PermissionID])
-
-  @@index([PermissionID])
-  @@index([UserID])
+model endpoints_parameter_entities {
+  id                 BigInt              @id @default(autoincrement())
+  endpoint_id        BigInt?
+  key                String              @db.VarChar(255)
+  value_type         String?             @db.VarChar(255)
+  parameter_type     String?             @db.VarChar(255)
+  example_value      String?             @db.VarChar(255)
+  required           Boolean?            @default(false)
+  endpoints_entities endpoints_entities? @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_parameters")
 }
 
-model apikeys {
-  ApiKeyID       Int            @id @default(autoincrement())
-  SubscriptionID Int
-  ApiKey         String         @unique @db.VarChar(255)
-  CreationDate   DateTime?      @default(now())
-  IsActive       Boolean?       @default(true)
-  subscriptions  subscriptions  @relation(fields: [SubscriptionID], references: [SubscriptionID], onUpdate: Restrict)
+model health_check_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  api_id                       BigInt                         @unique
+  schedule                     String?                        @db.VarChar(50)
+  last_status                  String?                        @default("pending") @db.VarChar(20)
+  last_checked_at              DateTime?                      @db.Timestamptz(6)
+  alerts_enabled               Boolean?
+  endpoint_id                  BigInt
+  email                        String?
+  api_entities                 api_entities                   @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_health_check")
+  endpoints_entities           endpoints_entities             @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_health_check")
+  health_check_result_entities health_check_result_entities[]
+}
+
+model health_check_result_entities {
+  id                    BigInt                @id @default(autoincrement())
+  health_check_id       BigInt
+  status                String                @db.VarChar(20)
+  response_time         BigInt?
+  status_message        String?
+  checked_at            DateTime?             @default(now()) @db.Timestamptz(6)
+  health_check_entities health_check_entities @relation(fields: [health_check_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_health_check_entities_results")
+}
+
+model object_plan_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  api_id                   BigInt
+  name                     String                     @db.VarChar(255)
+  description              String?
+  all_endpoints            Boolean?
+  cross_object_entities    cross_object_entities[]
+  endpoint_object_entities endpoint_object_entities[]
+  api_entities             api_entities               @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_object_plan")
+}
+
+model plan_entities {
+  id                    BigInt                  @id @default(autoincrement())
+  api_id                BigInt
+  name                  String                  @db.VarChar(255)
+  active                Boolean?
+  visibility            Boolean?
+  type                  String?
+  rate                  BigInt?
+  rate_unite            String?
+  recomnded_plan        Boolean?
+  price                 Decimal?                @db.Decimal(10, 2)
+  api_entities          api_entities            @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_plans")
+  subscription_entities subscription_entities[]
+}
+
+model subscription_entities {
+  id                 BigInt               @id @default(autoincrement())
+  user_id            BigInt
+  plan_id            BigInt
+  start_date         DateTime?            @db.Timestamptz(6)
+  end_date           DateTime?            @db.Timestamptz(6)
+  used_calls         BigInt?
+  status             String?              @db.VarChar(50)
+  invoice_entities   invoice_entities[]
+  plan_entities      plan_entities        @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscription_entities_plan")
+  usage_log_entities usage_log_entities[]
+}
+
+model usage_log_entities {
+  id                    BigInt                @id @default(autoincrement())
+  subscription_id       BigInt
+  timestamp             DateTime?             @default(now()) @db.Timestamptz(6)
+  endpoint_id           BigInt
+  status                BigInt?
+  response_time         BigInt?
+  endpoints_entities    endpoints_entities    @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_logs")
+  subscription_entities subscription_entities @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscription_entities_usage_logs")
+}
+
+model api_review_entities {
+  id            BigInt        @id @default(autoincrement())
+  api_id        BigInt
+  user_id       BigInt
+  rating        BigInt
+  comment       String?
+  date_rated    DateTime?     @default(now()) @db.Timestamptz(6)
+  api_entities  api_entities  @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_reviews")
+  user_entities user_entities @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_review_entities_user")
+}
+
+model billing_history_entities {
+  id               BigInt            @id @default(autoincrement())
+  user_id          BigInt?
+  invoice_id       BigInt?
+  payment_date     DateTime?         @db.Timestamptz(6)
+  amount           Decimal?          @db.Decimal(10, 2)
+  user_entities    user_entities?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_billing_history_entities_user")
+  invoice_entities invoice_entities? @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_billing_history")
+}
+
+model invoice_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  subscription_id          BigInt?
+  total_amount             Decimal?                   @db.Decimal(10, 2)
+  date_issued              DateTime?                  @default(now()) @db.Timestamptz(6)
+  due_date                 DateTime?                  @db.Timestamptz(6)
+  status                   String?                    @db.VarChar(50)
+  billing_history_entities billing_history_entities[]
+  subscription_entities    subscription_entities?     @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_invoice_entities_subscription")
+  transaction_entities     transaction_entities[]
+}
+
+model like_entities {
+  id            BigInt         @id @default(autoincrement())
+  user_id       BigInt?
+  api_id        BigInt?
+  api_entities  api_entities?  @relation(fields: [api_id], references: [id], onDelete: Cascade)
+  user_entities user_entities? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, api_id])
+}
+
+model moderator_permission_entities {
+  id                  BigInt               @id @default(autoincrement())
+  user_id             BigInt?
+  permission_id       BigInt?
+  user_entities       user_entities?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_moderator_permission_entities_user")
+  permission_entities permission_entities? @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permission_entities_moderator_permissions")
+}
+
+model payment_method_entities {
+  id                   BigInt                 @id @default(autoincrement())
+  user_id              BigInt?
+  provider             String?                @db.VarChar(255)
+  account_details      String?
+  is_default           Boolean?               @default(false)
+  user_entities        user_entities?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_payment_method_entities_user")
+  transaction_entities transaction_entities[]
+}
+
+model permission_entities {
+  id                            BigInt                          @id @default(autoincrement())
+  name                          String?                         @db.VarChar(255)
+  description                   String?
+  moderator_permission_entities moderator_permission_entities[]
+}
+
+model profile_entities {
+  id              BigInt         @id @default(autoincrement())
+  user_id         BigInt?
+  full_name       String?        @db.VarChar(255)
+  bio             String?
+  profile_picture String?        @db.VarChar(255)
+  date_of_birth   DateTime?      @db.Date
+  location        String?        @db.VarChar(255)
+  user_entities   user_entities? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_profile_entities_user")
+}
+
+model transaction_entities {
+  id                      BigInt                   @id @default(autoincrement())
+  invoice_id              BigInt?
+  amount                  Decimal?                 @db.Decimal(10, 2)
+  transaction_date        DateTime?                @default(now()) @db.Timestamptz(6)
+  payment_method_id       BigInt?
+  status                  String?                  @db.VarChar(50)
+  invoice_entities        invoice_entities?        @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_transactions")
+  payment_method_entities payment_method_entities? @relation(fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_method_entities_transactions")
+}
+
+model user_entities {
+  id                            BigInt                          @id @default(autoincrement())
+  username                      String                          @db.VarChar(255)
+  email                         String                          @unique @db.VarChar(255)
+  password_hash                 String?                         @db.VarChar(60)
+  date_created                  DateTime?                       @default(now()) @db.Timestamptz(6)
+  last_login                    DateTime?                       @db.Timestamptz(6)
+  is_active                     Boolean?                        @default(true)
+  is_two_factor                 Boolean?                        @default(false)
+  role                          String?                         @db.VarChar(50)
+  phone_number                  String?                         @unique @db.VarChar(20)
+  verified                      Boolean?                        @default(false)
+  image                         String?                         @db.VarChar(255)
+  api_entities                  api_entities[]
+  api_key_entities              api_key_entities[]
+  api_review_entities           api_review_entities[]
+  billing_history_entities      billing_history_entities[]
+  like_entities                 like_entities[]
+  moderator_permission_entities moderator_permission_entities[]
+  payment_method_entities       payment_method_entities[]
+  profile_entities              profile_entities[]
 }
