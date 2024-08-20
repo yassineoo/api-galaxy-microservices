@@ -40,6 +40,8 @@ func MigrateDatabase(db *gorm.DB) error {
         &models.PaymentMethodEntity{},
         &models.BillingHistoryEntity{},
         &models.TransactionEntity{},
+        &models.ReviewReportsEntity{},
+        &models.ApiReportEntity{},
     )
 
     if err != nil {
