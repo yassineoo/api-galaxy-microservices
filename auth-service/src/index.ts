@@ -32,8 +32,14 @@ app.use((req, res, next) => {
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/", authRouter);
+app.get("/hello",(req,res)=>res.send("hello"))
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
+const port = 7000
+app.listen(port,()=>{
+  console.log("auth service server is running on port 7000")
+})
+/*
 const server = http.createServer(app);
 const envConfig = config["development"];
 const log = envConfig.log();
@@ -104,3 +110,4 @@ server.on("listening", () => {
     } in ${app.get("env")} mode.`
   );
 });
+*/
