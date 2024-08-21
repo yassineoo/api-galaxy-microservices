@@ -2,7 +2,6 @@
 **/node_modules/
 
 # Ignore specific service directories (if necessary)
-user-service/**
 notification-service/node_modules/
 apis-service/pkg/
 api-gateway/node_modules/
