@@ -1,5 +1,5 @@
 {
-  "name": "stats-service",
+  "name": "statistics-service",
   "version": "v1",
   "description": "",
   "main": "index.js",

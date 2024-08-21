@@ -4,6 +4,7 @@
 # Ignore specific service directories (if necessary)
 notification-service/node_modules/
 apis-service/pkg/
+apis-service/tmp/
 api-gateway/node_modules/
 auth-service/node_modules/
 service_registry/node_modules/

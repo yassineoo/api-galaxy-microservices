@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
-import {handleErrors} from "./utils/errorHandler"
+import { handleErrors } from "./utils/errorHandler";
 import http from "http";
 require("dotenv").config();
 const app = express();
-import config from "./utils/config"
+import config from "./utils/config";
 import { userApiRouter } from "./routes/apiRoute";
+import axios from "axios";
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -18,39 +19,33 @@ app.use(cors({ origin: true, credentials: true }));
 
 // Add this line to parse JSON bodies
 app.use(express.json());
-app.use("/userApi",userApiRouter)
 app.use((req, res, next) => {
   console.log(`API Gateway received: ${req.method} ${req.url}`);
   next();
 });
+app.use("/userApi", userApiRouter);
 
-
-app.use(handleErrors)
-const port = process.env.PORT
-app.listen(port,()=>{
-    console.log(`user service server is running on port ${port}`)
-})
-
+app.use(handleErrors);
 
 const server = http.createServer(app);
 const envConfig = config["development"];
 const log = envConfig.log();
 
-// Important - a service should not have a fixed port but should randomly choose one
-/*
-server.listen(process.env.PORT || 2000,()=>{
-    console.log(`user-service server is running on port ${process.env.PORT}`)
-});
-*/
+const port = 7002;
 
-/*
+// Important - a service should not have a fixed port but should randomly choose one
+
+server.listen(7002);
+// Important - a service should not have a fixed port but should randomly choose one
+
 server.on("listening", () => {
   const addr = server.address();
-  const PORT = typeof addr === "string" ? addr : addr?.port;
+  const PORT = 7002;
   const registerService = () =>
     axios
       .put(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
+          //        `http://localhost:3001/register/${envConfig.serviceName}/${
           envConfig.version
         }/${
           //  server?.address()?.port ||
@@ -62,7 +57,8 @@ server.on("listening", () => {
   const unregisterService = () =>
     axios
       .delete(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
+          //        `http://localhost:3001/register/${envConfig.serviceName}/${
           envConfig.version
         }/${
           //  server?.address()?.port ||
@@ -105,4 +101,3 @@ server.on("listening", () => {
     } in ${app.get("env")} mode.`
   );
 });
-*/

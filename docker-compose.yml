@@ -18,6 +18,15 @@ services:
       - "7000:7000"
     environment:
       - NODE_ENV=development
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    depends_on:
+      - service-registry
+    ports:
+      - "7002:7002"
+    environment:
+      - NODE_ENV=development
 
   statistics-service:
     build: ./stat-service

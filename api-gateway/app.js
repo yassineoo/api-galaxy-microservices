@@ -40,7 +40,7 @@ const services = [
     path: "/notifications-service",
   },
   { name: "statistics-service", version: "v1", path: "/stats-service" },
-  { name: "users", version: "v1", path: "/users" },
+  { name: "user-service", version: "v1", path: "/user-service" },
   { name: "notifications", version: "v1", path: "/notifications" },
   { name: "abonnements", version: "v1", path: "/abonnements" },
   { name: "paiements", version: "v1", path: "/paiements" },
@@ -52,6 +52,8 @@ async function createServiceProxy(service) {
     service.name,
     service.version
   );
+  console.log(`serviceInfo  for ${service.name} is : ${serviceInfo}`);
+
   if (serviceInfo) {
     //let serviceIp = serviceInfo.ip;
     let serviceIp = service.name;
@@ -102,7 +104,7 @@ app.get("/services/:name", async (req, res) => {
   try {
     const serviceInfo = await fetchServiceUrlFromRegistry(name, "v1");
     if (serviceInfo) {
-      const serviceUrl = `http://${serviceInfo.ip}:${serviceInfo.port}`;
+      const serviceUrl = `http://${name}:${serviceInfo.port}`;
       res.status(200).json(serviceUrl);
     }
   } catch (error) {
