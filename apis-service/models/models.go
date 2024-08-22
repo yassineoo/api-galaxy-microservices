@@ -39,6 +39,7 @@ type UserEntity struct {
 	PhoneNumber   string    `gorm:"size:20;unique"`
 	Verified      bool      `gorm:"default:false"`
 	Image         string    `gorm:"size:255"`
+	StripeCustomerID string  `gorm:"size:255"`
 	// Add the billinghistory relation when it's defined
 	 Apis []ApiEntity `gorm:"foreignKey:ProviderID"`
 }
@@ -225,6 +226,7 @@ type PlanEntity struct {
 	RateUnite      string
 	RecomndedPlan  bool
 	Price          float64 `gorm:"type:decimal(10,2)"`
+	StripePriceID  string  `gorm:"size:255"`
 	Subscriptions  []SubscriptionEntity `gorm:"foreignKey:PlanID"`
 }
 
@@ -273,6 +275,7 @@ type SubscriptionEntity struct {
 	EndDate   time.Time
 	UsedCalls  int    // Number of calls used
 	Status    string           `gorm:"size:50"`
+	StripeSubID     string `gorm:"size:255"`
 	UsageLogs []UsageLogEntity `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
 	Plan     PlanEntity `gorm:"foreignKey:PlanID"`
 
@@ -301,6 +304,7 @@ type InvoiceEntity struct {
 	DateIssued     time.Time            `gorm:"default:current_timestamp"`
 	DueDate        time.Time
 	Status         string               `gorm:"type:varchar(50)"`
+	StripeInvoiceID string             `gorm:"size:255"`
 	BillingHistory []BillingHistoryEntity `gorm:"foreignKey:InvoiceID"`
 	Subscription   SubscriptionEntity     `gorm:"foreignKey:SubscriptionID;constraint:OnUpdate:RESTRICT"`
 	Transactions   []TransactionEntity    `gorm:"foreignKey:InvoiceID"`
@@ -312,6 +316,7 @@ type PaymentMethodEntity struct {
 	Provider        string               `gorm:"type:varchar(255)"`
 	AccountDetails  string               `gorm:"type:text"`
 	IsDefault       bool                 `gorm:"default:false"`
+	StripePaymentMethodID string         `gorm:"size:255"`
 	User            UserEntity           `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
 	Transactions    []TransactionEntity  `gorm:"foreignKey:PaymentMethodID"`
 }
