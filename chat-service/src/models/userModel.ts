@@ -1,4 +1,4 @@
-import { prismaClientSingleton } from "../utils/prisma";
+import { prismaClientSingleton } from "../utils/prismaClient";
 import { ID } from "../validators/chats/_common";
 const currentDate: Date = new Date();
 
@@ -170,28 +170,22 @@ export default class userModel {
     try {
       const user = await prismaClientSingleton.user_entities.findUnique({
         where: {
-          id,
+          id
         },
         select: {
           id: true,
-          email: true,
-        },
-      });
+          email: true
+        }
+      })
 
       if (!user || !user.email || !user.id) return false;
-      return true;
+      return true
     } catch (error) {
       console.error("Error in isUserExist:", error);
-      if (error instanceof Error) throw error;
-      if (typeof error === "string") throw new Error(error);
-      if (
-        error &&
-        typeof error === "object" &&
-        "message" in error &&
-        typeof error.message === "string"
-      )
-        throw new Error(error.message);
-      throw new Error("Internal Server Error");
+      if (error instanceof Error) throw error
+      if (typeof error === 'string') throw new Error(error)
+      if (error && typeof error === "object" && "message" in error && typeof error.message === "string") throw new Error(error.message)
+      throw new Error("Internal Server Error")
     }
-  };
+  }
 }
