@@ -7,6 +7,11 @@ const app = express();
 import config from "./utils/config";
 import { userApiRouter } from "./routes/apiRoute";
 import axios from "axios";
+import ChatsGateway from "./routes/chats/chats.gateway";
+
+import { Server } from "socket.io";
+import ChatroomsRouter from "./routes/chats/chatrooms.routes";
+
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -24,6 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/userApi", userApiRouter);
+app.use("/chatrooms", ChatroomsRouter);
 
 app.use(handleErrors);
 
@@ -32,6 +38,12 @@ const envConfig = config["development"];
 const log = envConfig.log();
 
 const port = 7002;
+
+const chatsGateway = new ChatsGateway();
+
+chatsGateway.attatchServer(server);
+
+chatsGateway.initListeners();
 
 // Important - a service should not have a fixed port but should randomly choose one
 
