@@ -1,6 +1,14 @@
-notification-service/node_modules
-apis-service/pkg
-api-gateway/node_modules
-auth-service/node_modules
-service_registry/node_modules
-stats-service/node_modules
+# Ignore node_modules in all directories
+**/node_modules/
+
+# Ignore specific service directories (if necessary)
+notification-service/node_modules/
+apis-service/pkg/
+apis-service/tmp/
+api-gateway/node_modules/
+auth-service/node_modules/
+service_registry/node_modules/
+stats-service/node_modules/
+
+# General patterns (if needed)
+node_modules/**

@@ -11,6 +11,10 @@ require("dotenv").config();
 const app = express();
 import config from "./utils/config";
 
+const server = http.createServer(app);
+const envConfig = config["development"];
+const log = envConfig.log();
+
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -32,17 +36,10 @@ app.use((req, res, next) => {
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/", authRouter);
-app.get("/hello",(req,res)=>res.send("hello"))
+app.get("/hello", (req, res) => res.send("hello"));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-const port = 7000
-app.listen(port,()=>{
-  console.log("auth service server is running on port 7000")
-})
-/*
-const server = http.createServer(app);
-const envConfig = config["development"];
-const log = envConfig.log();
+const port = 7000;
 
 // Important - a service should not have a fixed port but should randomly choose one
 
@@ -54,7 +51,8 @@ server.on("listening", () => {
   const registerService = () =>
     axios
       .put(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
+        //  `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
           envConfig.version
         }/${
           //  server?.address()?.port ||
