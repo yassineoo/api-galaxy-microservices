@@ -1,26 +1,29 @@
-# Use an official Node.js runtime as a parent image
-FROM node:20-alpine
+# Dockerfile
 
-# Set the working directory inside the container
+# Step 1: Use an appropriate Node.js image
+FROM node:20.16.0-alpine
+
+# Step 2: Set the working directory
 WORKDIR /app
 
-# Install pnpm globally
-RUN npm install -g pnpm
+# Step 3: Copy the package.json and package-lock.json (if you have one)
+COPY package.json ./
+COPY pnpm-lock.yaml ./
 
-# Copy the package.json and pnpm-lock.yaml to the working directory
-COPY package.json pnpm-lock.yaml ./
+# Step 4: Install the dependencies
+RUN npm install
 
-# Install dependencies
-RUN pnpm install
-
-# Copy the rest of the application files
+# Step 5: Copy the rest of your application code
 COPY . .
 
-# Build the NestJS application
-RUN pnpm build
+# Step 6: Run Prisma generate
+RUN npx prisma generate
 
-# Expose the application port
-EXPOSE 7004
+# Step 7: Build the application
+RUN npm run build
 
-# Command to run the application
-CMD ["pnpm", "start:prod"]
+# Step 8: Expose the port the app runs on
+EXPOSE 8088
+
+# Step 9: Start the application
+CMD ["npm", "run", "start"]

@@ -34,17 +34,10 @@ export const login = async (req: Request, res: Response) => {
 
 export const Oauthlogin = async (req: Request, res: Response) => {
   try {
-<<<<<<< HEAD
-    console.log("called from backend")
-    const token = await authService.OathUser(req.body);
-    console.log("token",token)
-      return res.status(statusCodes.ok).json({ ...token });
-=======
     console.log("called from backend");
     const token = await authService.OathUser(req.body);
     console.log("token", token);
     return res.status(statusCodes.ok).json({ ...token });
->>>>>>> 4b181f5396d54ed40342175d97b994cd7c6dcfbf
   } catch (error: any) {
     res.status(statusCodes.badRequest).send({ message: error.message });
   }

@@ -41,6 +41,8 @@ type UserEntity struct {
 	Likes         []LikeEntity        `gorm:"foreignKey:UserID"`
 	ApiReports    []ApiReportEntity   `gorm:"foreignKey:UserID"`
 	ReviewReports []ReviewReportsEntity `gorm:"foreignKey:UserID"`
+	Settings          []SettingsEntity         `gorm:"foreignKey:AdminID"`
+	Notifications    []NotificationEntity `gorm:"foreignKey:RecipientID"`
 }
 
 // ApiEntity represents the Apis table
@@ -83,6 +85,17 @@ type LikeEntity struct {
 	ApiID   int       `gorm:"null"`
 	Api     ApiEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	User    UserEntity `gorm:"foreignKey:UserID;onDelete:CASCADE"`
+}
+
+
+type SettingsEntity struct {
+    ID                 int        `gorm:"primaryKey;autoIncrement"`
+	AdminID        int                   `gorm:"not null"`
+    EarningPercentage  *float32   `gorm:"type:real"`                   // Corresponds to `Float? @db.Real`
+    TermsAndConditions  *string    `gorm:"type:text"`                   // Corresponds to `String?`
+    PrivacyAndPolicy   *string    `gorm:"type:text"`                   // Corresponds to `String?`
+    UpdatedAt          time.Time   `gorm:"default:CURRENT_TIMESTAMP"` // Corresponds to `DateTime? @db.Timestamptz(6) @default(now())`
+	User                UserEntity            `gorm:"foreignKey:AdminID"`
 }
 
 // ApiDocsEntity represents the ApiDocsEntities table
@@ -362,4 +375,15 @@ type ApiKeyEntity struct {
 	CreationDate    time.Time               `gorm:"default:current_timestamp"`
 	IsActive        bool                    `gorm:"default:true"`
 	User            UserEntity              `gorm:"foreignKey:UserID"`
+}
+
+
+// add notification 
+type NotificationEntity struct {
+    ID           int            `gorm:"primaryKey;autoIncrement;column:id"`
+    RecipientID  *int64         `gorm:"column:recipient_id"`   // Nullable BigInt equivalent
+    Title        *string        `gorm:"column:title"`          // Nullable String equivalent
+    Message      *string        `gorm:"column:message"`        // Nullable String equivalent
+	IsRead      bool                `gorm:"default:true"`
+    UserEntity   *UserEntity    `gorm:"foreignKey:RecipientID;constraint:onUpdate:CASCADE,onDelete:CASCADE;references:ID"`
 }
