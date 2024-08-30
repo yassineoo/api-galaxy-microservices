@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/@types/json-schema/package.json",
+  "name": "bpm-service",
+  "version": "1.0.0",
+  "description": "a service for billing and payment management",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "@types/express": "^4.17.21",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "joi": "^17.12.2",
+    "nodemon": "^3.1.4",
+    "prisma": "^5.10.2",
+    "stripe": "^14.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
