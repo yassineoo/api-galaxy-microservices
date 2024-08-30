@@ -9,6 +9,8 @@ const PORT = 5000;
 app.use(cors({ origin: "*" }));
 app.use(cors({ origin: true, credentials: true }));
 
+
+
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
