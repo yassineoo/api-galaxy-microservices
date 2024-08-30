@@ -160,4 +160,53 @@ export default class APIModel {
         throw error
       }
     }
+
+    static async updateAPI(api_id:number,dataToChange:any){
+      try {
+        const updated = await prismaClientSingleton.api_entities.update({
+          where:{
+            id:api_id
+          },
+          data:dataToChange
+        })
+        console.log(updated)
+        return updated
+      } catch (error) {
+        throw error
+      }
+    }
+
+    static async getInactiveAPIS(){
+      try {
+        const res= await prismaClientSingleton.api_entities.findMany({
+          where:{
+            status:"inactive"
+          }
+        })
+        const finalRes = JSON.stringify(res,(key,value)=>
+          typeof value == "bigint" ? value.toString() : value
+        )
+        return res.length ? finalRes : []
+      } catch (error) {
+        throw error
+      }
+    }
+
+
+    static async getSettings(){
+      try {
+        const settings = await prismaClientSingleton.settings_entities.findFirst({
+         orderBy:{
+          updated_at:"desc"
+         }
+        })
+        const jsonString = JSON.stringify(settings,(key,value)=>
+        
+        typeof value == "bigint" ? value.toString() : value
+      )
+      return jsonString
+      } catch (error) {
+        throw error
+      }
+    }
 }

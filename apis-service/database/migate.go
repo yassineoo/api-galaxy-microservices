@@ -47,6 +47,7 @@ func MigrateDatabase(db *gorm.DB) error {
         &models.ReviewReportsEntity{},
         &models.ApiReportEntity{},
         &models.LikeEntity{},
+        &models.SettingsEntity{},
     )
 
     if err != nil {
