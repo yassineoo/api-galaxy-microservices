@@ -123,7 +123,6 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-
 	api, err := h.service.GetOne(c, id)
 	if err != nil {
 		// Log the actual error

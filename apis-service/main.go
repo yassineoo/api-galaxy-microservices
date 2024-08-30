@@ -76,7 +76,13 @@ func main() {
 	serviceVersion := "v1"
 	log.Println("Starting service registration...")
 
-	registerService(serviceName, serviceVersion, port)
+	// Register the service every 15 seconds
+    go func() {
+        for {
+            registerService(serviceName, serviceVersion, port)
+            time.Sleep(15 * time.Second)
+        }
+    }()
 	log.Println("Starting service registrationstooooop")
 	
 	
@@ -99,7 +105,8 @@ func registerService(serviceName, serviceVersion, port string) {
    
     log.Println("Starting service registration...")
     log.Println("Starting service registration...")
-    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    url := fmt.Sprintf("http://service-registry:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+   // url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
     
     client := &http.Client{
         Timeout: 10 * time.Second, // Setting a timeout for the request
@@ -133,7 +140,9 @@ func registerService(serviceName, serviceVersion, port string) {
     }
 }
 func unregisterService(serviceName, serviceVersion, port string) {
-    url := fmt.Sprintf("http://localhost:3001/register/%s/%s/%s", serviceName, serviceVersion, port)
+    
+    //url := fmt.Sprintf("http://localhost:3001/unregister/%s/%s/%s", serviceName, serviceVersion, port)
+    url := fmt.Sprintf("http://service-registry:3001/unregister/%s/%s/%s", serviceName, serviceVersion, port)
     // Create a new request
     req, err := http.NewRequest(http.MethodDelete, url, nil)
     if err != nil {

@@ -3,21 +3,22 @@ import swaggerUi from "swagger-ui-express";
 import cors from "cors";
 import axios from "axios";
 import http from "http";
-import statRouter from "./routes/statRouter";
+
+import EndpointsStatsRouter from "./presentation/endpoints-stats/endpoints-stats.router";
+import ApisStatsRouter from "./presentation/api-stats/api-stats.router";
 
 import { specs } from "./utils/swagger";
 require("dotenv").config();
 const app = express();
+
 import config from "./utils/config";
 
 app.use(express.json());
-app.use(
-  express.urlencoded({
-    extended: true,
-  })
-);
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors());
-app.use("/stats", statRouter);
+app.use("/stats/endpoints", EndpointsStatsRouter);
+app.use("/stats/apis", ApisStatsRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 const server = http.createServer(app);
@@ -26,7 +27,7 @@ const log = envConfig.log();
 
 // Important - a service should not have a fixed port but should randomly choose one
 
-server.listen(0);
+server.listen(7001);
 console.log("log port", process.env.PORT);
 
 server.on("listening", () => {
@@ -36,7 +37,8 @@ server.on("listening", () => {
   const registerService = () =>
     axios
       .put(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
+        //  `http://localhost:3001/register/${envConfig.serviceName}/${
+        `http://service-registry:3001/register/${envConfig.serviceName}/${
           envConfig.version
         }/${
           //  server?.address()?.port ||
