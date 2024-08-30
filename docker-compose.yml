@@ -32,8 +32,20 @@ services:
       - "7002:7002"
     environment:
       - NODE_ENV=development
+
     networks:
       - app-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    depends_on:
+      - service-registry
+    ports:
+      - "7004:7004"
+    environment:
+      - NODE_ENV=development
+
 
   statistics-service:
     build: ./stat-service
