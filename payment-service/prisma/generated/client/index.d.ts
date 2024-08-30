@@ -129,8 +129,8 @@ export type usage_log_entities = $Result.DefaultSelection<Prisma.$usage_log_enti
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
  */
 export class PrismaClient<
-  T extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof T ? T['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<T['log']> : never : never,
+  ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -150,7 +150,7 @@ export class PrismaClient<
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
-  constructor(optionsArg ?: Prisma.Subset<T, Prisma.PrismaClientOptions>);
+  constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
   $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
 
   /**
@@ -216,6 +216,7 @@ export class PrismaClient<
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
 
+
   /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
    * @example
@@ -234,7 +235,7 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<'extends', Prisma.TypeMapCb, ExtArgs>
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs>
 
       /**
    * `prisma.api_collection_entities`: Exposes CRUD operations for the **api_collection_entities** model.
@@ -492,8 +493,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 5.10.2
-   * Query Engine version: 5a9203d0590c951969e85a7d07215503f4672eb9
+   * Prisma Client JS version: 5.19.0
+   * Query Engine version: 5fe21811a6ba0b952a3bc71400666511fe3b902f
    */
   export type PrismaVersion = {
     client: string
@@ -505,51 +506,13 @@ export namespace Prisma {
    * Utility Types
    */
 
-  /**
-   * From https://github.com/sindresorhus/type-fest/
-   * Matches a JSON object.
-   * This type can be useful to enforce some input to be JSON-compatible or as a super-type to be extended from. 
-   */
-  export type JsonObject = {[Key in string]?: JsonValue}
 
-  /**
-   * From https://github.com/sindresorhus/type-fest/
-   * Matches a JSON array.
-   */
-  export interface JsonArray extends Array<JsonValue> {}
-
-  /**
-   * From https://github.com/sindresorhus/type-fest/
-   * Matches any valid JSON value.
-   */
-  export type JsonValue = string | number | boolean | JsonObject | JsonArray | null
-
-  /**
-   * Matches a JSON object.
-   * Unlike `JsonObject`, this type allows undefined and read-only properties.
-   */
-  export type InputJsonObject = {readonly [Key in string]?: InputJsonValue | null}
-
-  /**
-   * Matches a JSON array.
-   * Unlike `JsonArray`, readonly arrays are assignable to this type.
-   */
-  export interface InputJsonArray extends ReadonlyArray<InputJsonValue | null> {}
-
-  /**
-   * Matches any valid value that can be used as an input for operations like
-   * create and update as the value of a JSON field. Unlike `JsonValue`, this
-   * type allows read-only arrays and read-only object properties and disallows
-   * `null` at the top level.
-   *
-   * `null` cannot be used as the value of a JSON field because its meaning
-   * would be ambiguous. Use `Prisma.JsonNull` to store the JSON null value or
-   * `Prisma.DbNull` to clear the JSON value and set the field to the database
-   * NULL value instead.
-   *
-   * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
-   */
-  export type InputJsonValue = string | number | boolean | InputJsonObject | InputJsonArray | { toJSON(): unknown }
+  export import JsonObject = runtime.JsonObject
+  export import JsonArray = runtime.JsonArray
+  export import JsonValue = runtime.JsonValue
+  export import InputJsonObject = runtime.InputJsonObject
+  export import InputJsonArray = runtime.InputJsonArray
+  export import InputJsonValue = runtime.InputJsonValue
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
@@ -620,6 +583,11 @@ export namespace Prisma {
     include: any
   }
 
+  type SelectAndOmit = {
+    select: any
+    omit: any
+  }
+
   /**
    * Get the type of the value, that the Promise holds.
    */
@@ -668,7 +636,9 @@ export namespace Prisma {
   } &
     (T extends SelectAndInclude
       ? 'Please either choose `select` or `include`.'
-      : {})
+      : T extends SelectAndOmit
+        ? 'Please either choose `select` or `omit`.'
+        : {})
 
   /**
    * Subset + Intersection
@@ -934,79 +904,82 @@ export namespace Prisma {
     db?: Datasource
   }
 
-
-  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs}, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs']>
+  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: 'api_collection_entities' | 'api_collections_apis' | 'api_docs_entities' | 'api_entities' | 'api_key_entities' | 'api_rating_entities' | 'api_version_entities' | 'body_param_entities' | 'category_entities' | 'cross_object_entities' | 'endpoint_object_entities' | 'endpoints_entities' | 'endpoints_group_entities' | 'endpoints_parameter_entities' | 'health_check_entities' | 'health_check_result_entities' | 'object_plan_entities' | 'plan_entities' | 'subscription_entities' | 'usage_log_entities'
+      modelProps: "api_collection_entities" | "api_collections_apis" | "api_docs_entities" | "api_entities" | "api_key_entities" | "api_rating_entities" | "api_version_entities" | "body_param_entities" | "category_entities" | "cross_object_entities" | "endpoint_object_entities" | "endpoints_entities" | "endpoints_group_entities" | "endpoints_parameter_entities" | "health_check_entities" | "health_check_result_entities" | "object_plan_entities" | "plan_entities" | "subscription_entities" | "usage_log_entities"
       txIsolationLevel: Prisma.TransactionIsolationLevel
-    },
+    }
     model: {
       api_collection_entities: {
         payload: Prisma.$api_collection_entitiesPayload<ExtArgs>
         fields: Prisma.api_collection_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_collection_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_collection_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_collection_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_collection_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_collection_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_collection_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_collection_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collection_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_collection_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_collection_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           update: {
-            args: Prisma.api_collection_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_collection_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collection_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_collection_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collection_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_collection_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collection_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_collection_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_collection_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_collection_entities>
           }
           groupBy: {
-            args: Prisma.api_collection_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_collection_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_collection_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_collection_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_collection_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1016,63 +989,67 @@ export namespace Prisma {
         fields: Prisma.api_collections_apisFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_collections_apisFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_collections_apisFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_collections_apisFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_collections_apisFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           findFirst: {
-            args: Prisma.api_collections_apisFindFirstArgs<ExtArgs>,
+            args: Prisma.api_collections_apisFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_collections_apisFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_collections_apisFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           findMany: {
-            args: Prisma.api_collections_apisFindManyArgs<ExtArgs>,
+            args: Prisma.api_collections_apisFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>[]
           }
           create: {
-            args: Prisma.api_collections_apisCreateArgs<ExtArgs>,
+            args: Prisma.api_collections_apisCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           createMany: {
-            args: Prisma.api_collections_apisCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collections_apisCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_collections_apisCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>[]
           }
           delete: {
-            args: Prisma.api_collections_apisDeleteArgs<ExtArgs>,
+            args: Prisma.api_collections_apisDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           update: {
-            args: Prisma.api_collections_apisUpdateArgs<ExtArgs>,
+            args: Prisma.api_collections_apisUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           deleteMany: {
-            args: Prisma.api_collections_apisDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collections_apisDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_collections_apisUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_collections_apisUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_collections_apisUpsertArgs<ExtArgs>,
+            args: Prisma.api_collections_apisUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_collections_apisPayload>
           }
           aggregate: {
-            args: Prisma.Api_collections_apisAggregateArgs<ExtArgs>,
+            args: Prisma.Api_collections_apisAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_collections_apis>
           }
           groupBy: {
-            args: Prisma.api_collections_apisGroupByArgs<ExtArgs>,
+            args: Prisma.api_collections_apisGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_collections_apisGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_collections_apisCountArgs<ExtArgs>,
+            args: Prisma.api_collections_apisCountArgs<ExtArgs>
             result: $Utils.Optional<Api_collections_apisCountAggregateOutputType> | number
           }
         }
@@ -1082,63 +1059,67 @@ export namespace Prisma {
         fields: Prisma.api_docs_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_docs_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_docs_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_docs_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_docs_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_docs_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_docs_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_docs_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_docs_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_docs_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_docs_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           update: {
-            args: Prisma.api_docs_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_docs_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_docs_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_docs_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_docs_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_docs_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_docs_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_docs_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_docs_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_docs_entities>
           }
           groupBy: {
-            args: Prisma.api_docs_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_docs_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_docs_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_docs_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_docs_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1148,63 +1129,67 @@ export namespace Prisma {
         fields: Prisma.api_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           update: {
-            args: Prisma.api_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_entities>
           }
           groupBy: {
-            args: Prisma.api_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1214,63 +1199,67 @@ export namespace Prisma {
         fields: Prisma.api_key_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_key_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_key_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_key_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_key_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_key_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_key_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_key_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_key_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_key_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_key_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           update: {
-            args: Prisma.api_key_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_key_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_key_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_key_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_key_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_key_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_key_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_key_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_key_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_key_entities>
           }
           groupBy: {
-            args: Prisma.api_key_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_key_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_key_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_key_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_key_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1280,63 +1269,67 @@ export namespace Prisma {
         fields: Prisma.api_rating_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_rating_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_rating_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_rating_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_rating_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_rating_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_rating_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_rating_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_rating_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_rating_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_rating_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           update: {
-            args: Prisma.api_rating_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_rating_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_rating_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_rating_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_rating_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_rating_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_rating_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_rating_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_rating_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_rating_entities>
           }
           groupBy: {
-            args: Prisma.api_rating_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_rating_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_rating_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_rating_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_rating_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1346,63 +1339,67 @@ export namespace Prisma {
         fields: Prisma.api_version_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.api_version_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.api_version_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.api_version_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.api_version_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           findMany: {
-            args: Prisma.api_version_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>[]
           }
           create: {
-            args: Prisma.api_version_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           createMany: {
-            args: Prisma.api_version_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_version_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.api_version_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.api_version_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           update: {
-            args: Prisma.api_version_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.api_version_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_version_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.api_version_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.api_version_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.api_version_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$api_version_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Api_version_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Api_version_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateApi_version_entities>
           }
           groupBy: {
-            args: Prisma.api_version_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Api_version_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.api_version_entitiesCountArgs<ExtArgs>,
+            args: Prisma.api_version_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Api_version_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1412,63 +1409,67 @@ export namespace Prisma {
         fields: Prisma.body_param_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.body_param_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.body_param_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.body_param_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.body_param_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           findMany: {
-            args: Prisma.body_param_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>[]
           }
           create: {
-            args: Prisma.body_param_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           createMany: {
-            args: Prisma.body_param_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.body_param_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.body_param_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.body_param_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           update: {
-            args: Prisma.body_param_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.body_param_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.body_param_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.body_param_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.body_param_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.body_param_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$body_param_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Body_param_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Body_param_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateBody_param_entities>
           }
           groupBy: {
-            args: Prisma.body_param_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Body_param_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.body_param_entitiesCountArgs<ExtArgs>,
+            args: Prisma.body_param_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Body_param_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1478,63 +1479,67 @@ export namespace Prisma {
         fields: Prisma.category_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.category_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.category_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.category_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.category_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.category_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.category_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.category_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.category_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           findMany: {
-            args: Prisma.category_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.category_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>[]
           }
           create: {
-            args: Prisma.category_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.category_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           createMany: {
-            args: Prisma.category_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.category_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.category_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.category_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.category_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           update: {
-            args: Prisma.category_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.category_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.category_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.category_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.category_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.category_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.category_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.category_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$category_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Category_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Category_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateCategory_entities>
           }
           groupBy: {
-            args: Prisma.category_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.category_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Category_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.category_entitiesCountArgs<ExtArgs>,
+            args: Prisma.category_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Category_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1544,63 +1549,67 @@ export namespace Prisma {
         fields: Prisma.cross_object_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.cross_object_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.cross_object_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.cross_object_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.cross_object_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           findMany: {
-            args: Prisma.cross_object_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>[]
           }
           create: {
-            args: Prisma.cross_object_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           createMany: {
-            args: Prisma.cross_object_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.cross_object_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.cross_object_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.cross_object_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           update: {
-            args: Prisma.cross_object_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.cross_object_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.cross_object_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.cross_object_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.cross_object_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.cross_object_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$cross_object_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Cross_object_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Cross_object_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateCross_object_entities>
           }
           groupBy: {
-            args: Prisma.cross_object_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Cross_object_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.cross_object_entitiesCountArgs<ExtArgs>,
+            args: Prisma.cross_object_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Cross_object_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1610,63 +1619,67 @@ export namespace Prisma {
         fields: Prisma.endpoint_object_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.endpoint_object_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.endpoint_object_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.endpoint_object_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.endpoint_object_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           findMany: {
-            args: Prisma.endpoint_object_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>[]
           }
           create: {
-            args: Prisma.endpoint_object_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           createMany: {
-            args: Prisma.endpoint_object_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoint_object_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.endpoint_object_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.endpoint_object_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           update: {
-            args: Prisma.endpoint_object_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.endpoint_object_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoint_object_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.endpoint_object_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoint_object_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.endpoint_object_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoint_object_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Endpoint_object_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Endpoint_object_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateEndpoint_object_entities>
           }
           groupBy: {
-            args: Prisma.endpoint_object_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Endpoint_object_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.endpoint_object_entitiesCountArgs<ExtArgs>,
+            args: Prisma.endpoint_object_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Endpoint_object_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1676,63 +1689,67 @@ export namespace Prisma {
         fields: Prisma.endpoints_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.endpoints_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.endpoints_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.endpoints_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.endpoints_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           findMany: {
-            args: Prisma.endpoints_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>[]
           }
           create: {
-            args: Prisma.endpoints_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           createMany: {
-            args: Prisma.endpoints_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.endpoints_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.endpoints_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           update: {
-            args: Prisma.endpoints_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.endpoints_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.endpoints_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.endpoints_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Endpoints_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Endpoints_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateEndpoints_entities>
           }
           groupBy: {
-            args: Prisma.endpoints_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.endpoints_entitiesCountArgs<ExtArgs>,
+            args: Prisma.endpoints_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1742,63 +1759,67 @@ export namespace Prisma {
         fields: Prisma.endpoints_group_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.endpoints_group_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.endpoints_group_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.endpoints_group_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.endpoints_group_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           findMany: {
-            args: Prisma.endpoints_group_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>[]
           }
           create: {
-            args: Prisma.endpoints_group_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           createMany: {
-            args: Prisma.endpoints_group_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_group_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.endpoints_group_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.endpoints_group_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           update: {
-            args: Prisma.endpoints_group_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.endpoints_group_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_group_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.endpoints_group_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_group_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.endpoints_group_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_group_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Endpoints_group_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Endpoints_group_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateEndpoints_group_entities>
           }
           groupBy: {
-            args: Prisma.endpoints_group_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_group_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.endpoints_group_entitiesCountArgs<ExtArgs>,
+            args: Prisma.endpoints_group_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_group_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1808,63 +1829,67 @@ export namespace Prisma {
         fields: Prisma.endpoints_parameter_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.endpoints_parameter_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.endpoints_parameter_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.endpoints_parameter_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.endpoints_parameter_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           findMany: {
-            args: Prisma.endpoints_parameter_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>[]
           }
           create: {
-            args: Prisma.endpoints_parameter_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           createMany: {
-            args: Prisma.endpoints_parameter_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_parameter_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.endpoints_parameter_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.endpoints_parameter_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           update: {
-            args: Prisma.endpoints_parameter_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.endpoints_parameter_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_parameter_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.endpoints_parameter_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.endpoints_parameter_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.endpoints_parameter_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$endpoints_parameter_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Endpoints_parameter_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Endpoints_parameter_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateEndpoints_parameter_entities>
           }
           groupBy: {
-            args: Prisma.endpoints_parameter_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_parameter_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.endpoints_parameter_entitiesCountArgs<ExtArgs>,
+            args: Prisma.endpoints_parameter_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Endpoints_parameter_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1874,63 +1899,67 @@ export namespace Prisma {
         fields: Prisma.health_check_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.health_check_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.health_check_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.health_check_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.health_check_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           findMany: {
-            args: Prisma.health_check_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>[]
           }
           create: {
-            args: Prisma.health_check_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           createMany: {
-            args: Prisma.health_check_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.health_check_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.health_check_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           update: {
-            args: Prisma.health_check_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.health_check_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.health_check_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.health_check_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Health_check_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Health_check_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateHealth_check_entities>
           }
           groupBy: {
-            args: Prisma.health_check_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Health_check_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.health_check_entitiesCountArgs<ExtArgs>,
+            args: Prisma.health_check_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Health_check_entitiesCountAggregateOutputType> | number
           }
         }
@@ -1940,63 +1969,67 @@ export namespace Prisma {
         fields: Prisma.health_check_result_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.health_check_result_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.health_check_result_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.health_check_result_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.health_check_result_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           findMany: {
-            args: Prisma.health_check_result_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>[]
           }
           create: {
-            args: Prisma.health_check_result_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           createMany: {
-            args: Prisma.health_check_result_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_result_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.health_check_result_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.health_check_result_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           update: {
-            args: Prisma.health_check_result_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.health_check_result_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_result_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.health_check_result_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.health_check_result_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.health_check_result_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$health_check_result_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Health_check_result_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Health_check_result_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateHealth_check_result_entities>
           }
           groupBy: {
-            args: Prisma.health_check_result_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Health_check_result_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.health_check_result_entitiesCountArgs<ExtArgs>,
+            args: Prisma.health_check_result_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Health_check_result_entitiesCountAggregateOutputType> | number
           }
         }
@@ -2006,63 +2039,67 @@ export namespace Prisma {
         fields: Prisma.object_plan_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.object_plan_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.object_plan_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.object_plan_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.object_plan_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           findMany: {
-            args: Prisma.object_plan_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>[]
           }
           create: {
-            args: Prisma.object_plan_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           createMany: {
-            args: Prisma.object_plan_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.object_plan_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.object_plan_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.object_plan_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           update: {
-            args: Prisma.object_plan_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.object_plan_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.object_plan_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.object_plan_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.object_plan_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.object_plan_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$object_plan_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Object_plan_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Object_plan_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateObject_plan_entities>
           }
           groupBy: {
-            args: Prisma.object_plan_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Object_plan_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.object_plan_entitiesCountArgs<ExtArgs>,
+            args: Prisma.object_plan_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Object_plan_entitiesCountAggregateOutputType> | number
           }
         }
@@ -2072,63 +2109,67 @@ export namespace Prisma {
         fields: Prisma.plan_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.plan_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.plan_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.plan_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.plan_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.plan_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.plan_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.plan_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.plan_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           findMany: {
-            args: Prisma.plan_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.plan_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>[]
           }
           create: {
-            args: Prisma.plan_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.plan_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           createMany: {
-            args: Prisma.plan_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.plan_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.plan_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.plan_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.plan_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           update: {
-            args: Prisma.plan_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.plan_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.plan_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.plan_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.plan_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.plan_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.plan_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.plan_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$plan_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Plan_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Plan_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregatePlan_entities>
           }
           groupBy: {
-            args: Prisma.plan_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.plan_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Plan_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.plan_entitiesCountArgs<ExtArgs>,
+            args: Prisma.plan_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Plan_entitiesCountAggregateOutputType> | number
           }
         }
@@ -2138,63 +2179,67 @@ export namespace Prisma {
         fields: Prisma.subscription_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.subscription_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.subscription_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.subscription_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.subscription_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           findMany: {
-            args: Prisma.subscription_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>[]
           }
           create: {
-            args: Prisma.subscription_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           createMany: {
-            args: Prisma.subscription_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.subscription_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.subscription_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.subscription_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           update: {
-            args: Prisma.subscription_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.subscription_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.subscription_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.subscription_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.subscription_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.subscription_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$subscription_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Subscription_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Subscription_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateSubscription_entities>
           }
           groupBy: {
-            args: Prisma.subscription_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Subscription_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.subscription_entitiesCountArgs<ExtArgs>,
+            args: Prisma.subscription_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Subscription_entitiesCountAggregateOutputType> | number
           }
         }
@@ -2204,63 +2249,67 @@ export namespace Prisma {
         fields: Prisma.usage_log_entitiesFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.usage_log_entitiesFindUniqueArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesFindUniqueArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.usage_log_entitiesFindUniqueOrThrowArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesFindUniqueOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           findFirst: {
-            args: Prisma.usage_log_entitiesFindFirstArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesFindFirstArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.usage_log_entitiesFindFirstOrThrowArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesFindFirstOrThrowArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           findMany: {
-            args: Prisma.usage_log_entitiesFindManyArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesFindManyArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>[]
           }
           create: {
-            args: Prisma.usage_log_entitiesCreateArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesCreateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           createMany: {
-            args: Prisma.usage_log_entitiesCreateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.usage_log_entitiesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.usage_log_entitiesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>[]
           }
           delete: {
-            args: Prisma.usage_log_entitiesDeleteArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           update: {
-            args: Prisma.usage_log_entitiesUpdateArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesUpdateArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           deleteMany: {
-            args: Prisma.usage_log_entitiesDeleteManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.usage_log_entitiesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
           }
           updateMany: {
-            args: Prisma.usage_log_entitiesUpdateManyArgs<ExtArgs>,
-            result: Prisma.BatchPayload
+            args: Prisma.usage_log_entitiesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
           }
           upsert: {
-            args: Prisma.usage_log_entitiesUpsertArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$usage_log_entitiesPayload>
           }
           aggregate: {
-            args: Prisma.Usage_log_entitiesAggregateArgs<ExtArgs>,
+            args: Prisma.Usage_log_entitiesAggregateArgs<ExtArgs>
             result: $Utils.Optional<AggregateUsage_log_entities>
           }
           groupBy: {
-            args: Prisma.usage_log_entitiesGroupByArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesGroupByArgs<ExtArgs>
             result: $Utils.Optional<Usage_log_entitiesGroupByOutputType>[]
           }
           count: {
-            args: Prisma.usage_log_entitiesCountArgs<ExtArgs>,
+            args: Prisma.usage_log_entitiesCountArgs<ExtArgs>
             result: $Utils.Optional<Usage_log_entitiesCountAggregateOutputType> | number
           }
         }
@@ -2270,15 +2319,11 @@ export namespace Prisma {
     other: {
       payload: any
       operations: {
-        $executeRawUnsafe: {
-          args: [query: string, ...values: any[]],
-          result: any
-        }
         $executeRaw: {
           args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
           result: any
         }
-        $queryRawUnsafe: {
+        $executeRawUnsafe: {
           args: [query: string, ...values: any[]],
           result: any
         }
@@ -2286,10 +2331,14 @@ export namespace Prisma {
           args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
           result: any
         }
+        $queryRawUnsafe: {
+          args: [query: string, ...values: any[]],
+          result: any
+        }
       }
     }
   }
-  export const defineExtension: $Extensions.ExtendsHook<'define', Prisma.TypeMapCb, $Extensions.DefaultArgs>
+  export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
   export type DefaultPrismaClient = PrismaClient
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
@@ -2334,6 +2383,7 @@ export namespace Prisma {
     }
   }
 
+
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
   export type LogDefinition = {
@@ -2370,6 +2420,7 @@ export namespace Prisma {
     | 'findFirstOrThrow'
     | 'create'
     | 'createMany'
+    | 'createManyAndReturn'
     | 'update'
     | 'updateMany'
     | 'upsert'
@@ -2432,7 +2483,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Api_collection_entitiesCountOutputType without action
    */
@@ -2443,14 +2493,12 @@ export namespace Prisma {
     select?: Api_collection_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Api_collection_entitiesCountOutputType without action
    */
   export type Api_collection_entitiesCountOutputTypeCountApi_collections_apisArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: api_collections_apisWhereInput
   }
-
 
 
   /**
@@ -2478,7 +2526,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Api_entitiesCountOutputType without action
    */
@@ -2489,14 +2536,12 @@ export namespace Prisma {
     select?: Api_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Api_entitiesCountOutputType without action
    */
   export type Api_entitiesCountOutputTypeCountApi_collections_apisArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: api_collections_apisWhereInput
   }
-
 
   /**
    * Api_entitiesCountOutputType without action
@@ -2505,14 +2550,12 @@ export namespace Prisma {
     where?: api_docs_entitiesWhereInput
   }
 
-
   /**
    * Api_entitiesCountOutputType without action
    */
   export type Api_entitiesCountOutputTypeCountApi_rating_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: api_rating_entitiesWhereInput
   }
-
 
   /**
    * Api_entitiesCountOutputType without action
@@ -2521,14 +2564,12 @@ export namespace Prisma {
     where?: api_version_entitiesWhereInput
   }
 
-
   /**
    * Api_entitiesCountOutputType without action
    */
   export type Api_entitiesCountOutputTypeCountEndpoints_group_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: endpoints_group_entitiesWhereInput
   }
-
 
   /**
    * Api_entitiesCountOutputType without action
@@ -2537,14 +2578,12 @@ export namespace Prisma {
     where?: object_plan_entitiesWhereInput
   }
 
-
   /**
    * Api_entitiesCountOutputType without action
    */
   export type Api_entitiesCountOutputTypeCountPlan_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: plan_entitiesWhereInput
   }
-
 
 
   /**
@@ -2560,7 +2599,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Category_entitiesCountOutputType without action
    */
@@ -2571,14 +2609,12 @@ export namespace Prisma {
     select?: Category_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Category_entitiesCountOutputType without action
    */
   export type Category_entitiesCountOutputTypeCountApi_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: api_entitiesWhereInput
   }
-
 
 
   /**
@@ -2598,7 +2634,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Endpoints_entitiesCountOutputType without action
    */
@@ -2609,14 +2644,12 @@ export namespace Prisma {
     select?: Endpoints_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Endpoints_entitiesCountOutputType without action
    */
   export type Endpoints_entitiesCountOutputTypeCountBody_param_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: body_param_entitiesWhereInput
   }
-
 
   /**
    * Endpoints_entitiesCountOutputType without action
@@ -2625,14 +2658,12 @@ export namespace Prisma {
     where?: endpoints_parameter_entitiesWhereInput
   }
 
-
   /**
    * Endpoints_entitiesCountOutputType without action
    */
   export type Endpoints_entitiesCountOutputTypeCountUsage_log_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: usage_log_entitiesWhereInput
   }
-
 
 
   /**
@@ -2648,7 +2679,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Endpoints_group_entitiesCountOutputType without action
    */
@@ -2659,14 +2689,12 @@ export namespace Prisma {
     select?: Endpoints_group_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Endpoints_group_entitiesCountOutputType without action
    */
   export type Endpoints_group_entitiesCountOutputTypeCountEndpoints_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: endpoints_entitiesWhereInput
   }
-
 
 
   /**
@@ -2682,7 +2710,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Health_check_entitiesCountOutputType without action
    */
@@ -2693,14 +2720,12 @@ export namespace Prisma {
     select?: Health_check_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Health_check_entitiesCountOutputType without action
    */
   export type Health_check_entitiesCountOutputTypeCountHealth_check_result_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: health_check_result_entitiesWhereInput
   }
-
 
 
   /**
@@ -2718,7 +2743,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Object_plan_entitiesCountOutputType without action
    */
@@ -2729,7 +2753,6 @@ export namespace Prisma {
     select?: Object_plan_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Object_plan_entitiesCountOutputType without action
    */
@@ -2737,14 +2760,12 @@ export namespace Prisma {
     where?: cross_object_entitiesWhereInput
   }
 
-
   /**
    * Object_plan_entitiesCountOutputType without action
    */
   export type Object_plan_entitiesCountOutputTypeCountEndpoint_object_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: endpoint_object_entitiesWhereInput
   }
-
 
 
   /**
@@ -2762,7 +2783,6 @@ export namespace Prisma {
   }
 
   // Custom InputTypes
-
   /**
    * Subscription_entitiesCountOutputType without action
    */
@@ -2773,7 +2793,6 @@ export namespace Prisma {
     select?: Subscription_entitiesCountOutputTypeSelect<ExtArgs> | null
   }
 
-
   /**
    * Subscription_entitiesCountOutputType without action
    */
@@ -2781,14 +2800,12 @@ export namespace Prisma {
     where?: api_key_entitiesWhereInput
   }
 
-
   /**
    * Subscription_entitiesCountOutputType without action
    */
   export type Subscription_entitiesCountOutputTypeCountUsage_log_entitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: usage_log_entitiesWhereInput
   }
-
 
 
   /**
@@ -2981,6 +2998,12 @@ export namespace Prisma {
     _count?: boolean | Api_collection_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_collection_entities"]>
 
+  export type api_collection_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+  }, ExtArgs["result"]["api_collection_entities"]>
+
   export type api_collection_entitiesSelectScalar = {
     id?: boolean
     name?: boolean
@@ -2991,7 +3014,7 @@ export namespace Prisma {
     api_collections_apis?: boolean | api_collection_entities$api_collections_apisArgs<ExtArgs>
     _count?: boolean | Api_collection_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type api_collection_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $api_collection_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_collection_entities"
@@ -3005,7 +3028,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_collection_entities"]>
     composites: {}
   }
-
 
   type api_collection_entitiesGetPayload<S extends boolean | null | undefined | api_collection_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_collection_entitiesPayload, S>
 
@@ -3026,14 +3048,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_collection_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_collection_entitiesFindUniqueArgs>(args: SelectSubset<T, api_collection_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_collection_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_collection_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_collection_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_collection_entities
      * @example
      * // Get one Api_collection_entities
@@ -3042,10 +3062,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_collection_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_collection_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_collection_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_collection_entities that matches the filter.
@@ -3059,10 +3077,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_collection_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_collection_entitiesFindFirstArgs>(args?: SelectSubset<T, api_collection_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_collection_entities that matches the filter or
@@ -3077,16 +3093,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_collection_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_collection_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_collection_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_collection_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_collection_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_collection_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_collection_entities
      * const api_collection_entities = await prisma.api_collection_entities.findMany()
@@ -3097,10 +3111,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_collection_entitiesWithIdOnly = await prisma.api_collection_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_collection_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_collection_entitiesFindManyArgs>(args?: SelectSubset<T, api_collection_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_collection_entities.
@@ -3113,26 +3125,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_collection_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_collection_entitiesCreateArgs>(args: SelectSubset<T, api_collection_entitiesCreateArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_collection_entities.
-     *     @param {api_collection_entitiesCreateManyArgs} args - Arguments to create many Api_collection_entities.
-     *     @example
-     *     // Create many Api_collection_entities
-     *     const api_collection_entities = await prisma.api_collection_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_collection_entitiesCreateManyArgs} args - Arguments to create many Api_collection_entities.
+     * @example
+     * // Create many Api_collection_entities
+     * const api_collection_entities = await prisma.api_collection_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_collection_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_collection_entitiesCreateManyArgs>(args?: SelectSubset<T, api_collection_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_collection_entities and returns the data saved in the database.
+     * @param {api_collection_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_collection_entities.
+     * @example
+     * // Create many Api_collection_entities
+     * const api_collection_entities = await prisma.api_collection_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_collection_entities and only return the `id`
+     * const api_collection_entitiesWithIdOnly = await prisma.api_collection_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_collection_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_collection_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_collection_entities.
@@ -3145,10 +3177,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_collection_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_collection_entitiesDeleteArgs>(args: SelectSubset<T, api_collection_entitiesDeleteArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_collection_entities.
@@ -3164,10 +3194,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_collection_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_collection_entitiesUpdateArgs>(args: SelectSubset<T, api_collection_entitiesUpdateArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_collection_entities.
@@ -3180,10 +3208,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_collection_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collection_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_collection_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_collection_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_collection_entities.
@@ -3201,10 +3227,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_collection_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_collection_entitiesUpdateManyArgs>(args: SelectSubset<T, api_collection_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_collection_entities.
@@ -3222,10 +3246,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_collection_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_collection_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collection_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_collection_entitiesUpsertArgs>(args: SelectSubset<T, api_collection_entitiesUpsertArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_collection_entities.
@@ -3365,31 +3388,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_collection_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_collections_apis<T extends api_collection_entities$api_collections_apisArgs<ExtArgs> = {}>(args?: Subset<T, api_collection_entities$api_collections_apisArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_collections_apis<T extends api_collection_entities$api_collections_apisArgs<ExtArgs> = {}>(args?: Subset<T, api_collection_entities$api_collections_apisArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -3404,7 +3426,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_collection_entities findUnique
    */
@@ -3414,7 +3435,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3422,7 +3443,6 @@ export namespace Prisma {
      */
     where: api_collection_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_collection_entities findUniqueOrThrow
@@ -3433,7 +3453,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3441,7 +3461,6 @@ export namespace Prisma {
      */
     where: api_collection_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_collection_entities findFirst
@@ -3452,7 +3471,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3490,7 +3509,6 @@ export namespace Prisma {
      */
     distinct?: Api_collection_entitiesScalarFieldEnum | Api_collection_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_collection_entities findFirstOrThrow
@@ -3501,7 +3519,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3540,7 +3558,6 @@ export namespace Prisma {
     distinct?: Api_collection_entitiesScalarFieldEnum | Api_collection_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_collection_entities findMany
    */
@@ -3550,7 +3567,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3584,7 +3601,6 @@ export namespace Prisma {
     distinct?: Api_collection_entitiesScalarFieldEnum | Api_collection_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_collection_entities create
    */
@@ -3594,7 +3610,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3602,7 +3618,6 @@ export namespace Prisma {
      */
     data: XOR<api_collection_entitiesCreateInput, api_collection_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_collection_entities createMany
@@ -3615,6 +3630,20 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_collection_entities createManyAndReturn
+   */
+  export type api_collection_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_collection_entities
+     */
+    select?: api_collection_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_collection_entities.
+     */
+    data: api_collection_entitiesCreateManyInput | api_collection_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
 
   /**
    * api_collection_entities update
@@ -3625,7 +3654,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3637,7 +3666,6 @@ export namespace Prisma {
      */
     where: api_collection_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_collection_entities updateMany
@@ -3653,7 +3681,6 @@ export namespace Prisma {
     where?: api_collection_entitiesWhereInput
   }
 
-
   /**
    * api_collection_entities upsert
    */
@@ -3663,7 +3690,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3680,7 +3707,6 @@ export namespace Prisma {
     update: XOR<api_collection_entitiesUpdateInput, api_collection_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_collection_entities delete
    */
@@ -3690,7 +3716,7 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
     /**
@@ -3698,7 +3724,6 @@ export namespace Prisma {
      */
     where: api_collection_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_collection_entities deleteMany
@@ -3710,7 +3735,6 @@ export namespace Prisma {
     where?: api_collection_entitiesWhereInput
   }
 
-
   /**
    * api_collection_entities.api_collections_apis
    */
@@ -3720,7 +3744,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     where?: api_collections_apisWhereInput
@@ -3731,7 +3755,6 @@ export namespace Prisma {
     distinct?: Api_collections_apisScalarFieldEnum | Api_collections_apisScalarFieldEnum[]
   }
 
-
   /**
    * api_collection_entities without action
    */
@@ -3741,11 +3764,10 @@ export namespace Prisma {
      */
     select?: api_collection_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collection_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -3930,6 +3952,13 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_collections_apis"]>
 
+  export type api_collections_apisSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    api_entity_id?: boolean
+    api_collection_entity_id?: boolean
+    api_collection_entities?: boolean | api_collection_entitiesDefaultArgs<ExtArgs>
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["api_collections_apis"]>
+
   export type api_collections_apisSelectScalar = {
     api_entity_id?: boolean
     api_collection_entity_id?: boolean
@@ -3939,7 +3968,10 @@ export namespace Prisma {
     api_collection_entities?: boolean | api_collection_entitiesDefaultArgs<ExtArgs>
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type api_collections_apisIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_collection_entities?: boolean | api_collection_entitiesDefaultArgs<ExtArgs>
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $api_collections_apisPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_collections_apis"
@@ -3953,7 +3985,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_collections_apis"]>
     composites: {}
   }
-
 
   type api_collections_apisGetPayload<S extends boolean | null | undefined | api_collections_apisDefaultArgs> = $Result.GetResult<Prisma.$api_collections_apisPayload, S>
 
@@ -3974,14 +4005,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_collections_apisFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_collections_apisFindUniqueArgs>(args: SelectSubset<T, api_collections_apisFindUniqueArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_collections_apis that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_collections_apis that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_collections_apisFindUniqueOrThrowArgs} args - Arguments to find a Api_collections_apis
      * @example
      * // Get one Api_collections_apis
@@ -3990,10 +4019,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_collections_apisFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_collections_apisFindUniqueOrThrowArgs>(args: SelectSubset<T, api_collections_apisFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_collections_apis that matches the filter.
@@ -4007,10 +4034,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_collections_apisFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisFindFirstArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_collections_apisFindFirstArgs>(args?: SelectSubset<T, api_collections_apisFindFirstArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_collections_apis that matches the filter or
@@ -4025,16 +4050,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_collections_apisFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_collections_apisFindFirstOrThrowArgs>(args?: SelectSubset<T, api_collections_apisFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_collections_apis that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_collections_apisFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_collections_apisFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_collections_apis
      * const api_collections_apis = await prisma.api_collections_apis.findMany()
@@ -4045,10 +4068,8 @@ export namespace Prisma {
      * // Only select the `api_entity_id`
      * const api_collections_apisWithApi_entity_idOnly = await prisma.api_collections_apis.findMany({ select: { api_entity_id: true } })
      * 
-    **/
-    findMany<T extends api_collections_apisFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_collections_apisFindManyArgs>(args?: SelectSubset<T, api_collections_apisFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_collections_apis.
@@ -4061,26 +4082,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_collections_apisCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisCreateArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_collections_apisCreateArgs>(args: SelectSubset<T, api_collections_apisCreateArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_collections_apis.
-     *     @param {api_collections_apisCreateManyArgs} args - Arguments to create many Api_collections_apis.
-     *     @example
-     *     // Create many Api_collections_apis
-     *     const api_collections_apis = await prisma.api_collections_apis.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_collections_apisCreateManyArgs} args - Arguments to create many Api_collections_apis.
+     * @example
+     * // Create many Api_collections_apis
+     * const api_collections_apis = await prisma.api_collections_apis.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_collections_apisCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_collections_apisCreateManyArgs>(args?: SelectSubset<T, api_collections_apisCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_collections_apis and returns the data saved in the database.
+     * @param {api_collections_apisCreateManyAndReturnArgs} args - Arguments to create many Api_collections_apis.
+     * @example
+     * // Create many Api_collections_apis
+     * const api_collections_apis = await prisma.api_collections_apis.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_collections_apis and only return the `api_entity_id`
+     * const api_collections_apisWithApi_entity_idOnly = await prisma.api_collections_apis.createManyAndReturn({ 
+     *   select: { api_entity_id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_collections_apisCreateManyAndReturnArgs>(args?: SelectSubset<T, api_collections_apisCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_collections_apis.
@@ -4093,10 +4134,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_collections_apisDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisDeleteArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_collections_apisDeleteArgs>(args: SelectSubset<T, api_collections_apisDeleteArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_collections_apis.
@@ -4112,10 +4151,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_collections_apisUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisUpdateArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_collections_apisUpdateArgs>(args: SelectSubset<T, api_collections_apisUpdateArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_collections_apis.
@@ -4128,10 +4165,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_collections_apisDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_collections_apisDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_collections_apisDeleteManyArgs>(args?: SelectSubset<T, api_collections_apisDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_collections_apis.
@@ -4149,10 +4184,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_collections_apisUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_collections_apisUpdateManyArgs>(args: SelectSubset<T, api_collections_apisUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_collections_apis.
@@ -4170,10 +4203,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_collections_apis we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_collections_apisUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_collections_apisUpsertArgs<ExtArgs>>
-    ): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_collections_apisUpsertArgs>(args: SelectSubset<T, api_collections_apisUpsertArgs<ExtArgs>>): Prisma__api_collections_apisClient<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_collections_apis.
@@ -4313,33 +4345,31 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_collections_apisClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_collection_entities<T extends api_collection_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_collection_entitiesDefaultArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_collection_entities<T extends api_collection_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_collection_entitiesDefaultArgs<ExtArgs>>): Prisma__api_collection_entitiesClient<$Result.GetResult<Prisma.$api_collection_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -4353,7 +4383,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_collections_apis findUnique
    */
@@ -4363,7 +4392,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4371,7 +4400,6 @@ export namespace Prisma {
      */
     where: api_collections_apisWhereUniqueInput
   }
-
 
   /**
    * api_collections_apis findUniqueOrThrow
@@ -4382,7 +4410,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4390,7 +4418,6 @@ export namespace Prisma {
      */
     where: api_collections_apisWhereUniqueInput
   }
-
 
   /**
    * api_collections_apis findFirst
@@ -4401,7 +4428,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4439,7 +4466,6 @@ export namespace Prisma {
      */
     distinct?: Api_collections_apisScalarFieldEnum | Api_collections_apisScalarFieldEnum[]
   }
-
 
   /**
    * api_collections_apis findFirstOrThrow
@@ -4450,7 +4476,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4489,7 +4515,6 @@ export namespace Prisma {
     distinct?: Api_collections_apisScalarFieldEnum | Api_collections_apisScalarFieldEnum[]
   }
 
-
   /**
    * api_collections_apis findMany
    */
@@ -4499,7 +4524,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4533,7 +4558,6 @@ export namespace Prisma {
     distinct?: Api_collections_apisScalarFieldEnum | Api_collections_apisScalarFieldEnum[]
   }
 
-
   /**
    * api_collections_apis create
    */
@@ -4543,7 +4567,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4551,7 +4575,6 @@ export namespace Prisma {
      */
     data: XOR<api_collections_apisCreateInput, api_collections_apisUncheckedCreateInput>
   }
-
 
   /**
    * api_collections_apis createMany
@@ -4564,6 +4587,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_collections_apis createManyAndReturn
+   */
+  export type api_collections_apisCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_collections_apis
+     */
+    select?: api_collections_apisSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_collections_apis.
+     */
+    data: api_collections_apisCreateManyInput | api_collections_apisCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_collections_apisIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_collections_apis update
@@ -4574,7 +4615,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4586,7 +4627,6 @@ export namespace Prisma {
      */
     where: api_collections_apisWhereUniqueInput
   }
-
 
   /**
    * api_collections_apis updateMany
@@ -4602,7 +4642,6 @@ export namespace Prisma {
     where?: api_collections_apisWhereInput
   }
 
-
   /**
    * api_collections_apis upsert
    */
@@ -4612,7 +4651,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4629,7 +4668,6 @@ export namespace Prisma {
     update: XOR<api_collections_apisUpdateInput, api_collections_apisUncheckedUpdateInput>
   }
 
-
   /**
    * api_collections_apis delete
    */
@@ -4639,7 +4677,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     /**
@@ -4647,7 +4685,6 @@ export namespace Prisma {
      */
     where: api_collections_apisWhereUniqueInput
   }
-
 
   /**
    * api_collections_apis deleteMany
@@ -4659,7 +4696,6 @@ export namespace Prisma {
     where?: api_collections_apisWhereInput
   }
 
-
   /**
    * api_collections_apis without action
    */
@@ -4669,11 +4705,10 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -4873,6 +4908,14 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_docs_entities"]>
 
+  export type api_docs_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    content?: boolean
+    last_updated?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["api_docs_entities"]>
+
   export type api_docs_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -4883,7 +4926,9 @@ export namespace Prisma {
   export type api_docs_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type api_docs_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $api_docs_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_docs_entities"
@@ -4898,7 +4943,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_docs_entities"]>
     composites: {}
   }
-
 
   type api_docs_entitiesGetPayload<S extends boolean | null | undefined | api_docs_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_docs_entitiesPayload, S>
 
@@ -4919,14 +4963,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_docs_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_docs_entitiesFindUniqueArgs>(args: SelectSubset<T, api_docs_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_docs_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_docs_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_docs_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_docs_entities
      * @example
      * // Get one Api_docs_entities
@@ -4935,10 +4977,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_docs_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_docs_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_docs_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_docs_entities that matches the filter.
@@ -4952,10 +4992,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_docs_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_docs_entitiesFindFirstArgs>(args?: SelectSubset<T, api_docs_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_docs_entities that matches the filter or
@@ -4970,16 +5008,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_docs_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_docs_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_docs_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_docs_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_docs_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_docs_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_docs_entities
      * const api_docs_entities = await prisma.api_docs_entities.findMany()
@@ -4990,10 +5026,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_docs_entitiesWithIdOnly = await prisma.api_docs_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_docs_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_docs_entitiesFindManyArgs>(args?: SelectSubset<T, api_docs_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_docs_entities.
@@ -5006,26 +5040,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_docs_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_docs_entitiesCreateArgs>(args: SelectSubset<T, api_docs_entitiesCreateArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_docs_entities.
-     *     @param {api_docs_entitiesCreateManyArgs} args - Arguments to create many Api_docs_entities.
-     *     @example
-     *     // Create many Api_docs_entities
-     *     const api_docs_entities = await prisma.api_docs_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_docs_entitiesCreateManyArgs} args - Arguments to create many Api_docs_entities.
+     * @example
+     * // Create many Api_docs_entities
+     * const api_docs_entities = await prisma.api_docs_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_docs_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_docs_entitiesCreateManyArgs>(args?: SelectSubset<T, api_docs_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_docs_entities and returns the data saved in the database.
+     * @param {api_docs_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_docs_entities.
+     * @example
+     * // Create many Api_docs_entities
+     * const api_docs_entities = await prisma.api_docs_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_docs_entities and only return the `id`
+     * const api_docs_entitiesWithIdOnly = await prisma.api_docs_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_docs_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_docs_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_docs_entities.
@@ -5038,10 +5092,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_docs_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_docs_entitiesDeleteArgs>(args: SelectSubset<T, api_docs_entitiesDeleteArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_docs_entities.
@@ -5057,10 +5109,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_docs_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_docs_entitiesUpdateArgs>(args: SelectSubset<T, api_docs_entitiesUpdateArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_docs_entities.
@@ -5073,10 +5123,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_docs_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_docs_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_docs_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_docs_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_docs_entities.
@@ -5094,10 +5142,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_docs_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_docs_entitiesUpdateManyArgs>(args: SelectSubset<T, api_docs_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_docs_entities.
@@ -5115,10 +5161,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_docs_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_docs_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_docs_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_docs_entitiesUpsertArgs>(args: SelectSubset<T, api_docs_entitiesUpsertArgs<ExtArgs>>): Prisma__api_docs_entitiesClient<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_docs_entities.
@@ -5258,31 +5303,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_docs_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -5298,7 +5342,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_docs_entities findUnique
    */
@@ -5308,7 +5351,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5316,7 +5359,6 @@ export namespace Prisma {
      */
     where: api_docs_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_docs_entities findUniqueOrThrow
@@ -5327,7 +5369,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5335,7 +5377,6 @@ export namespace Prisma {
      */
     where: api_docs_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_docs_entities findFirst
@@ -5346,7 +5387,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5384,7 +5425,6 @@ export namespace Prisma {
      */
     distinct?: Api_docs_entitiesScalarFieldEnum | Api_docs_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_docs_entities findFirstOrThrow
@@ -5395,7 +5435,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5434,7 +5474,6 @@ export namespace Prisma {
     distinct?: Api_docs_entitiesScalarFieldEnum | Api_docs_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_docs_entities findMany
    */
@@ -5444,7 +5483,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5478,7 +5517,6 @@ export namespace Prisma {
     distinct?: Api_docs_entitiesScalarFieldEnum | Api_docs_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_docs_entities create
    */
@@ -5488,7 +5526,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5496,7 +5534,6 @@ export namespace Prisma {
      */
     data: XOR<api_docs_entitiesCreateInput, api_docs_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_docs_entities createMany
@@ -5509,6 +5546,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_docs_entities createManyAndReturn
+   */
+  export type api_docs_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_docs_entities
+     */
+    select?: api_docs_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_docs_entities.
+     */
+    data: api_docs_entitiesCreateManyInput | api_docs_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_docs_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_docs_entities update
@@ -5519,7 +5574,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5531,7 +5586,6 @@ export namespace Prisma {
      */
     where: api_docs_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_docs_entities updateMany
@@ -5547,7 +5601,6 @@ export namespace Prisma {
     where?: api_docs_entitiesWhereInput
   }
 
-
   /**
    * api_docs_entities upsert
    */
@@ -5557,7 +5610,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5574,7 +5627,6 @@ export namespace Prisma {
     update: XOR<api_docs_entitiesUpdateInput, api_docs_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_docs_entities delete
    */
@@ -5584,7 +5636,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     /**
@@ -5592,7 +5644,6 @@ export namespace Prisma {
      */
     where: api_docs_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_docs_entities deleteMany
@@ -5604,7 +5655,6 @@ export namespace Prisma {
     where?: api_docs_entitiesWhereInput
   }
 
-
   /**
    * api_docs_entities without action
    */
@@ -5614,11 +5664,10 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -5902,6 +5951,23 @@ export namespace Prisma {
     _count?: boolean | Api_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_entities"]>
 
+  export type api_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider_id?: boolean
+    name?: boolean
+    image_path?: boolean
+    description?: boolean
+    category_id?: boolean
+    status?: boolean
+    date_created?: boolean
+    last_updated?: boolean
+    date_deleted?: boolean
+    keywords?: boolean
+    api_url?: boolean
+    visibility?: boolean
+    category_entities?: boolean | api_entities$category_entitiesArgs<ExtArgs>
+  }, ExtArgs["result"]["api_entities"]>
+
   export type api_entitiesSelectScalar = {
     id?: boolean
     provider_id?: boolean
@@ -5929,7 +5995,9 @@ export namespace Prisma {
     plan_entities?: boolean | api_entities$plan_entitiesArgs<ExtArgs>
     _count?: boolean | Api_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type api_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category_entities?: boolean | api_entities$category_entitiesArgs<ExtArgs>
+  }
 
   export type $api_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_entities"
@@ -5961,7 +6029,6 @@ export namespace Prisma {
     composites: {}
   }
 
-
   type api_entitiesGetPayload<S extends boolean | null | undefined | api_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_entitiesPayload, S>
 
   type api_entitiesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
@@ -5981,14 +6048,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_entitiesFindUniqueArgs>(args: SelectSubset<T, api_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_entities
      * @example
      * // Get one Api_entities
@@ -5997,10 +6062,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_entities that matches the filter.
@@ -6014,10 +6077,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_entitiesFindFirstArgs>(args?: SelectSubset<T, api_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_entities that matches the filter or
@@ -6032,16 +6093,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_entities
      * const api_entities = await prisma.api_entities.findMany()
@@ -6052,10 +6111,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_entitiesWithIdOnly = await prisma.api_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_entitiesFindManyArgs>(args?: SelectSubset<T, api_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_entities.
@@ -6068,26 +6125,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_entitiesCreateArgs>(args: SelectSubset<T, api_entitiesCreateArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_entities.
-     *     @param {api_entitiesCreateManyArgs} args - Arguments to create many Api_entities.
-     *     @example
-     *     // Create many Api_entities
-     *     const api_entities = await prisma.api_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_entitiesCreateManyArgs} args - Arguments to create many Api_entities.
+     * @example
+     * // Create many Api_entities
+     * const api_entities = await prisma.api_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_entitiesCreateManyArgs>(args?: SelectSubset<T, api_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_entities and returns the data saved in the database.
+     * @param {api_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_entities.
+     * @example
+     * // Create many Api_entities
+     * const api_entities = await prisma.api_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_entities and only return the `id`
+     * const api_entitiesWithIdOnly = await prisma.api_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_entities.
@@ -6100,10 +6177,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_entitiesDeleteArgs>(args: SelectSubset<T, api_entitiesDeleteArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_entities.
@@ -6119,10 +6194,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_entitiesUpdateArgs>(args: SelectSubset<T, api_entitiesUpdateArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_entities.
@@ -6135,10 +6208,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_entities.
@@ -6156,10 +6227,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_entitiesUpdateManyArgs>(args: SelectSubset<T, api_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_entities.
@@ -6177,10 +6246,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_entitiesUpsertArgs>(args: SelectSubset<T, api_entitiesUpsertArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_entities.
@@ -6320,45 +6388,37 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_collections_apis<T extends api_entities$api_collections_apisArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_collections_apisArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    api_docs_entities<T extends api_entities$api_docs_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_docs_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    category_entities<T extends api_entities$category_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$category_entitiesArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
-
-    api_rating_entities<T extends api_entities$api_rating_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_rating_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    api_version_entities<T extends api_entities$api_version_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_version_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    endpoints_group_entities<T extends api_entities$endpoints_group_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$endpoints_group_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    object_plan_entities<T extends api_entities$object_plan_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$object_plan_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    plan_entities<T extends api_entities$plan_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$plan_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_collections_apis<T extends api_entities$api_collections_apisArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_collections_apisArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_collections_apisPayload<ExtArgs>, T, "findMany"> | Null>
+    api_docs_entities<T extends api_entities$api_docs_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_docs_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_docs_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    category_entities<T extends api_entities$category_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$category_entitiesArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    api_rating_entities<T extends api_entities$api_rating_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_rating_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    api_version_entities<T extends api_entities$api_version_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$api_version_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    endpoints_group_entities<T extends api_entities$endpoints_group_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$endpoints_group_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    object_plan_entities<T extends api_entities$object_plan_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$object_plan_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    plan_entities<T extends api_entities$plan_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, api_entities$plan_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -6383,7 +6443,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_entities findUnique
    */
@@ -6393,7 +6452,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6401,7 +6460,6 @@ export namespace Prisma {
      */
     where: api_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_entities findUniqueOrThrow
@@ -6412,7 +6470,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6420,7 +6478,6 @@ export namespace Prisma {
      */
     where: api_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_entities findFirst
@@ -6431,7 +6488,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6469,7 +6526,6 @@ export namespace Prisma {
      */
     distinct?: Api_entitiesScalarFieldEnum | Api_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_entities findFirstOrThrow
@@ -6480,7 +6536,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6519,7 +6575,6 @@ export namespace Prisma {
     distinct?: Api_entitiesScalarFieldEnum | Api_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities findMany
    */
@@ -6529,7 +6584,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6563,7 +6618,6 @@ export namespace Prisma {
     distinct?: Api_entitiesScalarFieldEnum | Api_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities create
    */
@@ -6573,7 +6627,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6581,7 +6635,6 @@ export namespace Prisma {
      */
     data: XOR<api_entitiesCreateInput, api_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_entities createMany
@@ -6594,6 +6647,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_entities createManyAndReturn
+   */
+  export type api_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_entities
+     */
+    select?: api_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_entities.
+     */
+    data: api_entitiesCreateManyInput | api_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_entities update
@@ -6604,7 +6675,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6616,7 +6687,6 @@ export namespace Prisma {
      */
     where: api_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_entities updateMany
@@ -6632,7 +6702,6 @@ export namespace Prisma {
     where?: api_entitiesWhereInput
   }
 
-
   /**
    * api_entities upsert
    */
@@ -6642,7 +6711,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6659,7 +6728,6 @@ export namespace Prisma {
     update: XOR<api_entitiesUpdateInput, api_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_entities delete
    */
@@ -6669,7 +6737,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     /**
@@ -6677,7 +6745,6 @@ export namespace Prisma {
      */
     where: api_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_entities deleteMany
@@ -6689,7 +6756,6 @@ export namespace Prisma {
     where?: api_entitiesWhereInput
   }
 
-
   /**
    * api_entities.api_collections_apis
    */
@@ -6699,7 +6765,7 @@ export namespace Prisma {
      */
     select?: api_collections_apisSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_collections_apisInclude<ExtArgs> | null
     where?: api_collections_apisWhereInput
@@ -6710,7 +6776,6 @@ export namespace Prisma {
     distinct?: Api_collections_apisScalarFieldEnum | Api_collections_apisScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.api_docs_entities
    */
@@ -6720,7 +6785,7 @@ export namespace Prisma {
      */
     select?: api_docs_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_docs_entitiesInclude<ExtArgs> | null
     where?: api_docs_entitiesWhereInput
@@ -6731,7 +6796,6 @@ export namespace Prisma {
     distinct?: Api_docs_entitiesScalarFieldEnum | Api_docs_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.category_entities
    */
@@ -6741,12 +6805,11 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     where?: category_entitiesWhereInput
   }
-
 
   /**
    * api_entities.api_rating_entities
@@ -6757,7 +6820,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     where?: api_rating_entitiesWhereInput
@@ -6768,7 +6831,6 @@ export namespace Prisma {
     distinct?: Api_rating_entitiesScalarFieldEnum | Api_rating_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.api_version_entities
    */
@@ -6778,7 +6840,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     where?: api_version_entitiesWhereInput
@@ -6789,7 +6851,6 @@ export namespace Prisma {
     distinct?: Api_version_entitiesScalarFieldEnum | Api_version_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.endpoints_group_entities
    */
@@ -6799,7 +6860,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     where?: endpoints_group_entitiesWhereInput
@@ -6810,7 +6871,6 @@ export namespace Prisma {
     distinct?: Endpoints_group_entitiesScalarFieldEnum | Endpoints_group_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.object_plan_entities
    */
@@ -6820,7 +6880,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     where?: object_plan_entitiesWhereInput
@@ -6831,7 +6891,6 @@ export namespace Prisma {
     distinct?: Object_plan_entitiesScalarFieldEnum | Object_plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities.plan_entities
    */
@@ -6841,7 +6900,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     where?: plan_entitiesWhereInput
@@ -6852,7 +6911,6 @@ export namespace Prisma {
     distinct?: Plan_entitiesScalarFieldEnum | Plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_entities without action
    */
@@ -6862,11 +6920,10 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -7074,6 +7131,15 @@ export namespace Prisma {
     subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_key_entities"]>
 
+  export type api_key_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    subscription_id?: boolean
+    api_key?: boolean
+    creation_date?: boolean
+    is_active?: boolean
+    subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["api_key_entities"]>
+
   export type api_key_entitiesSelectScalar = {
     id?: boolean
     subscription_id?: boolean
@@ -7085,7 +7151,9 @@ export namespace Prisma {
   export type api_key_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type api_key_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $api_key_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_key_entities"
@@ -7101,7 +7169,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_key_entities"]>
     composites: {}
   }
-
 
   type api_key_entitiesGetPayload<S extends boolean | null | undefined | api_key_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_key_entitiesPayload, S>
 
@@ -7122,14 +7189,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_key_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_key_entitiesFindUniqueArgs>(args: SelectSubset<T, api_key_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_key_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_key_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_key_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_key_entities
      * @example
      * // Get one Api_key_entities
@@ -7138,10 +7203,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_key_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_key_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_key_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_key_entities that matches the filter.
@@ -7155,10 +7218,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_key_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_key_entitiesFindFirstArgs>(args?: SelectSubset<T, api_key_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_key_entities that matches the filter or
@@ -7173,16 +7234,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_key_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_key_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_key_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_key_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_key_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_key_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_key_entities
      * const api_key_entities = await prisma.api_key_entities.findMany()
@@ -7193,10 +7252,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_key_entitiesWithIdOnly = await prisma.api_key_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_key_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_key_entitiesFindManyArgs>(args?: SelectSubset<T, api_key_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_key_entities.
@@ -7209,26 +7266,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_key_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_key_entitiesCreateArgs>(args: SelectSubset<T, api_key_entitiesCreateArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_key_entities.
-     *     @param {api_key_entitiesCreateManyArgs} args - Arguments to create many Api_key_entities.
-     *     @example
-     *     // Create many Api_key_entities
-     *     const api_key_entities = await prisma.api_key_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_key_entitiesCreateManyArgs} args - Arguments to create many Api_key_entities.
+     * @example
+     * // Create many Api_key_entities
+     * const api_key_entities = await prisma.api_key_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_key_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_key_entitiesCreateManyArgs>(args?: SelectSubset<T, api_key_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_key_entities and returns the data saved in the database.
+     * @param {api_key_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_key_entities.
+     * @example
+     * // Create many Api_key_entities
+     * const api_key_entities = await prisma.api_key_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_key_entities and only return the `id`
+     * const api_key_entitiesWithIdOnly = await prisma.api_key_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_key_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_key_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_key_entities.
@@ -7241,10 +7318,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_key_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_key_entitiesDeleteArgs>(args: SelectSubset<T, api_key_entitiesDeleteArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_key_entities.
@@ -7260,10 +7335,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_key_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_key_entitiesUpdateArgs>(args: SelectSubset<T, api_key_entitiesUpdateArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_key_entities.
@@ -7276,10 +7349,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_key_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_key_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_key_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_key_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_key_entities.
@@ -7297,10 +7368,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_key_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_key_entitiesUpdateManyArgs>(args: SelectSubset<T, api_key_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_key_entities.
@@ -7318,10 +7387,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_key_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_key_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_key_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_key_entitiesUpsertArgs>(args: SelectSubset<T, api_key_entitiesUpsertArgs<ExtArgs>>): Prisma__api_key_entitiesClient<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_key_entities.
@@ -7461,31 +7529,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_key_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    subscription_entities<T extends subscription_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entitiesDefaultArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    subscription_entities<T extends subscription_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entitiesDefaultArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -7502,7 +7569,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_key_entities findUnique
    */
@@ -7512,7 +7578,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7520,7 +7586,6 @@ export namespace Prisma {
      */
     where: api_key_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_key_entities findUniqueOrThrow
@@ -7531,7 +7596,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7539,7 +7604,6 @@ export namespace Prisma {
      */
     where: api_key_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_key_entities findFirst
@@ -7550,7 +7614,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7588,7 +7652,6 @@ export namespace Prisma {
      */
     distinct?: Api_key_entitiesScalarFieldEnum | Api_key_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_key_entities findFirstOrThrow
@@ -7599,7 +7662,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7638,7 +7701,6 @@ export namespace Prisma {
     distinct?: Api_key_entitiesScalarFieldEnum | Api_key_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_key_entities findMany
    */
@@ -7648,7 +7710,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7682,7 +7744,6 @@ export namespace Prisma {
     distinct?: Api_key_entitiesScalarFieldEnum | Api_key_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_key_entities create
    */
@@ -7692,7 +7753,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7700,7 +7761,6 @@ export namespace Prisma {
      */
     data: XOR<api_key_entitiesCreateInput, api_key_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_key_entities createMany
@@ -7713,6 +7773,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_key_entities createManyAndReturn
+   */
+  export type api_key_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_key_entities
+     */
+    select?: api_key_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_key_entities.
+     */
+    data: api_key_entitiesCreateManyInput | api_key_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_key_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_key_entities update
@@ -7723,7 +7801,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7735,7 +7813,6 @@ export namespace Prisma {
      */
     where: api_key_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_key_entities updateMany
@@ -7751,7 +7828,6 @@ export namespace Prisma {
     where?: api_key_entitiesWhereInput
   }
 
-
   /**
    * api_key_entities upsert
    */
@@ -7761,7 +7837,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7778,7 +7854,6 @@ export namespace Prisma {
     update: XOR<api_key_entitiesUpdateInput, api_key_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_key_entities delete
    */
@@ -7788,7 +7863,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     /**
@@ -7796,7 +7871,6 @@ export namespace Prisma {
      */
     where: api_key_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_key_entities deleteMany
@@ -7808,7 +7882,6 @@ export namespace Prisma {
     where?: api_key_entitiesWhereInput
   }
 
-
   /**
    * api_key_entities without action
    */
@@ -7818,11 +7891,10 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -8046,6 +8118,16 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_rating_entities"]>
 
+  export type api_rating_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    user_id?: boolean
+    rating?: boolean
+    comment?: boolean
+    date_rated?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["api_rating_entities"]>
+
   export type api_rating_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -8058,7 +8140,9 @@ export namespace Prisma {
   export type api_rating_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type api_rating_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $api_rating_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_rating_entities"
@@ -8075,7 +8159,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_rating_entities"]>
     composites: {}
   }
-
 
   type api_rating_entitiesGetPayload<S extends boolean | null | undefined | api_rating_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_rating_entitiesPayload, S>
 
@@ -8096,14 +8179,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_rating_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_rating_entitiesFindUniqueArgs>(args: SelectSubset<T, api_rating_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_rating_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_rating_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_rating_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_rating_entities
      * @example
      * // Get one Api_rating_entities
@@ -8112,10 +8193,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_rating_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_rating_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_rating_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_rating_entities that matches the filter.
@@ -8129,10 +8208,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_rating_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_rating_entitiesFindFirstArgs>(args?: SelectSubset<T, api_rating_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_rating_entities that matches the filter or
@@ -8147,16 +8224,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_rating_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_rating_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_rating_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_rating_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_rating_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_rating_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_rating_entities
      * const api_rating_entities = await prisma.api_rating_entities.findMany()
@@ -8167,10 +8242,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_rating_entitiesWithIdOnly = await prisma.api_rating_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_rating_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_rating_entitiesFindManyArgs>(args?: SelectSubset<T, api_rating_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_rating_entities.
@@ -8183,26 +8256,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_rating_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_rating_entitiesCreateArgs>(args: SelectSubset<T, api_rating_entitiesCreateArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_rating_entities.
-     *     @param {api_rating_entitiesCreateManyArgs} args - Arguments to create many Api_rating_entities.
-     *     @example
-     *     // Create many Api_rating_entities
-     *     const api_rating_entities = await prisma.api_rating_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_rating_entitiesCreateManyArgs} args - Arguments to create many Api_rating_entities.
+     * @example
+     * // Create many Api_rating_entities
+     * const api_rating_entities = await prisma.api_rating_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_rating_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_rating_entitiesCreateManyArgs>(args?: SelectSubset<T, api_rating_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_rating_entities and returns the data saved in the database.
+     * @param {api_rating_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_rating_entities.
+     * @example
+     * // Create many Api_rating_entities
+     * const api_rating_entities = await prisma.api_rating_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_rating_entities and only return the `id`
+     * const api_rating_entitiesWithIdOnly = await prisma.api_rating_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_rating_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_rating_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_rating_entities.
@@ -8215,10 +8308,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_rating_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_rating_entitiesDeleteArgs>(args: SelectSubset<T, api_rating_entitiesDeleteArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_rating_entities.
@@ -8234,10 +8325,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_rating_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_rating_entitiesUpdateArgs>(args: SelectSubset<T, api_rating_entitiesUpdateArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_rating_entities.
@@ -8250,10 +8339,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_rating_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_rating_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_rating_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_rating_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_rating_entities.
@@ -8271,10 +8358,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_rating_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_rating_entitiesUpdateManyArgs>(args: SelectSubset<T, api_rating_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_rating_entities.
@@ -8292,10 +8377,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_rating_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_rating_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_rating_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_rating_entitiesUpsertArgs>(args: SelectSubset<T, api_rating_entitiesUpsertArgs<ExtArgs>>): Prisma__api_rating_entitiesClient<$Result.GetResult<Prisma.$api_rating_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_rating_entities.
@@ -8435,31 +8519,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_rating_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -8477,7 +8560,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_rating_entities findUnique
    */
@@ -8487,7 +8569,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8495,7 +8577,6 @@ export namespace Prisma {
      */
     where: api_rating_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_rating_entities findUniqueOrThrow
@@ -8506,7 +8587,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8514,7 +8595,6 @@ export namespace Prisma {
      */
     where: api_rating_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_rating_entities findFirst
@@ -8525,7 +8605,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8563,7 +8643,6 @@ export namespace Prisma {
      */
     distinct?: Api_rating_entitiesScalarFieldEnum | Api_rating_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_rating_entities findFirstOrThrow
@@ -8574,7 +8653,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8613,7 +8692,6 @@ export namespace Prisma {
     distinct?: Api_rating_entitiesScalarFieldEnum | Api_rating_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_rating_entities findMany
    */
@@ -8623,7 +8701,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8657,7 +8735,6 @@ export namespace Prisma {
     distinct?: Api_rating_entitiesScalarFieldEnum | Api_rating_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_rating_entities create
    */
@@ -8667,7 +8744,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8675,7 +8752,6 @@ export namespace Prisma {
      */
     data: XOR<api_rating_entitiesCreateInput, api_rating_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_rating_entities createMany
@@ -8688,6 +8764,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_rating_entities createManyAndReturn
+   */
+  export type api_rating_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_rating_entities
+     */
+    select?: api_rating_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_rating_entities.
+     */
+    data: api_rating_entitiesCreateManyInput | api_rating_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_rating_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_rating_entities update
@@ -8698,7 +8792,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8710,7 +8804,6 @@ export namespace Prisma {
      */
     where: api_rating_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_rating_entities updateMany
@@ -8726,7 +8819,6 @@ export namespace Prisma {
     where?: api_rating_entitiesWhereInput
   }
 
-
   /**
    * api_rating_entities upsert
    */
@@ -8736,7 +8828,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8753,7 +8845,6 @@ export namespace Prisma {
     update: XOR<api_rating_entitiesUpdateInput, api_rating_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_rating_entities delete
    */
@@ -8763,7 +8854,7 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
     /**
@@ -8771,7 +8862,6 @@ export namespace Prisma {
      */
     where: api_rating_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_rating_entities deleteMany
@@ -8783,7 +8873,6 @@ export namespace Prisma {
     where?: api_rating_entitiesWhereInput
   }
 
-
   /**
    * api_rating_entities without action
    */
@@ -8793,11 +8882,10 @@ export namespace Prisma {
      */
     select?: api_rating_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_rating_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -9005,6 +9093,15 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["api_version_entities"]>
 
+  export type api_version_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    version_number?: boolean
+    release_date?: boolean
+    whats_new?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["api_version_entities"]>
+
   export type api_version_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -9016,7 +9113,9 @@ export namespace Prisma {
   export type api_version_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type api_version_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $api_version_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "api_version_entities"
@@ -9032,7 +9131,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["api_version_entities"]>
     composites: {}
   }
-
 
   type api_version_entitiesGetPayload<S extends boolean | null | undefined | api_version_entitiesDefaultArgs> = $Result.GetResult<Prisma.$api_version_entitiesPayload, S>
 
@@ -9053,14 +9151,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends api_version_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends api_version_entitiesFindUniqueArgs>(args: SelectSubset<T, api_version_entitiesFindUniqueArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Api_version_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Api_version_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {api_version_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Api_version_entities
      * @example
      * // Get one Api_version_entities
@@ -9069,10 +9165,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends api_version_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends api_version_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, api_version_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Api_version_entities that matches the filter.
@@ -9086,10 +9180,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends api_version_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends api_version_entitiesFindFirstArgs>(args?: SelectSubset<T, api_version_entitiesFindFirstArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Api_version_entities that matches the filter or
@@ -9104,16 +9196,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends api_version_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends api_version_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, api_version_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Api_version_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {api_version_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {api_version_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Api_version_entities
      * const api_version_entities = await prisma.api_version_entities.findMany()
@@ -9124,10 +9214,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const api_version_entitiesWithIdOnly = await prisma.api_version_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends api_version_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends api_version_entitiesFindManyArgs>(args?: SelectSubset<T, api_version_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Api_version_entities.
@@ -9140,26 +9228,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends api_version_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends api_version_entitiesCreateArgs>(args: SelectSubset<T, api_version_entitiesCreateArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Api_version_entities.
-     *     @param {api_version_entitiesCreateManyArgs} args - Arguments to create many Api_version_entities.
-     *     @example
-     *     // Create many Api_version_entities
-     *     const api_version_entities = await prisma.api_version_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {api_version_entitiesCreateManyArgs} args - Arguments to create many Api_version_entities.
+     * @example
+     * // Create many Api_version_entities
+     * const api_version_entities = await prisma.api_version_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends api_version_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends api_version_entitiesCreateManyArgs>(args?: SelectSubset<T, api_version_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Api_version_entities and returns the data saved in the database.
+     * @param {api_version_entitiesCreateManyAndReturnArgs} args - Arguments to create many Api_version_entities.
+     * @example
+     * // Create many Api_version_entities
+     * const api_version_entities = await prisma.api_version_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Api_version_entities and only return the `id`
+     * const api_version_entitiesWithIdOnly = await prisma.api_version_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends api_version_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, api_version_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Api_version_entities.
@@ -9172,10 +9280,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends api_version_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends api_version_entitiesDeleteArgs>(args: SelectSubset<T, api_version_entitiesDeleteArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Api_version_entities.
@@ -9191,10 +9297,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends api_version_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends api_version_entitiesUpdateArgs>(args: SelectSubset<T, api_version_entitiesUpdateArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Api_version_entities.
@@ -9207,10 +9311,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends api_version_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, api_version_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends api_version_entitiesDeleteManyArgs>(args?: SelectSubset<T, api_version_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Api_version_entities.
@@ -9228,10 +9330,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends api_version_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends api_version_entitiesUpdateManyArgs>(args: SelectSubset<T, api_version_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Api_version_entities.
@@ -9249,10 +9349,9 @@ export namespace Prisma {
      *     // ... the filter for the Api_version_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends api_version_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, api_version_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends api_version_entitiesUpsertArgs>(args: SelectSubset<T, api_version_entitiesUpsertArgs<ExtArgs>>): Prisma__api_version_entitiesClient<$Result.GetResult<Prisma.$api_version_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Api_version_entities.
@@ -9392,31 +9491,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__api_version_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -9433,7 +9531,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * api_version_entities findUnique
    */
@@ -9443,7 +9540,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9451,7 +9548,6 @@ export namespace Prisma {
      */
     where: api_version_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_version_entities findUniqueOrThrow
@@ -9462,7 +9558,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9470,7 +9566,6 @@ export namespace Prisma {
      */
     where: api_version_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_version_entities findFirst
@@ -9481,7 +9576,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9519,7 +9614,6 @@ export namespace Prisma {
      */
     distinct?: Api_version_entitiesScalarFieldEnum | Api_version_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * api_version_entities findFirstOrThrow
@@ -9530,7 +9624,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9569,7 +9663,6 @@ export namespace Prisma {
     distinct?: Api_version_entitiesScalarFieldEnum | Api_version_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_version_entities findMany
    */
@@ -9579,7 +9672,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9613,7 +9706,6 @@ export namespace Prisma {
     distinct?: Api_version_entitiesScalarFieldEnum | Api_version_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * api_version_entities create
    */
@@ -9623,7 +9715,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9631,7 +9723,6 @@ export namespace Prisma {
      */
     data: XOR<api_version_entitiesCreateInput, api_version_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * api_version_entities createMany
@@ -9644,6 +9735,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * api_version_entities createManyAndReturn
+   */
+  export type api_version_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the api_version_entities
+     */
+    select?: api_version_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many api_version_entities.
+     */
+    data: api_version_entitiesCreateManyInput | api_version_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: api_version_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * api_version_entities update
@@ -9654,7 +9763,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9666,7 +9775,6 @@ export namespace Prisma {
      */
     where: api_version_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_version_entities updateMany
@@ -9682,7 +9790,6 @@ export namespace Prisma {
     where?: api_version_entitiesWhereInput
   }
 
-
   /**
    * api_version_entities upsert
    */
@@ -9692,7 +9799,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9709,7 +9816,6 @@ export namespace Prisma {
     update: XOR<api_version_entitiesUpdateInput, api_version_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * api_version_entities delete
    */
@@ -9719,7 +9825,7 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
     /**
@@ -9727,7 +9833,6 @@ export namespace Prisma {
      */
     where: api_version_entitiesWhereUniqueInput
   }
-
 
   /**
    * api_version_entities deleteMany
@@ -9739,7 +9844,6 @@ export namespace Prisma {
     where?: api_version_entitiesWhereInput
   }
 
-
   /**
    * api_version_entities without action
    */
@@ -9749,11 +9853,10 @@ export namespace Prisma {
      */
     select?: api_version_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_version_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -9965,6 +10068,15 @@ export namespace Prisma {
     endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["body_param_entities"]>
 
+  export type body_param_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    endpoint_id?: boolean
+    content_type?: boolean
+    text_body?: boolean
+    media_file_id?: boolean
+    endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["body_param_entities"]>
+
   export type body_param_entitiesSelectScalar = {
     id?: boolean
     endpoint_id?: boolean
@@ -9976,7 +10088,9 @@ export namespace Prisma {
   export type body_param_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type body_param_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $body_param_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "body_param_entities"
@@ -9992,7 +10106,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["body_param_entities"]>
     composites: {}
   }
-
 
   type body_param_entitiesGetPayload<S extends boolean | null | undefined | body_param_entitiesDefaultArgs> = $Result.GetResult<Prisma.$body_param_entitiesPayload, S>
 
@@ -10013,14 +10126,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends body_param_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends body_param_entitiesFindUniqueArgs>(args: SelectSubset<T, body_param_entitiesFindUniqueArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Body_param_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Body_param_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {body_param_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Body_param_entities
      * @example
      * // Get one Body_param_entities
@@ -10029,10 +10140,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends body_param_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends body_param_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, body_param_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Body_param_entities that matches the filter.
@@ -10046,10 +10155,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends body_param_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends body_param_entitiesFindFirstArgs>(args?: SelectSubset<T, body_param_entitiesFindFirstArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Body_param_entities that matches the filter or
@@ -10064,16 +10171,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends body_param_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends body_param_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, body_param_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Body_param_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {body_param_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {body_param_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Body_param_entities
      * const body_param_entities = await prisma.body_param_entities.findMany()
@@ -10084,10 +10189,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const body_param_entitiesWithIdOnly = await prisma.body_param_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends body_param_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends body_param_entitiesFindManyArgs>(args?: SelectSubset<T, body_param_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Body_param_entities.
@@ -10100,26 +10203,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends body_param_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends body_param_entitiesCreateArgs>(args: SelectSubset<T, body_param_entitiesCreateArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Body_param_entities.
-     *     @param {body_param_entitiesCreateManyArgs} args - Arguments to create many Body_param_entities.
-     *     @example
-     *     // Create many Body_param_entities
-     *     const body_param_entities = await prisma.body_param_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {body_param_entitiesCreateManyArgs} args - Arguments to create many Body_param_entities.
+     * @example
+     * // Create many Body_param_entities
+     * const body_param_entities = await prisma.body_param_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends body_param_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends body_param_entitiesCreateManyArgs>(args?: SelectSubset<T, body_param_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Body_param_entities and returns the data saved in the database.
+     * @param {body_param_entitiesCreateManyAndReturnArgs} args - Arguments to create many Body_param_entities.
+     * @example
+     * // Create many Body_param_entities
+     * const body_param_entities = await prisma.body_param_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Body_param_entities and only return the `id`
+     * const body_param_entitiesWithIdOnly = await prisma.body_param_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends body_param_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, body_param_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Body_param_entities.
@@ -10132,10 +10255,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends body_param_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends body_param_entitiesDeleteArgs>(args: SelectSubset<T, body_param_entitiesDeleteArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Body_param_entities.
@@ -10151,10 +10272,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends body_param_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends body_param_entitiesUpdateArgs>(args: SelectSubset<T, body_param_entitiesUpdateArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Body_param_entities.
@@ -10167,10 +10286,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends body_param_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, body_param_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends body_param_entitiesDeleteManyArgs>(args?: SelectSubset<T, body_param_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Body_param_entities.
@@ -10188,10 +10305,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends body_param_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends body_param_entitiesUpdateManyArgs>(args: SelectSubset<T, body_param_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Body_param_entities.
@@ -10209,10 +10324,9 @@ export namespace Prisma {
      *     // ... the filter for the Body_param_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends body_param_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, body_param_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends body_param_entitiesUpsertArgs>(args: SelectSubset<T, body_param_entitiesUpsertArgs<ExtArgs>>): Prisma__body_param_entitiesClient<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Body_param_entities.
@@ -10352,31 +10466,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__body_param_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    endpoints_entities<T extends endpoints_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    endpoints_entities<T extends endpoints_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -10393,7 +10506,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * body_param_entities findUnique
    */
@@ -10403,7 +10515,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10411,7 +10523,6 @@ export namespace Prisma {
      */
     where: body_param_entitiesWhereUniqueInput
   }
-
 
   /**
    * body_param_entities findUniqueOrThrow
@@ -10422,7 +10533,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10430,7 +10541,6 @@ export namespace Prisma {
      */
     where: body_param_entitiesWhereUniqueInput
   }
-
 
   /**
    * body_param_entities findFirst
@@ -10441,7 +10551,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10479,7 +10589,6 @@ export namespace Prisma {
      */
     distinct?: Body_param_entitiesScalarFieldEnum | Body_param_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * body_param_entities findFirstOrThrow
@@ -10490,7 +10599,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10529,7 +10638,6 @@ export namespace Prisma {
     distinct?: Body_param_entitiesScalarFieldEnum | Body_param_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * body_param_entities findMany
    */
@@ -10539,7 +10647,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10573,7 +10681,6 @@ export namespace Prisma {
     distinct?: Body_param_entitiesScalarFieldEnum | Body_param_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * body_param_entities create
    */
@@ -10583,7 +10690,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10591,7 +10698,6 @@ export namespace Prisma {
      */
     data: XOR<body_param_entitiesCreateInput, body_param_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * body_param_entities createMany
@@ -10604,6 +10710,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * body_param_entities createManyAndReturn
+   */
+  export type body_param_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the body_param_entities
+     */
+    select?: body_param_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many body_param_entities.
+     */
+    data: body_param_entitiesCreateManyInput | body_param_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: body_param_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * body_param_entities update
@@ -10614,7 +10738,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10626,7 +10750,6 @@ export namespace Prisma {
      */
     where: body_param_entitiesWhereUniqueInput
   }
-
 
   /**
    * body_param_entities updateMany
@@ -10642,7 +10765,6 @@ export namespace Prisma {
     where?: body_param_entitiesWhereInput
   }
 
-
   /**
    * body_param_entities upsert
    */
@@ -10652,7 +10774,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10669,7 +10791,6 @@ export namespace Prisma {
     update: XOR<body_param_entitiesUpdateInput, body_param_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * body_param_entities delete
    */
@@ -10679,7 +10800,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     /**
@@ -10687,7 +10808,6 @@ export namespace Prisma {
      */
     where: body_param_entitiesWhereUniqueInput
   }
-
 
   /**
    * body_param_entities deleteMany
@@ -10699,7 +10819,6 @@ export namespace Prisma {
     where?: body_param_entitiesWhereInput
   }
 
-
   /**
    * body_param_entities without action
    */
@@ -10709,11 +10828,10 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -10902,6 +11020,12 @@ export namespace Prisma {
     _count?: boolean | Category_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["category_entities"]>
 
+  export type category_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    category_name?: boolean
+    description?: boolean
+  }, ExtArgs["result"]["category_entities"]>
+
   export type category_entitiesSelectScalar = {
     id?: boolean
     category_name?: boolean
@@ -10912,7 +11036,7 @@ export namespace Prisma {
     api_entities?: boolean | category_entities$api_entitiesArgs<ExtArgs>
     _count?: boolean | Category_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type category_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $category_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "category_entities"
@@ -10926,7 +11050,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["category_entities"]>
     composites: {}
   }
-
 
   type category_entitiesGetPayload<S extends boolean | null | undefined | category_entitiesDefaultArgs> = $Result.GetResult<Prisma.$category_entitiesPayload, S>
 
@@ -10947,14 +11070,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends category_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends category_entitiesFindUniqueArgs>(args: SelectSubset<T, category_entitiesFindUniqueArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Category_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Category_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {category_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Category_entities
      * @example
      * // Get one Category_entities
@@ -10963,10 +11084,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends category_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends category_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, category_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Category_entities that matches the filter.
@@ -10980,10 +11099,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends category_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends category_entitiesFindFirstArgs>(args?: SelectSubset<T, category_entitiesFindFirstArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Category_entities that matches the filter or
@@ -10998,16 +11115,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends category_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends category_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, category_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Category_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {category_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {category_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Category_entities
      * const category_entities = await prisma.category_entities.findMany()
@@ -11018,10 +11133,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const category_entitiesWithIdOnly = await prisma.category_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends category_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends category_entitiesFindManyArgs>(args?: SelectSubset<T, category_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Category_entities.
@@ -11034,26 +11147,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends category_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends category_entitiesCreateArgs>(args: SelectSubset<T, category_entitiesCreateArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Category_entities.
-     *     @param {category_entitiesCreateManyArgs} args - Arguments to create many Category_entities.
-     *     @example
-     *     // Create many Category_entities
-     *     const category_entities = await prisma.category_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {category_entitiesCreateManyArgs} args - Arguments to create many Category_entities.
+     * @example
+     * // Create many Category_entities
+     * const category_entities = await prisma.category_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends category_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends category_entitiesCreateManyArgs>(args?: SelectSubset<T, category_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Category_entities and returns the data saved in the database.
+     * @param {category_entitiesCreateManyAndReturnArgs} args - Arguments to create many Category_entities.
+     * @example
+     * // Create many Category_entities
+     * const category_entities = await prisma.category_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Category_entities and only return the `id`
+     * const category_entitiesWithIdOnly = await prisma.category_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends category_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, category_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Category_entities.
@@ -11066,10 +11199,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends category_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends category_entitiesDeleteArgs>(args: SelectSubset<T, category_entitiesDeleteArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Category_entities.
@@ -11085,10 +11216,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends category_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends category_entitiesUpdateArgs>(args: SelectSubset<T, category_entitiesUpdateArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Category_entities.
@@ -11101,10 +11230,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends category_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, category_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends category_entitiesDeleteManyArgs>(args?: SelectSubset<T, category_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Category_entities.
@@ -11122,10 +11249,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends category_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends category_entitiesUpdateManyArgs>(args: SelectSubset<T, category_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Category_entities.
@@ -11143,10 +11268,9 @@ export namespace Prisma {
      *     // ... the filter for the Category_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends category_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, category_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends category_entitiesUpsertArgs>(args: SelectSubset<T, category_entitiesUpsertArgs<ExtArgs>>): Prisma__category_entitiesClient<$Result.GetResult<Prisma.$category_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Category_entities.
@@ -11286,31 +11410,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__category_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_entities<T extends category_entities$api_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, category_entities$api_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_entities<T extends category_entities$api_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, category_entities$api_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -11325,7 +11448,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * category_entities findUnique
    */
@@ -11335,7 +11457,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11343,7 +11465,6 @@ export namespace Prisma {
      */
     where: category_entitiesWhereUniqueInput
   }
-
 
   /**
    * category_entities findUniqueOrThrow
@@ -11354,7 +11475,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11362,7 +11483,6 @@ export namespace Prisma {
      */
     where: category_entitiesWhereUniqueInput
   }
-
 
   /**
    * category_entities findFirst
@@ -11373,7 +11493,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11411,7 +11531,6 @@ export namespace Prisma {
      */
     distinct?: Category_entitiesScalarFieldEnum | Category_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * category_entities findFirstOrThrow
@@ -11422,7 +11541,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11461,7 +11580,6 @@ export namespace Prisma {
     distinct?: Category_entitiesScalarFieldEnum | Category_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * category_entities findMany
    */
@@ -11471,7 +11589,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11505,7 +11623,6 @@ export namespace Prisma {
     distinct?: Category_entitiesScalarFieldEnum | Category_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * category_entities create
    */
@@ -11515,7 +11632,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11523,7 +11640,6 @@ export namespace Prisma {
      */
     data: XOR<category_entitiesCreateInput, category_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * category_entities createMany
@@ -11536,6 +11652,20 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * category_entities createManyAndReturn
+   */
+  export type category_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the category_entities
+     */
+    select?: category_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many category_entities.
+     */
+    data: category_entitiesCreateManyInput | category_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
 
   /**
    * category_entities update
@@ -11546,7 +11676,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11558,7 +11688,6 @@ export namespace Prisma {
      */
     where: category_entitiesWhereUniqueInput
   }
-
 
   /**
    * category_entities updateMany
@@ -11574,7 +11703,6 @@ export namespace Prisma {
     where?: category_entitiesWhereInput
   }
 
-
   /**
    * category_entities upsert
    */
@@ -11584,7 +11712,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11601,7 +11729,6 @@ export namespace Prisma {
     update: XOR<category_entitiesUpdateInput, category_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * category_entities delete
    */
@@ -11611,7 +11738,7 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
     /**
@@ -11619,7 +11746,6 @@ export namespace Prisma {
      */
     where: category_entitiesWhereUniqueInput
   }
-
 
   /**
    * category_entities deleteMany
@@ -11631,7 +11757,6 @@ export namespace Prisma {
     where?: category_entitiesWhereInput
   }
 
-
   /**
    * category_entities.api_entities
    */
@@ -11641,7 +11766,7 @@ export namespace Prisma {
      */
     select?: api_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_entitiesInclude<ExtArgs> | null
     where?: api_entitiesWhereInput
@@ -11652,7 +11777,6 @@ export namespace Prisma {
     distinct?: Api_entitiesScalarFieldEnum | Api_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * category_entities without action
    */
@@ -11662,11 +11786,10 @@ export namespace Prisma {
      */
     select?: category_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: category_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -11910,6 +12033,18 @@ export namespace Prisma {
     object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cross_object_entities"]>
 
+  export type cross_object_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    object_id?: boolean
+    limit_fee?: boolean
+    limit_type?: boolean
+    price?: boolean
+    quota_type?: boolean
+    quota_value?: boolean
+    add?: boolean
+    object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cross_object_entities"]>
+
   export type cross_object_entitiesSelectScalar = {
     id?: boolean
     object_id?: boolean
@@ -11924,7 +12059,9 @@ export namespace Prisma {
   export type cross_object_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type cross_object_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $cross_object_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "cross_object_entities"
@@ -11943,7 +12080,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["cross_object_entities"]>
     composites: {}
   }
-
 
   type cross_object_entitiesGetPayload<S extends boolean | null | undefined | cross_object_entitiesDefaultArgs> = $Result.GetResult<Prisma.$cross_object_entitiesPayload, S>
 
@@ -11964,14 +12100,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends cross_object_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends cross_object_entitiesFindUniqueArgs>(args: SelectSubset<T, cross_object_entitiesFindUniqueArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Cross_object_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Cross_object_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {cross_object_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Cross_object_entities
      * @example
      * // Get one Cross_object_entities
@@ -11980,10 +12114,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends cross_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends cross_object_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, cross_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Cross_object_entities that matches the filter.
@@ -11997,10 +12129,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends cross_object_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends cross_object_entitiesFindFirstArgs>(args?: SelectSubset<T, cross_object_entitiesFindFirstArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Cross_object_entities that matches the filter or
@@ -12015,16 +12145,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends cross_object_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends cross_object_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, cross_object_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Cross_object_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {cross_object_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {cross_object_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Cross_object_entities
      * const cross_object_entities = await prisma.cross_object_entities.findMany()
@@ -12035,10 +12163,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const cross_object_entitiesWithIdOnly = await prisma.cross_object_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends cross_object_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends cross_object_entitiesFindManyArgs>(args?: SelectSubset<T, cross_object_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Cross_object_entities.
@@ -12051,26 +12177,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends cross_object_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends cross_object_entitiesCreateArgs>(args: SelectSubset<T, cross_object_entitiesCreateArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Cross_object_entities.
-     *     @param {cross_object_entitiesCreateManyArgs} args - Arguments to create many Cross_object_entities.
-     *     @example
-     *     // Create many Cross_object_entities
-     *     const cross_object_entities = await prisma.cross_object_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {cross_object_entitiesCreateManyArgs} args - Arguments to create many Cross_object_entities.
+     * @example
+     * // Create many Cross_object_entities
+     * const cross_object_entities = await prisma.cross_object_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends cross_object_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends cross_object_entitiesCreateManyArgs>(args?: SelectSubset<T, cross_object_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Cross_object_entities and returns the data saved in the database.
+     * @param {cross_object_entitiesCreateManyAndReturnArgs} args - Arguments to create many Cross_object_entities.
+     * @example
+     * // Create many Cross_object_entities
+     * const cross_object_entities = await prisma.cross_object_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Cross_object_entities and only return the `id`
+     * const cross_object_entitiesWithIdOnly = await prisma.cross_object_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends cross_object_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, cross_object_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Cross_object_entities.
@@ -12083,10 +12229,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends cross_object_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends cross_object_entitiesDeleteArgs>(args: SelectSubset<T, cross_object_entitiesDeleteArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Cross_object_entities.
@@ -12102,10 +12246,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends cross_object_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends cross_object_entitiesUpdateArgs>(args: SelectSubset<T, cross_object_entitiesUpdateArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Cross_object_entities.
@@ -12118,10 +12260,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends cross_object_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, cross_object_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends cross_object_entitiesDeleteManyArgs>(args?: SelectSubset<T, cross_object_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Cross_object_entities.
@@ -12139,10 +12279,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends cross_object_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends cross_object_entitiesUpdateManyArgs>(args: SelectSubset<T, cross_object_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Cross_object_entities.
@@ -12160,10 +12298,9 @@ export namespace Prisma {
      *     // ... the filter for the Cross_object_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends cross_object_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, cross_object_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends cross_object_entitiesUpsertArgs>(args: SelectSubset<T, cross_object_entitiesUpsertArgs<ExtArgs>>): Prisma__cross_object_entitiesClient<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Cross_object_entities.
@@ -12303,31 +12440,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__cross_object_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    object_plan_entities<T extends object_plan_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entitiesDefaultArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    object_plan_entities<T extends object_plan_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entitiesDefaultArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -12347,7 +12483,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * cross_object_entities findUnique
    */
@@ -12357,7 +12492,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12365,7 +12500,6 @@ export namespace Prisma {
      */
     where: cross_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * cross_object_entities findUniqueOrThrow
@@ -12376,7 +12510,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12384,7 +12518,6 @@ export namespace Prisma {
      */
     where: cross_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * cross_object_entities findFirst
@@ -12395,7 +12528,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12433,7 +12566,6 @@ export namespace Prisma {
      */
     distinct?: Cross_object_entitiesScalarFieldEnum | Cross_object_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * cross_object_entities findFirstOrThrow
@@ -12444,7 +12576,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12483,7 +12615,6 @@ export namespace Prisma {
     distinct?: Cross_object_entitiesScalarFieldEnum | Cross_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * cross_object_entities findMany
    */
@@ -12493,7 +12624,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12527,7 +12658,6 @@ export namespace Prisma {
     distinct?: Cross_object_entitiesScalarFieldEnum | Cross_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * cross_object_entities create
    */
@@ -12537,7 +12667,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12545,7 +12675,6 @@ export namespace Prisma {
      */
     data: XOR<cross_object_entitiesCreateInput, cross_object_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * cross_object_entities createMany
@@ -12558,6 +12687,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * cross_object_entities createManyAndReturn
+   */
+  export type cross_object_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the cross_object_entities
+     */
+    select?: cross_object_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many cross_object_entities.
+     */
+    data: cross_object_entitiesCreateManyInput | cross_object_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: cross_object_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * cross_object_entities update
@@ -12568,7 +12715,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12580,7 +12727,6 @@ export namespace Prisma {
      */
     where: cross_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * cross_object_entities updateMany
@@ -12596,7 +12742,6 @@ export namespace Prisma {
     where?: cross_object_entitiesWhereInput
   }
 
-
   /**
    * cross_object_entities upsert
    */
@@ -12606,7 +12751,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12623,7 +12768,6 @@ export namespace Prisma {
     update: XOR<cross_object_entitiesUpdateInput, cross_object_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * cross_object_entities delete
    */
@@ -12633,7 +12777,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     /**
@@ -12641,7 +12785,6 @@ export namespace Prisma {
      */
     where: cross_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * cross_object_entities deleteMany
@@ -12653,7 +12796,6 @@ export namespace Prisma {
     where?: cross_object_entitiesWhereInput
   }
 
-
   /**
    * cross_object_entities without action
    */
@@ -12663,11 +12805,10 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -12863,6 +13004,13 @@ export namespace Prisma {
     object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["endpoint_object_entities"]>
 
+  export type endpoint_object_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    object_id?: boolean
+    endpoints_id?: boolean
+    object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["endpoint_object_entities"]>
+
   export type endpoint_object_entitiesSelectScalar = {
     id?: boolean
     object_id?: boolean
@@ -12872,7 +13020,9 @@ export namespace Prisma {
   export type endpoint_object_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type endpoint_object_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    object_plan_entities?: boolean | object_plan_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $endpoint_object_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "endpoint_object_entities"
@@ -12886,7 +13036,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["endpoint_object_entities"]>
     composites: {}
   }
-
 
   type endpoint_object_entitiesGetPayload<S extends boolean | null | undefined | endpoint_object_entitiesDefaultArgs> = $Result.GetResult<Prisma.$endpoint_object_entitiesPayload, S>
 
@@ -12907,14 +13056,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends endpoint_object_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends endpoint_object_entitiesFindUniqueArgs>(args: SelectSubset<T, endpoint_object_entitiesFindUniqueArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Endpoint_object_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Endpoint_object_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {endpoint_object_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Endpoint_object_entities
      * @example
      * // Get one Endpoint_object_entities
@@ -12923,10 +13070,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends endpoint_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends endpoint_object_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, endpoint_object_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Endpoint_object_entities that matches the filter.
@@ -12940,10 +13085,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends endpoint_object_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends endpoint_object_entitiesFindFirstArgs>(args?: SelectSubset<T, endpoint_object_entitiesFindFirstArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Endpoint_object_entities that matches the filter or
@@ -12958,16 +13101,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends endpoint_object_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends endpoint_object_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, endpoint_object_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Endpoint_object_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {endpoint_object_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {endpoint_object_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Endpoint_object_entities
      * const endpoint_object_entities = await prisma.endpoint_object_entities.findMany()
@@ -12978,10 +13119,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const endpoint_object_entitiesWithIdOnly = await prisma.endpoint_object_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends endpoint_object_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends endpoint_object_entitiesFindManyArgs>(args?: SelectSubset<T, endpoint_object_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Endpoint_object_entities.
@@ -12994,26 +13133,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends endpoint_object_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends endpoint_object_entitiesCreateArgs>(args: SelectSubset<T, endpoint_object_entitiesCreateArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Endpoint_object_entities.
-     *     @param {endpoint_object_entitiesCreateManyArgs} args - Arguments to create many Endpoint_object_entities.
-     *     @example
-     *     // Create many Endpoint_object_entities
-     *     const endpoint_object_entities = await prisma.endpoint_object_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {endpoint_object_entitiesCreateManyArgs} args - Arguments to create many Endpoint_object_entities.
+     * @example
+     * // Create many Endpoint_object_entities
+     * const endpoint_object_entities = await prisma.endpoint_object_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends endpoint_object_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends endpoint_object_entitiesCreateManyArgs>(args?: SelectSubset<T, endpoint_object_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Endpoint_object_entities and returns the data saved in the database.
+     * @param {endpoint_object_entitiesCreateManyAndReturnArgs} args - Arguments to create many Endpoint_object_entities.
+     * @example
+     * // Create many Endpoint_object_entities
+     * const endpoint_object_entities = await prisma.endpoint_object_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Endpoint_object_entities and only return the `id`
+     * const endpoint_object_entitiesWithIdOnly = await prisma.endpoint_object_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends endpoint_object_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, endpoint_object_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Endpoint_object_entities.
@@ -13026,10 +13185,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends endpoint_object_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends endpoint_object_entitiesDeleteArgs>(args: SelectSubset<T, endpoint_object_entitiesDeleteArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Endpoint_object_entities.
@@ -13045,10 +13202,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends endpoint_object_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends endpoint_object_entitiesUpdateArgs>(args: SelectSubset<T, endpoint_object_entitiesUpdateArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Endpoint_object_entities.
@@ -13061,10 +13216,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends endpoint_object_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoint_object_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends endpoint_object_entitiesDeleteManyArgs>(args?: SelectSubset<T, endpoint_object_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Endpoint_object_entities.
@@ -13082,10 +13235,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends endpoint_object_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends endpoint_object_entitiesUpdateManyArgs>(args: SelectSubset<T, endpoint_object_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Endpoint_object_entities.
@@ -13103,10 +13254,9 @@ export namespace Prisma {
      *     // ... the filter for the Endpoint_object_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends endpoint_object_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoint_object_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends endpoint_object_entitiesUpsertArgs>(args: SelectSubset<T, endpoint_object_entitiesUpsertArgs<ExtArgs>>): Prisma__endpoint_object_entitiesClient<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Endpoint_object_entities.
@@ -13246,31 +13396,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__endpoint_object_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    object_plan_entities<T extends object_plan_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entitiesDefaultArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    object_plan_entities<T extends object_plan_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entitiesDefaultArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -13285,7 +13434,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * endpoint_object_entities findUnique
    */
@@ -13295,7 +13443,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13303,7 +13451,6 @@ export namespace Prisma {
      */
     where: endpoint_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoint_object_entities findUniqueOrThrow
@@ -13314,7 +13461,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13322,7 +13469,6 @@ export namespace Prisma {
      */
     where: endpoint_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoint_object_entities findFirst
@@ -13333,7 +13479,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13371,7 +13517,6 @@ export namespace Prisma {
      */
     distinct?: Endpoint_object_entitiesScalarFieldEnum | Endpoint_object_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * endpoint_object_entities findFirstOrThrow
@@ -13382,7 +13527,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13421,7 +13566,6 @@ export namespace Prisma {
     distinct?: Endpoint_object_entitiesScalarFieldEnum | Endpoint_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoint_object_entities findMany
    */
@@ -13431,7 +13575,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13465,7 +13609,6 @@ export namespace Prisma {
     distinct?: Endpoint_object_entitiesScalarFieldEnum | Endpoint_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoint_object_entities create
    */
@@ -13475,7 +13618,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13483,7 +13626,6 @@ export namespace Prisma {
      */
     data: XOR<endpoint_object_entitiesCreateInput, endpoint_object_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * endpoint_object_entities createMany
@@ -13496,6 +13638,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * endpoint_object_entities createManyAndReturn
+   */
+  export type endpoint_object_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the endpoint_object_entities
+     */
+    select?: endpoint_object_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many endpoint_object_entities.
+     */
+    data: endpoint_object_entitiesCreateManyInput | endpoint_object_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: endpoint_object_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * endpoint_object_entities update
@@ -13506,7 +13666,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13518,7 +13678,6 @@ export namespace Prisma {
      */
     where: endpoint_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoint_object_entities updateMany
@@ -13534,7 +13693,6 @@ export namespace Prisma {
     where?: endpoint_object_entitiesWhereInput
   }
 
-
   /**
    * endpoint_object_entities upsert
    */
@@ -13544,7 +13702,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13561,7 +13719,6 @@ export namespace Prisma {
     update: XOR<endpoint_object_entitiesUpdateInput, endpoint_object_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * endpoint_object_entities delete
    */
@@ -13571,7 +13728,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     /**
@@ -13579,7 +13736,6 @@ export namespace Prisma {
      */
     where: endpoint_object_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoint_object_entities deleteMany
@@ -13591,7 +13747,6 @@ export namespace Prisma {
     where?: endpoint_object_entitiesWhereInput
   }
 
-
   /**
    * endpoint_object_entities without action
    */
@@ -13601,11 +13756,10 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -13825,6 +13979,16 @@ export namespace Prisma {
     _count?: boolean | Endpoints_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["endpoints_entities"]>
 
+  export type endpoints_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    group_id?: boolean
+    methode?: boolean
+    url?: boolean
+    description?: boolean
+    name?: boolean
+    endpoints_group_entities?: boolean | endpoints_group_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["endpoints_entities"]>
+
   export type endpoints_entitiesSelectScalar = {
     id?: boolean
     group_id?: boolean
@@ -13841,7 +14005,9 @@ export namespace Prisma {
     usage_log_entities?: boolean | endpoints_entities$usage_log_entitiesArgs<ExtArgs>
     _count?: boolean | Endpoints_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type endpoints_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    endpoints_group_entities?: boolean | endpoints_group_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $endpoints_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "endpoints_entities"
@@ -13862,7 +14028,6 @@ export namespace Prisma {
     composites: {}
   }
 
-
   type endpoints_entitiesGetPayload<S extends boolean | null | undefined | endpoints_entitiesDefaultArgs> = $Result.GetResult<Prisma.$endpoints_entitiesPayload, S>
 
   type endpoints_entitiesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
@@ -13882,14 +14047,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends endpoints_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends endpoints_entitiesFindUniqueArgs>(args: SelectSubset<T, endpoints_entitiesFindUniqueArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Endpoints_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Endpoints_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {endpoints_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Endpoints_entities
      * @example
      * // Get one Endpoints_entities
@@ -13898,10 +14061,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends endpoints_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends endpoints_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, endpoints_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Endpoints_entities that matches the filter.
@@ -13915,10 +14076,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends endpoints_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends endpoints_entitiesFindFirstArgs>(args?: SelectSubset<T, endpoints_entitiesFindFirstArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Endpoints_entities that matches the filter or
@@ -13933,16 +14092,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends endpoints_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends endpoints_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, endpoints_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Endpoints_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {endpoints_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {endpoints_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Endpoints_entities
      * const endpoints_entities = await prisma.endpoints_entities.findMany()
@@ -13953,10 +14110,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const endpoints_entitiesWithIdOnly = await prisma.endpoints_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends endpoints_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends endpoints_entitiesFindManyArgs>(args?: SelectSubset<T, endpoints_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Endpoints_entities.
@@ -13969,26 +14124,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends endpoints_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends endpoints_entitiesCreateArgs>(args: SelectSubset<T, endpoints_entitiesCreateArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Endpoints_entities.
-     *     @param {endpoints_entitiesCreateManyArgs} args - Arguments to create many Endpoints_entities.
-     *     @example
-     *     // Create many Endpoints_entities
-     *     const endpoints_entities = await prisma.endpoints_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {endpoints_entitiesCreateManyArgs} args - Arguments to create many Endpoints_entities.
+     * @example
+     * // Create many Endpoints_entities
+     * const endpoints_entities = await prisma.endpoints_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends endpoints_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends endpoints_entitiesCreateManyArgs>(args?: SelectSubset<T, endpoints_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Endpoints_entities and returns the data saved in the database.
+     * @param {endpoints_entitiesCreateManyAndReturnArgs} args - Arguments to create many Endpoints_entities.
+     * @example
+     * // Create many Endpoints_entities
+     * const endpoints_entities = await prisma.endpoints_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Endpoints_entities and only return the `id`
+     * const endpoints_entitiesWithIdOnly = await prisma.endpoints_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends endpoints_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, endpoints_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Endpoints_entities.
@@ -14001,10 +14176,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends endpoints_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends endpoints_entitiesDeleteArgs>(args: SelectSubset<T, endpoints_entitiesDeleteArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Endpoints_entities.
@@ -14020,10 +14193,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends endpoints_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends endpoints_entitiesUpdateArgs>(args: SelectSubset<T, endpoints_entitiesUpdateArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Endpoints_entities.
@@ -14036,10 +14207,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends endpoints_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends endpoints_entitiesDeleteManyArgs>(args?: SelectSubset<T, endpoints_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Endpoints_entities.
@@ -14057,10 +14226,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends endpoints_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends endpoints_entitiesUpdateManyArgs>(args: SelectSubset<T, endpoints_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Endpoints_entities.
@@ -14078,10 +14245,9 @@ export namespace Prisma {
      *     // ... the filter for the Endpoints_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends endpoints_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends endpoints_entitiesUpsertArgs>(args: SelectSubset<T, endpoints_entitiesUpsertArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Endpoints_entities.
@@ -14221,37 +14387,33 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__endpoints_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    body_param_entities<T extends endpoints_entities$body_param_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$body_param_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    endpoints_group_entities<T extends endpoints_group_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_group_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
-    endpoints_parameter_entities<T extends endpoints_entities$endpoints_parameter_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$endpoints_parameter_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    usage_log_entities<T extends endpoints_entities$usage_log_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$usage_log_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    body_param_entities<T extends endpoints_entities$body_param_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$body_param_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$body_param_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    endpoints_group_entities<T extends endpoints_group_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_group_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    endpoints_parameter_entities<T extends endpoints_entities$endpoints_parameter_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$endpoints_parameter_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    usage_log_entities<T extends endpoints_entities$usage_log_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entities$usage_log_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -14269,7 +14431,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * endpoints_entities findUnique
    */
@@ -14279,7 +14440,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14287,7 +14448,6 @@ export namespace Prisma {
      */
     where: endpoints_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_entities findUniqueOrThrow
@@ -14298,7 +14458,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14306,7 +14466,6 @@ export namespace Prisma {
      */
     where: endpoints_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_entities findFirst
@@ -14317,7 +14476,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14355,7 +14514,6 @@ export namespace Prisma {
      */
     distinct?: Endpoints_entitiesScalarFieldEnum | Endpoints_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * endpoints_entities findFirstOrThrow
@@ -14366,7 +14524,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14405,7 +14563,6 @@ export namespace Prisma {
     distinct?: Endpoints_entitiesScalarFieldEnum | Endpoints_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_entities findMany
    */
@@ -14415,7 +14572,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14449,7 +14606,6 @@ export namespace Prisma {
     distinct?: Endpoints_entitiesScalarFieldEnum | Endpoints_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_entities create
    */
@@ -14459,7 +14615,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14467,7 +14623,6 @@ export namespace Prisma {
      */
     data: XOR<endpoints_entitiesCreateInput, endpoints_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * endpoints_entities createMany
@@ -14480,6 +14635,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * endpoints_entities createManyAndReturn
+   */
+  export type endpoints_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the endpoints_entities
+     */
+    select?: endpoints_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many endpoints_entities.
+     */
+    data: endpoints_entitiesCreateManyInput | endpoints_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: endpoints_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * endpoints_entities update
@@ -14490,7 +14663,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14502,7 +14675,6 @@ export namespace Prisma {
      */
     where: endpoints_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_entities updateMany
@@ -14518,7 +14690,6 @@ export namespace Prisma {
     where?: endpoints_entitiesWhereInput
   }
 
-
   /**
    * endpoints_entities upsert
    */
@@ -14528,7 +14699,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14545,7 +14716,6 @@ export namespace Prisma {
     update: XOR<endpoints_entitiesUpdateInput, endpoints_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * endpoints_entities delete
    */
@@ -14555,7 +14725,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     /**
@@ -14563,7 +14733,6 @@ export namespace Prisma {
      */
     where: endpoints_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_entities deleteMany
@@ -14575,7 +14744,6 @@ export namespace Prisma {
     where?: endpoints_entitiesWhereInput
   }
 
-
   /**
    * endpoints_entities.body_param_entities
    */
@@ -14585,7 +14753,7 @@ export namespace Prisma {
      */
     select?: body_param_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: body_param_entitiesInclude<ExtArgs> | null
     where?: body_param_entitiesWhereInput
@@ -14596,7 +14764,6 @@ export namespace Prisma {
     distinct?: Body_param_entitiesScalarFieldEnum | Body_param_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_entities.endpoints_parameter_entities
    */
@@ -14606,7 +14773,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     where?: endpoints_parameter_entitiesWhereInput
@@ -14617,7 +14784,6 @@ export namespace Prisma {
     distinct?: Endpoints_parameter_entitiesScalarFieldEnum | Endpoints_parameter_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_entities.usage_log_entities
    */
@@ -14627,7 +14793,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     where?: usage_log_entitiesWhereInput
@@ -14638,7 +14804,6 @@ export namespace Prisma {
     distinct?: Usage_log_entitiesScalarFieldEnum | Usage_log_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_entities without action
    */
@@ -14648,11 +14813,10 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -14854,6 +15018,14 @@ export namespace Prisma {
     _count?: boolean | Endpoints_group_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["endpoints_group_entities"]>
 
+  export type endpoints_group_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    group?: boolean
+    api_id?: boolean
+    description?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["endpoints_group_entities"]>
+
   export type endpoints_group_entitiesSelectScalar = {
     id?: boolean
     group?: boolean
@@ -14866,7 +15038,9 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
     _count?: boolean | Endpoints_group_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type endpoints_group_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $endpoints_group_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "endpoints_group_entities"
@@ -14882,7 +15056,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["endpoints_group_entities"]>
     composites: {}
   }
-
 
   type endpoints_group_entitiesGetPayload<S extends boolean | null | undefined | endpoints_group_entitiesDefaultArgs> = $Result.GetResult<Prisma.$endpoints_group_entitiesPayload, S>
 
@@ -14903,14 +15076,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends endpoints_group_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends endpoints_group_entitiesFindUniqueArgs>(args: SelectSubset<T, endpoints_group_entitiesFindUniqueArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Endpoints_group_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Endpoints_group_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {endpoints_group_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Endpoints_group_entities
      * @example
      * // Get one Endpoints_group_entities
@@ -14919,10 +15090,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends endpoints_group_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends endpoints_group_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, endpoints_group_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Endpoints_group_entities that matches the filter.
@@ -14936,10 +15105,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends endpoints_group_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends endpoints_group_entitiesFindFirstArgs>(args?: SelectSubset<T, endpoints_group_entitiesFindFirstArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Endpoints_group_entities that matches the filter or
@@ -14954,16 +15121,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends endpoints_group_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends endpoints_group_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, endpoints_group_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Endpoints_group_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {endpoints_group_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {endpoints_group_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Endpoints_group_entities
      * const endpoints_group_entities = await prisma.endpoints_group_entities.findMany()
@@ -14974,10 +15139,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const endpoints_group_entitiesWithIdOnly = await prisma.endpoints_group_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends endpoints_group_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends endpoints_group_entitiesFindManyArgs>(args?: SelectSubset<T, endpoints_group_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Endpoints_group_entities.
@@ -14990,26 +15153,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends endpoints_group_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends endpoints_group_entitiesCreateArgs>(args: SelectSubset<T, endpoints_group_entitiesCreateArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Endpoints_group_entities.
-     *     @param {endpoints_group_entitiesCreateManyArgs} args - Arguments to create many Endpoints_group_entities.
-     *     @example
-     *     // Create many Endpoints_group_entities
-     *     const endpoints_group_entities = await prisma.endpoints_group_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {endpoints_group_entitiesCreateManyArgs} args - Arguments to create many Endpoints_group_entities.
+     * @example
+     * // Create many Endpoints_group_entities
+     * const endpoints_group_entities = await prisma.endpoints_group_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends endpoints_group_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends endpoints_group_entitiesCreateManyArgs>(args?: SelectSubset<T, endpoints_group_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Endpoints_group_entities and returns the data saved in the database.
+     * @param {endpoints_group_entitiesCreateManyAndReturnArgs} args - Arguments to create many Endpoints_group_entities.
+     * @example
+     * // Create many Endpoints_group_entities
+     * const endpoints_group_entities = await prisma.endpoints_group_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Endpoints_group_entities and only return the `id`
+     * const endpoints_group_entitiesWithIdOnly = await prisma.endpoints_group_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends endpoints_group_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, endpoints_group_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Endpoints_group_entities.
@@ -15022,10 +15205,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends endpoints_group_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends endpoints_group_entitiesDeleteArgs>(args: SelectSubset<T, endpoints_group_entitiesDeleteArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Endpoints_group_entities.
@@ -15041,10 +15222,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends endpoints_group_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends endpoints_group_entitiesUpdateArgs>(args: SelectSubset<T, endpoints_group_entitiesUpdateArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Endpoints_group_entities.
@@ -15057,10 +15236,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends endpoints_group_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_group_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends endpoints_group_entitiesDeleteManyArgs>(args?: SelectSubset<T, endpoints_group_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Endpoints_group_entities.
@@ -15078,10 +15255,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends endpoints_group_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends endpoints_group_entitiesUpdateManyArgs>(args: SelectSubset<T, endpoints_group_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Endpoints_group_entities.
@@ -15099,10 +15274,9 @@ export namespace Prisma {
      *     // ... the filter for the Endpoints_group_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends endpoints_group_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_group_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends endpoints_group_entitiesUpsertArgs>(args: SelectSubset<T, endpoints_group_entitiesUpsertArgs<ExtArgs>>): Prisma__endpoints_group_entitiesClient<$Result.GetResult<Prisma.$endpoints_group_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Endpoints_group_entities.
@@ -15242,33 +15416,31 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__endpoints_group_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    endpoints_entities<T extends endpoints_group_entities$endpoints_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_group_entities$endpoints_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    endpoints_entities<T extends endpoints_group_entities$endpoints_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_group_entities$endpoints_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -15284,7 +15456,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * endpoints_group_entities findUnique
    */
@@ -15294,7 +15465,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15302,7 +15473,6 @@ export namespace Prisma {
      */
     where: endpoints_group_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_group_entities findUniqueOrThrow
@@ -15313,7 +15483,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15321,7 +15491,6 @@ export namespace Prisma {
      */
     where: endpoints_group_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_group_entities findFirst
@@ -15332,7 +15501,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15370,7 +15539,6 @@ export namespace Prisma {
      */
     distinct?: Endpoints_group_entitiesScalarFieldEnum | Endpoints_group_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * endpoints_group_entities findFirstOrThrow
@@ -15381,7 +15549,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15420,7 +15588,6 @@ export namespace Prisma {
     distinct?: Endpoints_group_entitiesScalarFieldEnum | Endpoints_group_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_group_entities findMany
    */
@@ -15430,7 +15597,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15464,7 +15631,6 @@ export namespace Prisma {
     distinct?: Endpoints_group_entitiesScalarFieldEnum | Endpoints_group_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_group_entities create
    */
@@ -15474,7 +15640,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15482,7 +15648,6 @@ export namespace Prisma {
      */
     data: XOR<endpoints_group_entitiesCreateInput, endpoints_group_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * endpoints_group_entities createMany
@@ -15495,6 +15660,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * endpoints_group_entities createManyAndReturn
+   */
+  export type endpoints_group_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the endpoints_group_entities
+     */
+    select?: endpoints_group_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many endpoints_group_entities.
+     */
+    data: endpoints_group_entitiesCreateManyInput | endpoints_group_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: endpoints_group_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * endpoints_group_entities update
@@ -15505,7 +15688,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15517,7 +15700,6 @@ export namespace Prisma {
      */
     where: endpoints_group_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_group_entities updateMany
@@ -15533,7 +15715,6 @@ export namespace Prisma {
     where?: endpoints_group_entitiesWhereInput
   }
 
-
   /**
    * endpoints_group_entities upsert
    */
@@ -15543,7 +15724,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15560,7 +15741,6 @@ export namespace Prisma {
     update: XOR<endpoints_group_entitiesUpdateInput, endpoints_group_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * endpoints_group_entities delete
    */
@@ -15570,7 +15750,7 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
     /**
@@ -15578,7 +15758,6 @@ export namespace Prisma {
      */
     where: endpoints_group_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_group_entities deleteMany
@@ -15590,7 +15769,6 @@ export namespace Prisma {
     where?: endpoints_group_entitiesWhereInput
   }
 
-
   /**
    * endpoints_group_entities.endpoints_entities
    */
@@ -15600,7 +15778,7 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     where?: endpoints_entitiesWhereInput
@@ -15611,7 +15789,6 @@ export namespace Prisma {
     distinct?: Endpoints_entitiesScalarFieldEnum | Endpoints_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_group_entities without action
    */
@@ -15621,11 +15798,10 @@ export namespace Prisma {
      */
     select?: endpoints_group_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_group_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -15849,6 +16025,17 @@ export namespace Prisma {
     endpoints_entities?: boolean | endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>
   }, ExtArgs["result"]["endpoints_parameter_entities"]>
 
+  export type endpoints_parameter_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    endpoint_id?: boolean
+    key?: boolean
+    value_type?: boolean
+    parameter_type?: boolean
+    example_value?: boolean
+    required?: boolean
+    endpoints_entities?: boolean | endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>
+  }, ExtArgs["result"]["endpoints_parameter_entities"]>
+
   export type endpoints_parameter_entitiesSelectScalar = {
     id?: boolean
     endpoint_id?: boolean
@@ -15862,7 +16049,9 @@ export namespace Prisma {
   export type endpoints_parameter_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     endpoints_entities?: boolean | endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>
   }
-
+  export type endpoints_parameter_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    endpoints_entities?: boolean | endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>
+  }
 
   export type $endpoints_parameter_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "endpoints_parameter_entities"
@@ -15880,7 +16069,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["endpoints_parameter_entities"]>
     composites: {}
   }
-
 
   type endpoints_parameter_entitiesGetPayload<S extends boolean | null | undefined | endpoints_parameter_entitiesDefaultArgs> = $Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload, S>
 
@@ -15901,14 +16089,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends endpoints_parameter_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends endpoints_parameter_entitiesFindUniqueArgs>(args: SelectSubset<T, endpoints_parameter_entitiesFindUniqueArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Endpoints_parameter_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Endpoints_parameter_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {endpoints_parameter_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Endpoints_parameter_entities
      * @example
      * // Get one Endpoints_parameter_entities
@@ -15917,10 +16103,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends endpoints_parameter_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends endpoints_parameter_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, endpoints_parameter_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Endpoints_parameter_entities that matches the filter.
@@ -15934,10 +16118,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends endpoints_parameter_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends endpoints_parameter_entitiesFindFirstArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesFindFirstArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Endpoints_parameter_entities that matches the filter or
@@ -15952,16 +16134,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends endpoints_parameter_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends endpoints_parameter_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Endpoints_parameter_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {endpoints_parameter_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {endpoints_parameter_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Endpoints_parameter_entities
      * const endpoints_parameter_entities = await prisma.endpoints_parameter_entities.findMany()
@@ -15972,10 +16152,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const endpoints_parameter_entitiesWithIdOnly = await prisma.endpoints_parameter_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends endpoints_parameter_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends endpoints_parameter_entitiesFindManyArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Endpoints_parameter_entities.
@@ -15988,26 +16166,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends endpoints_parameter_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends endpoints_parameter_entitiesCreateArgs>(args: SelectSubset<T, endpoints_parameter_entitiesCreateArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Endpoints_parameter_entities.
-     *     @param {endpoints_parameter_entitiesCreateManyArgs} args - Arguments to create many Endpoints_parameter_entities.
-     *     @example
-     *     // Create many Endpoints_parameter_entities
-     *     const endpoints_parameter_entities = await prisma.endpoints_parameter_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {endpoints_parameter_entitiesCreateManyArgs} args - Arguments to create many Endpoints_parameter_entities.
+     * @example
+     * // Create many Endpoints_parameter_entities
+     * const endpoints_parameter_entities = await prisma.endpoints_parameter_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends endpoints_parameter_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends endpoints_parameter_entitiesCreateManyArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Endpoints_parameter_entities and returns the data saved in the database.
+     * @param {endpoints_parameter_entitiesCreateManyAndReturnArgs} args - Arguments to create many Endpoints_parameter_entities.
+     * @example
+     * // Create many Endpoints_parameter_entities
+     * const endpoints_parameter_entities = await prisma.endpoints_parameter_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Endpoints_parameter_entities and only return the `id`
+     * const endpoints_parameter_entitiesWithIdOnly = await prisma.endpoints_parameter_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends endpoints_parameter_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Endpoints_parameter_entities.
@@ -16020,10 +16218,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends endpoints_parameter_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends endpoints_parameter_entitiesDeleteArgs>(args: SelectSubset<T, endpoints_parameter_entitiesDeleteArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Endpoints_parameter_entities.
@@ -16039,10 +16235,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends endpoints_parameter_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends endpoints_parameter_entitiesUpdateArgs>(args: SelectSubset<T, endpoints_parameter_entitiesUpdateArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Endpoints_parameter_entities.
@@ -16055,10 +16249,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends endpoints_parameter_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, endpoints_parameter_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends endpoints_parameter_entitiesDeleteManyArgs>(args?: SelectSubset<T, endpoints_parameter_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Endpoints_parameter_entities.
@@ -16076,10 +16268,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends endpoints_parameter_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends endpoints_parameter_entitiesUpdateManyArgs>(args: SelectSubset<T, endpoints_parameter_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Endpoints_parameter_entities.
@@ -16097,10 +16287,9 @@ export namespace Prisma {
      *     // ... the filter for the Endpoints_parameter_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends endpoints_parameter_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, endpoints_parameter_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends endpoints_parameter_entitiesUpsertArgs>(args: SelectSubset<T, endpoints_parameter_entitiesUpsertArgs<ExtArgs>>): Prisma__endpoints_parameter_entitiesClient<$Result.GetResult<Prisma.$endpoints_parameter_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Endpoints_parameter_entities.
@@ -16240,31 +16429,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__endpoints_parameter_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    endpoints_entities<T extends endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    endpoints_entities<T extends endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_parameter_entities$endpoints_entitiesArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -16283,7 +16471,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * endpoints_parameter_entities findUnique
    */
@@ -16293,7 +16480,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16301,7 +16488,6 @@ export namespace Prisma {
      */
     where: endpoints_parameter_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_parameter_entities findUniqueOrThrow
@@ -16312,7 +16498,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16320,7 +16506,6 @@ export namespace Prisma {
      */
     where: endpoints_parameter_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_parameter_entities findFirst
@@ -16331,7 +16516,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16369,7 +16554,6 @@ export namespace Prisma {
      */
     distinct?: Endpoints_parameter_entitiesScalarFieldEnum | Endpoints_parameter_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * endpoints_parameter_entities findFirstOrThrow
@@ -16380,7 +16564,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16419,7 +16603,6 @@ export namespace Prisma {
     distinct?: Endpoints_parameter_entitiesScalarFieldEnum | Endpoints_parameter_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_parameter_entities findMany
    */
@@ -16429,7 +16612,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16463,7 +16646,6 @@ export namespace Prisma {
     distinct?: Endpoints_parameter_entitiesScalarFieldEnum | Endpoints_parameter_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * endpoints_parameter_entities create
    */
@@ -16473,7 +16655,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16481,7 +16663,6 @@ export namespace Prisma {
      */
     data: XOR<endpoints_parameter_entitiesCreateInput, endpoints_parameter_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * endpoints_parameter_entities createMany
@@ -16494,6 +16675,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * endpoints_parameter_entities createManyAndReturn
+   */
+  export type endpoints_parameter_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the endpoints_parameter_entities
+     */
+    select?: endpoints_parameter_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many endpoints_parameter_entities.
+     */
+    data: endpoints_parameter_entitiesCreateManyInput | endpoints_parameter_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: endpoints_parameter_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * endpoints_parameter_entities update
@@ -16504,7 +16703,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16516,7 +16715,6 @@ export namespace Prisma {
      */
     where: endpoints_parameter_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_parameter_entities updateMany
@@ -16532,7 +16730,6 @@ export namespace Prisma {
     where?: endpoints_parameter_entitiesWhereInput
   }
 
-
   /**
    * endpoints_parameter_entities upsert
    */
@@ -16542,7 +16739,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16559,7 +16756,6 @@ export namespace Prisma {
     update: XOR<endpoints_parameter_entitiesUpdateInput, endpoints_parameter_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * endpoints_parameter_entities delete
    */
@@ -16569,7 +16765,7 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
     /**
@@ -16577,7 +16773,6 @@ export namespace Prisma {
      */
     where: endpoints_parameter_entitiesWhereUniqueInput
   }
-
 
   /**
    * endpoints_parameter_entities deleteMany
@@ -16589,7 +16784,6 @@ export namespace Prisma {
     where?: endpoints_parameter_entitiesWhereInput
   }
 
-
   /**
    * endpoints_parameter_entities.endpoints_entities
    */
@@ -16599,12 +16793,11 @@ export namespace Prisma {
      */
     select?: endpoints_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_entitiesInclude<ExtArgs> | null
     where?: endpoints_entitiesWhereInput
   }
-
 
   /**
    * endpoints_parameter_entities without action
@@ -16615,11 +16808,10 @@ export namespace Prisma {
      */
     select?: endpoints_parameter_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoints_parameter_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -16844,6 +17036,16 @@ export namespace Prisma {
     _count?: boolean | Health_check_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["health_check_entities"]>
 
+  export type health_check_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    url?: boolean
+    schedule?: boolean
+    last_status?: boolean
+    last_checked_at?: boolean
+    alerts_enabled?: boolean
+  }, ExtArgs["result"]["health_check_entities"]>
+
   export type health_check_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -16858,7 +17060,7 @@ export namespace Prisma {
     health_check_result_entities?: boolean | health_check_entities$health_check_result_entitiesArgs<ExtArgs>
     _count?: boolean | Health_check_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type health_check_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $health_check_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "health_check_entities"
@@ -16876,7 +17078,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["health_check_entities"]>
     composites: {}
   }
-
 
   type health_check_entitiesGetPayload<S extends boolean | null | undefined | health_check_entitiesDefaultArgs> = $Result.GetResult<Prisma.$health_check_entitiesPayload, S>
 
@@ -16897,14 +17098,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends health_check_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends health_check_entitiesFindUniqueArgs>(args: SelectSubset<T, health_check_entitiesFindUniqueArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Health_check_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Health_check_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {health_check_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Health_check_entities
      * @example
      * // Get one Health_check_entities
@@ -16913,10 +17112,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends health_check_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends health_check_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, health_check_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Health_check_entities that matches the filter.
@@ -16930,10 +17127,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends health_check_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends health_check_entitiesFindFirstArgs>(args?: SelectSubset<T, health_check_entitiesFindFirstArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Health_check_entities that matches the filter or
@@ -16948,16 +17143,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends health_check_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends health_check_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, health_check_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Health_check_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {health_check_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {health_check_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Health_check_entities
      * const health_check_entities = await prisma.health_check_entities.findMany()
@@ -16968,10 +17161,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const health_check_entitiesWithIdOnly = await prisma.health_check_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends health_check_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends health_check_entitiesFindManyArgs>(args?: SelectSubset<T, health_check_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Health_check_entities.
@@ -16984,26 +17175,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends health_check_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends health_check_entitiesCreateArgs>(args: SelectSubset<T, health_check_entitiesCreateArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Health_check_entities.
-     *     @param {health_check_entitiesCreateManyArgs} args - Arguments to create many Health_check_entities.
-     *     @example
-     *     // Create many Health_check_entities
-     *     const health_check_entities = await prisma.health_check_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {health_check_entitiesCreateManyArgs} args - Arguments to create many Health_check_entities.
+     * @example
+     * // Create many Health_check_entities
+     * const health_check_entities = await prisma.health_check_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends health_check_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends health_check_entitiesCreateManyArgs>(args?: SelectSubset<T, health_check_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Health_check_entities and returns the data saved in the database.
+     * @param {health_check_entitiesCreateManyAndReturnArgs} args - Arguments to create many Health_check_entities.
+     * @example
+     * // Create many Health_check_entities
+     * const health_check_entities = await prisma.health_check_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Health_check_entities and only return the `id`
+     * const health_check_entitiesWithIdOnly = await prisma.health_check_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends health_check_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, health_check_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Health_check_entities.
@@ -17016,10 +17227,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends health_check_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends health_check_entitiesDeleteArgs>(args: SelectSubset<T, health_check_entitiesDeleteArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Health_check_entities.
@@ -17035,10 +17244,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends health_check_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends health_check_entitiesUpdateArgs>(args: SelectSubset<T, health_check_entitiesUpdateArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Health_check_entities.
@@ -17051,10 +17258,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends health_check_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends health_check_entitiesDeleteManyArgs>(args?: SelectSubset<T, health_check_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Health_check_entities.
@@ -17072,10 +17277,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends health_check_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends health_check_entitiesUpdateManyArgs>(args: SelectSubset<T, health_check_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Health_check_entities.
@@ -17093,10 +17296,9 @@ export namespace Prisma {
      *     // ... the filter for the Health_check_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends health_check_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends health_check_entitiesUpsertArgs>(args: SelectSubset<T, health_check_entitiesUpsertArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Health_check_entities.
@@ -17236,31 +17438,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__health_check_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    health_check_result_entities<T extends health_check_entities$health_check_result_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, health_check_entities$health_check_result_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    health_check_result_entities<T extends health_check_entities$health_check_result_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, health_check_entities$health_check_result_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -17279,7 +17480,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * health_check_entities findUnique
    */
@@ -17289,7 +17489,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17297,7 +17497,6 @@ export namespace Prisma {
      */
     where: health_check_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_entities findUniqueOrThrow
@@ -17308,7 +17507,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17316,7 +17515,6 @@ export namespace Prisma {
      */
     where: health_check_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_entities findFirst
@@ -17327,7 +17525,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17365,7 +17563,6 @@ export namespace Prisma {
      */
     distinct?: Health_check_entitiesScalarFieldEnum | Health_check_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * health_check_entities findFirstOrThrow
@@ -17376,7 +17573,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17415,7 +17612,6 @@ export namespace Prisma {
     distinct?: Health_check_entitiesScalarFieldEnum | Health_check_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * health_check_entities findMany
    */
@@ -17425,7 +17621,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17459,7 +17655,6 @@ export namespace Prisma {
     distinct?: Health_check_entitiesScalarFieldEnum | Health_check_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * health_check_entities create
    */
@@ -17469,7 +17664,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17477,7 +17672,6 @@ export namespace Prisma {
      */
     data: XOR<health_check_entitiesCreateInput, health_check_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * health_check_entities createMany
@@ -17490,6 +17684,20 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * health_check_entities createManyAndReturn
+   */
+  export type health_check_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the health_check_entities
+     */
+    select?: health_check_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many health_check_entities.
+     */
+    data: health_check_entitiesCreateManyInput | health_check_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
 
   /**
    * health_check_entities update
@@ -17500,7 +17708,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17512,7 +17720,6 @@ export namespace Prisma {
      */
     where: health_check_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_entities updateMany
@@ -17528,7 +17735,6 @@ export namespace Prisma {
     where?: health_check_entitiesWhereInput
   }
 
-
   /**
    * health_check_entities upsert
    */
@@ -17538,7 +17744,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17555,7 +17761,6 @@ export namespace Prisma {
     update: XOR<health_check_entitiesUpdateInput, health_check_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * health_check_entities delete
    */
@@ -17565,7 +17770,7 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
     /**
@@ -17573,7 +17778,6 @@ export namespace Prisma {
      */
     where: health_check_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_entities deleteMany
@@ -17585,7 +17789,6 @@ export namespace Prisma {
     where?: health_check_entitiesWhereInput
   }
 
-
   /**
    * health_check_entities.health_check_result_entities
    */
@@ -17595,7 +17798,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     where?: health_check_result_entitiesWhereInput
@@ -17606,7 +17809,6 @@ export namespace Prisma {
     distinct?: Health_check_result_entitiesScalarFieldEnum | Health_check_result_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * health_check_entities without action
    */
@@ -17616,11 +17818,10 @@ export namespace Prisma {
      */
     select?: health_check_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -17840,6 +18041,16 @@ export namespace Prisma {
     health_check_entities?: boolean | health_check_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["health_check_result_entities"]>
 
+  export type health_check_result_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    health_check_id?: boolean
+    status?: boolean
+    response_time?: boolean
+    status_message?: boolean
+    checked_at?: boolean
+    health_check_entities?: boolean | health_check_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["health_check_result_entities"]>
+
   export type health_check_result_entitiesSelectScalar = {
     id?: boolean
     health_check_id?: boolean
@@ -17852,7 +18063,9 @@ export namespace Prisma {
   export type health_check_result_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     health_check_entities?: boolean | health_check_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type health_check_result_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    health_check_entities?: boolean | health_check_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $health_check_result_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "health_check_result_entities"
@@ -17869,7 +18082,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["health_check_result_entities"]>
     composites: {}
   }
-
 
   type health_check_result_entitiesGetPayload<S extends boolean | null | undefined | health_check_result_entitiesDefaultArgs> = $Result.GetResult<Prisma.$health_check_result_entitiesPayload, S>
 
@@ -17890,14 +18102,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends health_check_result_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends health_check_result_entitiesFindUniqueArgs>(args: SelectSubset<T, health_check_result_entitiesFindUniqueArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Health_check_result_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Health_check_result_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {health_check_result_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Health_check_result_entities
      * @example
      * // Get one Health_check_result_entities
@@ -17906,10 +18116,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends health_check_result_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends health_check_result_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, health_check_result_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Health_check_result_entities that matches the filter.
@@ -17923,10 +18131,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends health_check_result_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends health_check_result_entitiesFindFirstArgs>(args?: SelectSubset<T, health_check_result_entitiesFindFirstArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Health_check_result_entities that matches the filter or
@@ -17941,16 +18147,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends health_check_result_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends health_check_result_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, health_check_result_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Health_check_result_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {health_check_result_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {health_check_result_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Health_check_result_entities
      * const health_check_result_entities = await prisma.health_check_result_entities.findMany()
@@ -17961,10 +18165,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const health_check_result_entitiesWithIdOnly = await prisma.health_check_result_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends health_check_result_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends health_check_result_entitiesFindManyArgs>(args?: SelectSubset<T, health_check_result_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Health_check_result_entities.
@@ -17977,26 +18179,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends health_check_result_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends health_check_result_entitiesCreateArgs>(args: SelectSubset<T, health_check_result_entitiesCreateArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Health_check_result_entities.
-     *     @param {health_check_result_entitiesCreateManyArgs} args - Arguments to create many Health_check_result_entities.
-     *     @example
-     *     // Create many Health_check_result_entities
-     *     const health_check_result_entities = await prisma.health_check_result_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {health_check_result_entitiesCreateManyArgs} args - Arguments to create many Health_check_result_entities.
+     * @example
+     * // Create many Health_check_result_entities
+     * const health_check_result_entities = await prisma.health_check_result_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends health_check_result_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends health_check_result_entitiesCreateManyArgs>(args?: SelectSubset<T, health_check_result_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Health_check_result_entities and returns the data saved in the database.
+     * @param {health_check_result_entitiesCreateManyAndReturnArgs} args - Arguments to create many Health_check_result_entities.
+     * @example
+     * // Create many Health_check_result_entities
+     * const health_check_result_entities = await prisma.health_check_result_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Health_check_result_entities and only return the `id`
+     * const health_check_result_entitiesWithIdOnly = await prisma.health_check_result_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends health_check_result_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, health_check_result_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Health_check_result_entities.
@@ -18009,10 +18231,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends health_check_result_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends health_check_result_entitiesDeleteArgs>(args: SelectSubset<T, health_check_result_entitiesDeleteArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Health_check_result_entities.
@@ -18028,10 +18248,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends health_check_result_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends health_check_result_entitiesUpdateArgs>(args: SelectSubset<T, health_check_result_entitiesUpdateArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Health_check_result_entities.
@@ -18044,10 +18262,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends health_check_result_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, health_check_result_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends health_check_result_entitiesDeleteManyArgs>(args?: SelectSubset<T, health_check_result_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Health_check_result_entities.
@@ -18065,10 +18281,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends health_check_result_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends health_check_result_entitiesUpdateManyArgs>(args: SelectSubset<T, health_check_result_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Health_check_result_entities.
@@ -18086,10 +18300,9 @@ export namespace Prisma {
      *     // ... the filter for the Health_check_result_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends health_check_result_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, health_check_result_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends health_check_result_entitiesUpsertArgs>(args: SelectSubset<T, health_check_result_entitiesUpsertArgs<ExtArgs>>): Prisma__health_check_result_entitiesClient<$Result.GetResult<Prisma.$health_check_result_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Health_check_result_entities.
@@ -18229,31 +18442,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__health_check_result_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    health_check_entities<T extends health_check_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, health_check_entitiesDefaultArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    health_check_entities<T extends health_check_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, health_check_entitiesDefaultArgs<ExtArgs>>): Prisma__health_check_entitiesClient<$Result.GetResult<Prisma.$health_check_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -18271,7 +18483,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * health_check_result_entities findUnique
    */
@@ -18281,7 +18492,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18289,7 +18500,6 @@ export namespace Prisma {
      */
     where: health_check_result_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_result_entities findUniqueOrThrow
@@ -18300,7 +18510,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18308,7 +18518,6 @@ export namespace Prisma {
      */
     where: health_check_result_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_result_entities findFirst
@@ -18319,7 +18528,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18357,7 +18566,6 @@ export namespace Prisma {
      */
     distinct?: Health_check_result_entitiesScalarFieldEnum | Health_check_result_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * health_check_result_entities findFirstOrThrow
@@ -18368,7 +18576,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18407,7 +18615,6 @@ export namespace Prisma {
     distinct?: Health_check_result_entitiesScalarFieldEnum | Health_check_result_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * health_check_result_entities findMany
    */
@@ -18417,7 +18624,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18451,7 +18658,6 @@ export namespace Prisma {
     distinct?: Health_check_result_entitiesScalarFieldEnum | Health_check_result_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * health_check_result_entities create
    */
@@ -18461,7 +18667,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18469,7 +18675,6 @@ export namespace Prisma {
      */
     data: XOR<health_check_result_entitiesCreateInput, health_check_result_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * health_check_result_entities createMany
@@ -18482,6 +18687,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * health_check_result_entities createManyAndReturn
+   */
+  export type health_check_result_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the health_check_result_entities
+     */
+    select?: health_check_result_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many health_check_result_entities.
+     */
+    data: health_check_result_entitiesCreateManyInput | health_check_result_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: health_check_result_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * health_check_result_entities update
@@ -18492,7 +18715,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18504,7 +18727,6 @@ export namespace Prisma {
      */
     where: health_check_result_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_result_entities updateMany
@@ -18520,7 +18742,6 @@ export namespace Prisma {
     where?: health_check_result_entitiesWhereInput
   }
 
-
   /**
    * health_check_result_entities upsert
    */
@@ -18530,7 +18751,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18547,7 +18768,6 @@ export namespace Prisma {
     update: XOR<health_check_result_entitiesUpdateInput, health_check_result_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * health_check_result_entities delete
    */
@@ -18557,7 +18777,7 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
     /**
@@ -18565,7 +18785,6 @@ export namespace Prisma {
      */
     where: health_check_result_entitiesWhereUniqueInput
   }
-
 
   /**
    * health_check_result_entities deleteMany
@@ -18577,7 +18796,6 @@ export namespace Prisma {
     where?: health_check_result_entitiesWhereInput
   }
 
-
   /**
    * health_check_result_entities without action
    */
@@ -18587,11 +18805,10 @@ export namespace Prisma {
      */
     select?: health_check_result_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: health_check_result_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -18802,6 +19019,15 @@ export namespace Prisma {
     _count?: boolean | Object_plan_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["object_plan_entities"]>
 
+  export type object_plan_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    name?: boolean
+    description?: boolean
+    all_endpoints?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["object_plan_entities"]>
+
   export type object_plan_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -18816,7 +19042,9 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
     _count?: boolean | Object_plan_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type object_plan_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $object_plan_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "object_plan_entities"
@@ -18834,7 +19062,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["object_plan_entities"]>
     composites: {}
   }
-
 
   type object_plan_entitiesGetPayload<S extends boolean | null | undefined | object_plan_entitiesDefaultArgs> = $Result.GetResult<Prisma.$object_plan_entitiesPayload, S>
 
@@ -18855,14 +19082,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends object_plan_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends object_plan_entitiesFindUniqueArgs>(args: SelectSubset<T, object_plan_entitiesFindUniqueArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Object_plan_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Object_plan_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {object_plan_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Object_plan_entities
      * @example
      * // Get one Object_plan_entities
@@ -18871,10 +19096,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends object_plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends object_plan_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, object_plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Object_plan_entities that matches the filter.
@@ -18888,10 +19111,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends object_plan_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends object_plan_entitiesFindFirstArgs>(args?: SelectSubset<T, object_plan_entitiesFindFirstArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Object_plan_entities that matches the filter or
@@ -18906,16 +19127,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends object_plan_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends object_plan_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, object_plan_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Object_plan_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {object_plan_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {object_plan_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Object_plan_entities
      * const object_plan_entities = await prisma.object_plan_entities.findMany()
@@ -18926,10 +19145,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const object_plan_entitiesWithIdOnly = await prisma.object_plan_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends object_plan_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends object_plan_entitiesFindManyArgs>(args?: SelectSubset<T, object_plan_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Object_plan_entities.
@@ -18942,26 +19159,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends object_plan_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends object_plan_entitiesCreateArgs>(args: SelectSubset<T, object_plan_entitiesCreateArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Object_plan_entities.
-     *     @param {object_plan_entitiesCreateManyArgs} args - Arguments to create many Object_plan_entities.
-     *     @example
-     *     // Create many Object_plan_entities
-     *     const object_plan_entities = await prisma.object_plan_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {object_plan_entitiesCreateManyArgs} args - Arguments to create many Object_plan_entities.
+     * @example
+     * // Create many Object_plan_entities
+     * const object_plan_entities = await prisma.object_plan_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends object_plan_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends object_plan_entitiesCreateManyArgs>(args?: SelectSubset<T, object_plan_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Object_plan_entities and returns the data saved in the database.
+     * @param {object_plan_entitiesCreateManyAndReturnArgs} args - Arguments to create many Object_plan_entities.
+     * @example
+     * // Create many Object_plan_entities
+     * const object_plan_entities = await prisma.object_plan_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Object_plan_entities and only return the `id`
+     * const object_plan_entitiesWithIdOnly = await prisma.object_plan_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends object_plan_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, object_plan_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Object_plan_entities.
@@ -18974,10 +19211,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends object_plan_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends object_plan_entitiesDeleteArgs>(args: SelectSubset<T, object_plan_entitiesDeleteArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Object_plan_entities.
@@ -18993,10 +19228,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends object_plan_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends object_plan_entitiesUpdateArgs>(args: SelectSubset<T, object_plan_entitiesUpdateArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Object_plan_entities.
@@ -19009,10 +19242,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends object_plan_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, object_plan_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends object_plan_entitiesDeleteManyArgs>(args?: SelectSubset<T, object_plan_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Object_plan_entities.
@@ -19030,10 +19261,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends object_plan_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends object_plan_entitiesUpdateManyArgs>(args: SelectSubset<T, object_plan_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Object_plan_entities.
@@ -19051,10 +19280,9 @@ export namespace Prisma {
      *     // ... the filter for the Object_plan_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends object_plan_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, object_plan_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends object_plan_entitiesUpsertArgs>(args: SelectSubset<T, object_plan_entitiesUpsertArgs<ExtArgs>>): Prisma__object_plan_entitiesClient<$Result.GetResult<Prisma.$object_plan_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Object_plan_entities.
@@ -19194,35 +19422,32 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__object_plan_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    cross_object_entities<T extends object_plan_entities$cross_object_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entities$cross_object_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    endpoint_object_entities<T extends object_plan_entities$endpoint_object_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entities$endpoint_object_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cross_object_entities<T extends object_plan_entities$cross_object_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entities$cross_object_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cross_object_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    endpoint_object_entities<T extends object_plan_entities$endpoint_object_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, object_plan_entities$endpoint_object_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$endpoint_object_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -19239,7 +19464,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * object_plan_entities findUnique
    */
@@ -19249,7 +19473,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19257,7 +19481,6 @@ export namespace Prisma {
      */
     where: object_plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * object_plan_entities findUniqueOrThrow
@@ -19268,7 +19491,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19276,7 +19499,6 @@ export namespace Prisma {
      */
     where: object_plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * object_plan_entities findFirst
@@ -19287,7 +19509,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19325,7 +19547,6 @@ export namespace Prisma {
      */
     distinct?: Object_plan_entitiesScalarFieldEnum | Object_plan_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * object_plan_entities findFirstOrThrow
@@ -19336,7 +19557,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19375,7 +19596,6 @@ export namespace Prisma {
     distinct?: Object_plan_entitiesScalarFieldEnum | Object_plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * object_plan_entities findMany
    */
@@ -19385,7 +19605,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19419,7 +19639,6 @@ export namespace Prisma {
     distinct?: Object_plan_entitiesScalarFieldEnum | Object_plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * object_plan_entities create
    */
@@ -19429,7 +19648,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19437,7 +19656,6 @@ export namespace Prisma {
      */
     data: XOR<object_plan_entitiesCreateInput, object_plan_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * object_plan_entities createMany
@@ -19450,6 +19668,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * object_plan_entities createManyAndReturn
+   */
+  export type object_plan_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the object_plan_entities
+     */
+    select?: object_plan_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many object_plan_entities.
+     */
+    data: object_plan_entitiesCreateManyInput | object_plan_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: object_plan_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * object_plan_entities update
@@ -19460,7 +19696,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19472,7 +19708,6 @@ export namespace Prisma {
      */
     where: object_plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * object_plan_entities updateMany
@@ -19488,7 +19723,6 @@ export namespace Prisma {
     where?: object_plan_entitiesWhereInput
   }
 
-
   /**
    * object_plan_entities upsert
    */
@@ -19498,7 +19732,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19515,7 +19749,6 @@ export namespace Prisma {
     update: XOR<object_plan_entitiesUpdateInput, object_plan_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * object_plan_entities delete
    */
@@ -19525,7 +19758,7 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
     /**
@@ -19533,7 +19766,6 @@ export namespace Prisma {
      */
     where: object_plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * object_plan_entities deleteMany
@@ -19545,7 +19777,6 @@ export namespace Prisma {
     where?: object_plan_entitiesWhereInput
   }
 
-
   /**
    * object_plan_entities.cross_object_entities
    */
@@ -19555,7 +19786,7 @@ export namespace Prisma {
      */
     select?: cross_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: cross_object_entitiesInclude<ExtArgs> | null
     where?: cross_object_entitiesWhereInput
@@ -19566,7 +19797,6 @@ export namespace Prisma {
     distinct?: Cross_object_entitiesScalarFieldEnum | Cross_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * object_plan_entities.endpoint_object_entities
    */
@@ -19576,7 +19806,7 @@ export namespace Prisma {
      */
     select?: endpoint_object_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: endpoint_object_entitiesInclude<ExtArgs> | null
     where?: endpoint_object_entitiesWhereInput
@@ -19587,7 +19817,6 @@ export namespace Prisma {
     distinct?: Endpoint_object_entitiesScalarFieldEnum | Endpoint_object_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * object_plan_entities without action
    */
@@ -19597,11 +19826,10 @@ export namespace Prisma {
      */
     select?: object_plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: object_plan_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -19857,6 +20085,20 @@ export namespace Prisma {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["plan_entities"]>
 
+  export type plan_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    api_id?: boolean
+    name?: boolean
+    active?: boolean
+    visibility?: boolean
+    type?: boolean
+    rate?: boolean
+    rate_unite?: boolean
+    recomnded_plan?: boolean
+    price?: boolean
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["plan_entities"]>
+
   export type plan_entitiesSelectScalar = {
     id?: boolean
     api_id?: boolean
@@ -19873,7 +20115,9 @@ export namespace Prisma {
   export type plan_entitiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type plan_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    api_entities?: boolean | api_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $plan_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "plan_entities"
@@ -19895,7 +20139,6 @@ export namespace Prisma {
     composites: {}
   }
 
-
   type plan_entitiesGetPayload<S extends boolean | null | undefined | plan_entitiesDefaultArgs> = $Result.GetResult<Prisma.$plan_entitiesPayload, S>
 
   type plan_entitiesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
@@ -19915,14 +20158,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends plan_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends plan_entitiesFindUniqueArgs>(args: SelectSubset<T, plan_entitiesFindUniqueArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Plan_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Plan_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {plan_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Plan_entities
      * @example
      * // Get one Plan_entities
@@ -19931,10 +20172,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends plan_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, plan_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Plan_entities that matches the filter.
@@ -19948,10 +20187,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends plan_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends plan_entitiesFindFirstArgs>(args?: SelectSubset<T, plan_entitiesFindFirstArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Plan_entities that matches the filter or
@@ -19966,16 +20203,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends plan_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends plan_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, plan_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Plan_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {plan_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {plan_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Plan_entities
      * const plan_entities = await prisma.plan_entities.findMany()
@@ -19986,10 +20221,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const plan_entitiesWithIdOnly = await prisma.plan_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends plan_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends plan_entitiesFindManyArgs>(args?: SelectSubset<T, plan_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Plan_entities.
@@ -20002,26 +20235,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends plan_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends plan_entitiesCreateArgs>(args: SelectSubset<T, plan_entitiesCreateArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Plan_entities.
-     *     @param {plan_entitiesCreateManyArgs} args - Arguments to create many Plan_entities.
-     *     @example
-     *     // Create many Plan_entities
-     *     const plan_entities = await prisma.plan_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {plan_entitiesCreateManyArgs} args - Arguments to create many Plan_entities.
+     * @example
+     * // Create many Plan_entities
+     * const plan_entities = await prisma.plan_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends plan_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends plan_entitiesCreateManyArgs>(args?: SelectSubset<T, plan_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Plan_entities and returns the data saved in the database.
+     * @param {plan_entitiesCreateManyAndReturnArgs} args - Arguments to create many Plan_entities.
+     * @example
+     * // Create many Plan_entities
+     * const plan_entities = await prisma.plan_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Plan_entities and only return the `id`
+     * const plan_entitiesWithIdOnly = await prisma.plan_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends plan_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, plan_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Plan_entities.
@@ -20034,10 +20287,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends plan_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends plan_entitiesDeleteArgs>(args: SelectSubset<T, plan_entitiesDeleteArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Plan_entities.
@@ -20053,10 +20304,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends plan_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends plan_entitiesUpdateArgs>(args: SelectSubset<T, plan_entitiesUpdateArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Plan_entities.
@@ -20069,10 +20318,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends plan_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, plan_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends plan_entitiesDeleteManyArgs>(args?: SelectSubset<T, plan_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Plan_entities.
@@ -20090,10 +20337,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends plan_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends plan_entitiesUpdateManyArgs>(args: SelectSubset<T, plan_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Plan_entities.
@@ -20111,10 +20356,9 @@ export namespace Prisma {
      *     // ... the filter for the Plan_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends plan_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, plan_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends plan_entitiesUpsertArgs>(args: SelectSubset<T, plan_entitiesUpsertArgs<ExtArgs>>): Prisma__plan_entitiesClient<$Result.GetResult<Prisma.$plan_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Plan_entities.
@@ -20254,31 +20498,30 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__plan_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_entities<T extends api_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, api_entitiesDefaultArgs<ExtArgs>>): Prisma__api_entitiesClient<$Result.GetResult<Prisma.$api_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -20300,7 +20543,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * plan_entities findUnique
    */
@@ -20310,7 +20552,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20318,7 +20560,6 @@ export namespace Prisma {
      */
     where: plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * plan_entities findUniqueOrThrow
@@ -20329,7 +20570,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20337,7 +20578,6 @@ export namespace Prisma {
      */
     where: plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * plan_entities findFirst
@@ -20348,7 +20588,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20386,7 +20626,6 @@ export namespace Prisma {
      */
     distinct?: Plan_entitiesScalarFieldEnum | Plan_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * plan_entities findFirstOrThrow
@@ -20397,7 +20636,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20436,7 +20675,6 @@ export namespace Prisma {
     distinct?: Plan_entitiesScalarFieldEnum | Plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * plan_entities findMany
    */
@@ -20446,7 +20684,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20480,7 +20718,6 @@ export namespace Prisma {
     distinct?: Plan_entitiesScalarFieldEnum | Plan_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * plan_entities create
    */
@@ -20490,7 +20727,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20498,7 +20735,6 @@ export namespace Prisma {
      */
     data: XOR<plan_entitiesCreateInput, plan_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * plan_entities createMany
@@ -20511,6 +20747,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * plan_entities createManyAndReturn
+   */
+  export type plan_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the plan_entities
+     */
+    select?: plan_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many plan_entities.
+     */
+    data: plan_entitiesCreateManyInput | plan_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: plan_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * plan_entities update
@@ -20521,7 +20775,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20533,7 +20787,6 @@ export namespace Prisma {
      */
     where: plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * plan_entities updateMany
@@ -20549,7 +20802,6 @@ export namespace Prisma {
     where?: plan_entitiesWhereInput
   }
 
-
   /**
    * plan_entities upsert
    */
@@ -20559,7 +20811,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20576,7 +20828,6 @@ export namespace Prisma {
     update: XOR<plan_entitiesUpdateInput, plan_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * plan_entities delete
    */
@@ -20586,7 +20837,7 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
     /**
@@ -20594,7 +20845,6 @@ export namespace Prisma {
      */
     where: plan_entitiesWhereUniqueInput
   }
-
 
   /**
    * plan_entities deleteMany
@@ -20606,7 +20856,6 @@ export namespace Prisma {
     where?: plan_entitiesWhereInput
   }
 
-
   /**
    * plan_entities without action
    */
@@ -20616,11 +20865,10 @@ export namespace Prisma {
      */
     select?: plan_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: plan_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -20854,6 +21102,16 @@ export namespace Prisma {
     _count?: boolean | Subscription_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subscription_entities"]>
 
+  export type subscription_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    api_id?: boolean
+    plan_id?: boolean
+    start_date?: boolean
+    end_date?: boolean
+    status?: boolean
+  }, ExtArgs["result"]["subscription_entities"]>
+
   export type subscription_entitiesSelectScalar = {
     id?: boolean
     user_id?: boolean
@@ -20869,7 +21127,7 @@ export namespace Prisma {
     usage_log_entities?: boolean | subscription_entities$usage_log_entitiesArgs<ExtArgs>
     _count?: boolean | Subscription_entitiesCountOutputTypeDefaultArgs<ExtArgs>
   }
-
+  export type subscription_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $subscription_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "subscription_entities"
@@ -20888,7 +21146,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["subscription_entities"]>
     composites: {}
   }
-
 
   type subscription_entitiesGetPayload<S extends boolean | null | undefined | subscription_entitiesDefaultArgs> = $Result.GetResult<Prisma.$subscription_entitiesPayload, S>
 
@@ -20909,14 +21166,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends subscription_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends subscription_entitiesFindUniqueArgs>(args: SelectSubset<T, subscription_entitiesFindUniqueArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Subscription_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Subscription_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {subscription_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Subscription_entities
      * @example
      * // Get one Subscription_entities
@@ -20925,10 +21180,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends subscription_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends subscription_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, subscription_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Subscription_entities that matches the filter.
@@ -20942,10 +21195,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends subscription_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends subscription_entitiesFindFirstArgs>(args?: SelectSubset<T, subscription_entitiesFindFirstArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Subscription_entities that matches the filter or
@@ -20960,16 +21211,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends subscription_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends subscription_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, subscription_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Subscription_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {subscription_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {subscription_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Subscription_entities
      * const subscription_entities = await prisma.subscription_entities.findMany()
@@ -20980,10 +21229,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const subscription_entitiesWithIdOnly = await prisma.subscription_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends subscription_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends subscription_entitiesFindManyArgs>(args?: SelectSubset<T, subscription_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Subscription_entities.
@@ -20996,26 +21243,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends subscription_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends subscription_entitiesCreateArgs>(args: SelectSubset<T, subscription_entitiesCreateArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Subscription_entities.
-     *     @param {subscription_entitiesCreateManyArgs} args - Arguments to create many Subscription_entities.
-     *     @example
-     *     // Create many Subscription_entities
-     *     const subscription_entities = await prisma.subscription_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {subscription_entitiesCreateManyArgs} args - Arguments to create many Subscription_entities.
+     * @example
+     * // Create many Subscription_entities
+     * const subscription_entities = await prisma.subscription_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends subscription_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends subscription_entitiesCreateManyArgs>(args?: SelectSubset<T, subscription_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Subscription_entities and returns the data saved in the database.
+     * @param {subscription_entitiesCreateManyAndReturnArgs} args - Arguments to create many Subscription_entities.
+     * @example
+     * // Create many Subscription_entities
+     * const subscription_entities = await prisma.subscription_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Subscription_entities and only return the `id`
+     * const subscription_entitiesWithIdOnly = await prisma.subscription_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends subscription_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, subscription_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Subscription_entities.
@@ -21028,10 +21295,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends subscription_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends subscription_entitiesDeleteArgs>(args: SelectSubset<T, subscription_entitiesDeleteArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Subscription_entities.
@@ -21047,10 +21312,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends subscription_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends subscription_entitiesUpdateArgs>(args: SelectSubset<T, subscription_entitiesUpdateArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Subscription_entities.
@@ -21063,10 +21326,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends subscription_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, subscription_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends subscription_entitiesDeleteManyArgs>(args?: SelectSubset<T, subscription_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Subscription_entities.
@@ -21084,10 +21345,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends subscription_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends subscription_entitiesUpdateManyArgs>(args: SelectSubset<T, subscription_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Subscription_entities.
@@ -21105,10 +21364,9 @@ export namespace Prisma {
      *     // ... the filter for the Subscription_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends subscription_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, subscription_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends subscription_entitiesUpsertArgs>(args: SelectSubset<T, subscription_entitiesUpsertArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Subscription_entities.
@@ -21248,33 +21506,31 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__subscription_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    api_key_entities<T extends subscription_entities$api_key_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entities$api_key_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
-    usage_log_entities<T extends subscription_entities$usage_log_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entities$usage_log_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findMany'> | Null>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    api_key_entities<T extends subscription_entities$api_key_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entities$api_key_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$api_key_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
+    usage_log_entities<T extends subscription_entities$usage_log_entitiesArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entities$usage_log_entitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -21293,7 +21549,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * subscription_entities findUnique
    */
@@ -21303,7 +21558,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21311,7 +21566,6 @@ export namespace Prisma {
      */
     where: subscription_entitiesWhereUniqueInput
   }
-
 
   /**
    * subscription_entities findUniqueOrThrow
@@ -21322,7 +21576,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21330,7 +21584,6 @@ export namespace Prisma {
      */
     where: subscription_entitiesWhereUniqueInput
   }
-
 
   /**
    * subscription_entities findFirst
@@ -21341,7 +21594,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21379,7 +21632,6 @@ export namespace Prisma {
      */
     distinct?: Subscription_entitiesScalarFieldEnum | Subscription_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * subscription_entities findFirstOrThrow
@@ -21390,7 +21642,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21429,7 +21681,6 @@ export namespace Prisma {
     distinct?: Subscription_entitiesScalarFieldEnum | Subscription_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * subscription_entities findMany
    */
@@ -21439,7 +21690,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21473,7 +21724,6 @@ export namespace Prisma {
     distinct?: Subscription_entitiesScalarFieldEnum | Subscription_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * subscription_entities create
    */
@@ -21483,7 +21733,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21491,7 +21741,6 @@ export namespace Prisma {
      */
     data: XOR<subscription_entitiesCreateInput, subscription_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * subscription_entities createMany
@@ -21504,6 +21753,20 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * subscription_entities createManyAndReturn
+   */
+  export type subscription_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the subscription_entities
+     */
+    select?: subscription_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many subscription_entities.
+     */
+    data: subscription_entitiesCreateManyInput | subscription_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
 
   /**
    * subscription_entities update
@@ -21514,7 +21777,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21526,7 +21789,6 @@ export namespace Prisma {
      */
     where: subscription_entitiesWhereUniqueInput
   }
-
 
   /**
    * subscription_entities updateMany
@@ -21542,7 +21804,6 @@ export namespace Prisma {
     where?: subscription_entitiesWhereInput
   }
 
-
   /**
    * subscription_entities upsert
    */
@@ -21552,7 +21813,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21569,7 +21830,6 @@ export namespace Prisma {
     update: XOR<subscription_entitiesUpdateInput, subscription_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * subscription_entities delete
    */
@@ -21579,7 +21839,7 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
     /**
@@ -21587,7 +21847,6 @@ export namespace Prisma {
      */
     where: subscription_entitiesWhereUniqueInput
   }
-
 
   /**
    * subscription_entities deleteMany
@@ -21599,7 +21858,6 @@ export namespace Prisma {
     where?: subscription_entitiesWhereInput
   }
 
-
   /**
    * subscription_entities.api_key_entities
    */
@@ -21609,7 +21867,7 @@ export namespace Prisma {
      */
     select?: api_key_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: api_key_entitiesInclude<ExtArgs> | null
     where?: api_key_entitiesWhereInput
@@ -21620,7 +21878,6 @@ export namespace Prisma {
     distinct?: Api_key_entitiesScalarFieldEnum | Api_key_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * subscription_entities.usage_log_entities
    */
@@ -21630,7 +21887,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     where?: usage_log_entitiesWhereInput
@@ -21641,7 +21898,6 @@ export namespace Prisma {
     distinct?: Usage_log_entitiesScalarFieldEnum | Usage_log_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * subscription_entities without action
    */
@@ -21651,11 +21907,10 @@ export namespace Prisma {
      */
     select?: subscription_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: subscription_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
@@ -21884,6 +22139,17 @@ export namespace Prisma {
     subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["usage_log_entities"]>
 
+  export type usage_log_entitiesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    subscription_id?: boolean
+    timestamp?: boolean
+    endpoint_id?: boolean
+    status?: boolean
+    response_time?: boolean
+    endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
+    subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["usage_log_entities"]>
+
   export type usage_log_entitiesSelectScalar = {
     id?: boolean
     subscription_id?: boolean
@@ -21897,7 +22163,10 @@ export namespace Prisma {
     endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
     subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
   }
-
+  export type usage_log_entitiesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    endpoints_entities?: boolean | endpoints_entitiesDefaultArgs<ExtArgs>
+    subscription_entities?: boolean | subscription_entitiesDefaultArgs<ExtArgs>
+  }
 
   export type $usage_log_entitiesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "usage_log_entities"
@@ -21915,7 +22184,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["usage_log_entities"]>
     composites: {}
   }
-
 
   type usage_log_entitiesGetPayload<S extends boolean | null | undefined | usage_log_entitiesDefaultArgs> = $Result.GetResult<Prisma.$usage_log_entitiesPayload, S>
 
@@ -21936,14 +22204,12 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUnique<T extends usage_log_entitiesFindUniqueArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesFindUniqueArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+     */
+    findUnique<T extends usage_log_entitiesFindUniqueArgs>(args: SelectSubset<T, usage_log_entitiesFindUniqueArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Usage_log_entities that matches the filter or throw an error  with `error.code='P2025'` 
-     *     if no matches were found.
+     * Find one Usage_log_entities that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
      * @param {usage_log_entitiesFindUniqueOrThrowArgs} args - Arguments to find a Usage_log_entities
      * @example
      * // Get one Usage_log_entities
@@ -21952,10 +22218,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findUniqueOrThrow<T extends usage_log_entitiesFindUniqueOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesFindUniqueOrThrowArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+     */
+    findUniqueOrThrow<T extends usage_log_entitiesFindUniqueOrThrowArgs>(args: SelectSubset<T, usage_log_entitiesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Usage_log_entities that matches the filter.
@@ -21969,10 +22233,8 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirst<T extends usage_log_entitiesFindFirstArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesFindFirstArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+     */
+    findFirst<T extends usage_log_entitiesFindFirstArgs>(args?: SelectSubset<T, usage_log_entitiesFindFirstArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Usage_log_entities that matches the filter or
@@ -21987,16 +22249,14 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-    **/
-    findFirstOrThrow<T extends usage_log_entitiesFindFirstOrThrowArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesFindFirstOrThrowArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+     */
+    findFirstOrThrow<T extends usage_log_entitiesFindFirstOrThrowArgs>(args?: SelectSubset<T, usage_log_entitiesFindFirstOrThrowArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Usage_log_entities that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {usage_log_entitiesFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @param {usage_log_entitiesFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all Usage_log_entities
      * const usage_log_entities = await prisma.usage_log_entities.findMany()
@@ -22007,10 +22267,8 @@ export namespace Prisma {
      * // Only select the `id`
      * const usage_log_entitiesWithIdOnly = await prisma.usage_log_entities.findMany({ select: { id: true } })
      * 
-    **/
-    findMany<T extends usage_log_entitiesFindManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesFindManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'findMany'>>
+     */
+    findMany<T extends usage_log_entitiesFindManyArgs>(args?: SelectSubset<T, usage_log_entitiesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Usage_log_entities.
@@ -22023,26 +22281,46 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    create<T extends usage_log_entitiesCreateArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesCreateArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+     */
+    create<T extends usage_log_entitiesCreateArgs>(args: SelectSubset<T, usage_log_entitiesCreateArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Usage_log_entities.
-     *     @param {usage_log_entitiesCreateManyArgs} args - Arguments to create many Usage_log_entities.
-     *     @example
-     *     // Create many Usage_log_entities
-     *     const usage_log_entities = await prisma.usage_log_entities.createMany({
-     *       data: {
-     *         // ... provide data here
-     *       }
-     *     })
+     * @param {usage_log_entitiesCreateManyArgs} args - Arguments to create many Usage_log_entities.
+     * @example
+     * // Create many Usage_log_entities
+     * const usage_log_entities = await prisma.usage_log_entities.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
      *     
-    **/
-    createMany<T extends usage_log_entitiesCreateManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesCreateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    createMany<T extends usage_log_entitiesCreateManyArgs>(args?: SelectSubset<T, usage_log_entitiesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Usage_log_entities and returns the data saved in the database.
+     * @param {usage_log_entitiesCreateManyAndReturnArgs} args - Arguments to create many Usage_log_entities.
+     * @example
+     * // Create many Usage_log_entities
+     * const usage_log_entities = await prisma.usage_log_entities.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Usage_log_entities and only return the `id`
+     * const usage_log_entitiesWithIdOnly = await prisma.usage_log_entities.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends usage_log_entitiesCreateManyAndReturnArgs>(args?: SelectSubset<T, usage_log_entitiesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Usage_log_entities.
@@ -22055,10 +22333,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    delete<T extends usage_log_entitiesDeleteArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesDeleteArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+     */
+    delete<T extends usage_log_entitiesDeleteArgs>(args: SelectSubset<T, usage_log_entitiesDeleteArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Usage_log_entities.
@@ -22074,10 +22350,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    update<T extends usage_log_entitiesUpdateArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesUpdateArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+     */
+    update<T extends usage_log_entitiesUpdateArgs>(args: SelectSubset<T, usage_log_entitiesUpdateArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Usage_log_entities.
@@ -22090,10 +22364,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    deleteMany<T extends usage_log_entitiesDeleteManyArgs<ExtArgs>>(
-      args?: SelectSubset<T, usage_log_entitiesDeleteManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    deleteMany<T extends usage_log_entitiesDeleteManyArgs>(args?: SelectSubset<T, usage_log_entitiesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Usage_log_entities.
@@ -22111,10 +22383,8 @@ export namespace Prisma {
      *   }
      * })
      * 
-    **/
-    updateMany<T extends usage_log_entitiesUpdateManyArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesUpdateManyArgs<ExtArgs>>
-    ): Prisma.PrismaPromise<BatchPayload>
+     */
+    updateMany<T extends usage_log_entitiesUpdateManyArgs>(args: SelectSubset<T, usage_log_entitiesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create or update one Usage_log_entities.
@@ -22132,10 +22402,9 @@ export namespace Prisma {
      *     // ... the filter for the Usage_log_entities we want to update
      *   }
      * })
-    **/
-    upsert<T extends usage_log_entitiesUpsertArgs<ExtArgs>>(
-      args: SelectSubset<T, usage_log_entitiesUpsertArgs<ExtArgs>>
-    ): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+     */
+    upsert<T extends usage_log_entitiesUpsertArgs>(args: SelectSubset<T, usage_log_entitiesUpsertArgs<ExtArgs>>): Prisma__usage_log_entitiesClient<$Result.GetResult<Prisma.$usage_log_entitiesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
 
     /**
      * Count the number of Usage_log_entities.
@@ -22275,33 +22544,31 @@ export namespace Prisma {
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__usage_log_entitiesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-
-    endpoints_entities<T extends endpoints_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
-    subscription_entities<T extends subscription_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entitiesDefaultArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
-
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    endpoints_entities<T extends endpoints_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, endpoints_entitiesDefaultArgs<ExtArgs>>): Prisma__endpoints_entitiesClient<$Result.GetResult<Prisma.$endpoints_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    subscription_entities<T extends subscription_entitiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, subscription_entitiesDefaultArgs<ExtArgs>>): Prisma__subscription_entitiesClient<$Result.GetResult<Prisma.$subscription_entitiesPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
 
 
 
@@ -22319,7 +22586,6 @@ export namespace Prisma {
     
 
   // Custom InputTypes
-
   /**
    * usage_log_entities findUnique
    */
@@ -22329,7 +22595,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22337,7 +22603,6 @@ export namespace Prisma {
      */
     where: usage_log_entitiesWhereUniqueInput
   }
-
 
   /**
    * usage_log_entities findUniqueOrThrow
@@ -22348,7 +22613,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22356,7 +22621,6 @@ export namespace Prisma {
      */
     where: usage_log_entitiesWhereUniqueInput
   }
-
 
   /**
    * usage_log_entities findFirst
@@ -22367,7 +22631,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22405,7 +22669,6 @@ export namespace Prisma {
      */
     distinct?: Usage_log_entitiesScalarFieldEnum | Usage_log_entitiesScalarFieldEnum[]
   }
-
 
   /**
    * usage_log_entities findFirstOrThrow
@@ -22416,7 +22679,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22455,7 +22718,6 @@ export namespace Prisma {
     distinct?: Usage_log_entitiesScalarFieldEnum | Usage_log_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * usage_log_entities findMany
    */
@@ -22465,7 +22727,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22499,7 +22761,6 @@ export namespace Prisma {
     distinct?: Usage_log_entitiesScalarFieldEnum | Usage_log_entitiesScalarFieldEnum[]
   }
 
-
   /**
    * usage_log_entities create
    */
@@ -22509,7 +22770,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22517,7 +22778,6 @@ export namespace Prisma {
      */
     data: XOR<usage_log_entitiesCreateInput, usage_log_entitiesUncheckedCreateInput>
   }
-
 
   /**
    * usage_log_entities createMany
@@ -22530,6 +22790,24 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  /**
+   * usage_log_entities createManyAndReturn
+   */
+  export type usage_log_entitiesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the usage_log_entities
+     */
+    select?: usage_log_entitiesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many usage_log_entities.
+     */
+    data: usage_log_entitiesCreateManyInput | usage_log_entitiesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: usage_log_entitiesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * usage_log_entities update
@@ -22540,7 +22818,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22552,7 +22830,6 @@ export namespace Prisma {
      */
     where: usage_log_entitiesWhereUniqueInput
   }
-
 
   /**
    * usage_log_entities updateMany
@@ -22568,7 +22845,6 @@ export namespace Prisma {
     where?: usage_log_entitiesWhereInput
   }
 
-
   /**
    * usage_log_entities upsert
    */
@@ -22578,7 +22854,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22595,7 +22871,6 @@ export namespace Prisma {
     update: XOR<usage_log_entitiesUpdateInput, usage_log_entitiesUncheckedUpdateInput>
   }
 
-
   /**
    * usage_log_entities delete
    */
@@ -22605,7 +22880,7 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
     /**
@@ -22613,7 +22888,6 @@ export namespace Prisma {
      */
     where: usage_log_entitiesWhereUniqueInput
   }
-
 
   /**
    * usage_log_entities deleteMany
@@ -22625,7 +22899,6 @@ export namespace Prisma {
     where?: usage_log_entitiesWhereInput
   }
 
-
   /**
    * usage_log_entities without action
    */
@@ -22635,11 +22908,10 @@ export namespace Prisma {
      */
     select?: usage_log_entitiesSelect<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well.
+     * Choose, which related nodes to fetch as well
      */
     include?: usage_log_entitiesInclude<ExtArgs> | null
   }
-
 
 
   /**
