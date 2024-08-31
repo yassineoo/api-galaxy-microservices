@@ -3,21 +3,23 @@ import { success_status_code_range } from "../../../../infrastructure/api/http";
 import { DB } from "../../../../infrastructure/database";
 import { getTimePeriods, Period } from "../../_common/get-time-periods";
 
-export default async function get_apis_stats_service(api_ids: ID[], duration: Duration) {
+export default async function get_apis_stats_service(api_ids: ID[], duration: Duration, userId: ID) {
     const periods = getTimePeriods(duration)
 
-    const results = await Promise.all(periods.map(period => get_apis_stats_in_period(period, api_ids)))
+    const results = await Promise.all(
+        periods.map(period => get_apis_stats_in_period(period, api_ids, userId))
+    );
 
     return results;
 }
 
-async function get_apis_stats_in_period(period: Period, api_ids: ID[]) {
+async function get_apis_stats_in_period(period: Period, api_ids: ID[], userId: ID) {
     const results = await Promise.all(api_ids.map(
         async api_id => {
             const [success, error, latency] = await Promise.all([
-                get_api_success_calls_in_period(period, api_id),
-                get_api_error_calls_in_period(period, api_id),
-                get_api_calls_latency_in_period(period, api_id),
+                get_api_success_calls_in_period(period, api_id, userId),
+                get_api_error_calls_in_period(period, api_id, userId),
+                get_api_calls_latency_in_period(period, api_id, userId),
             ])
             return ({
                 name: period.name,
@@ -37,13 +39,18 @@ async function get_apis_stats_in_period(period: Period, api_ids: ID[]) {
     return prettyStats
 }
 
-async function get_api_success_calls_in_period(period: Period, api_id: ID) {
+async function get_api_success_calls_in_period(period: Period, api_id: ID, userId: ID) {
     const success = await DB.usage_log_entities.aggregate({
         where: {
             endpoints_entities: {
                 endpoints_group_entities: {
-                    api_id
-                }
+                    api_id,
+                    api_entities: {
+                        user_entities: {
+                            id: userId
+                        }
+                    }
+                },
             },
             status: {
                 in: success_status_code_range
@@ -58,12 +65,17 @@ async function get_api_success_calls_in_period(period: Period, api_id: ID) {
     return success._count ?? 0
 }
 
-async function get_api_error_calls_in_period(period: Period, api_id: ID) {
+async function get_api_error_calls_in_period(period: Period, api_id: ID, userId: ID) {
     const errors = await DB.usage_log_entities.aggregate({
         where: {
             endpoints_entities: {
                 endpoints_group_entities: {
-                    api_id
+                    api_id,
+                    api_entities: {
+                        user_entities: {
+                            id: userId
+                        }
+                    }
                 }
             },
             status: {
@@ -79,12 +91,17 @@ async function get_api_error_calls_in_period(period: Period, api_id: ID) {
     return errors._count ?? 0
 }
 
-async function get_api_calls_latency_in_period(period: Period, api_id: ID) {
+async function get_api_calls_latency_in_period(period: Period, api_id: ID, userId: ID) {
     const success = await DB.usage_log_entities.aggregate({
         where: {
             endpoints_entities: {
                 endpoints_group_entities: {
-                    api_id
+                    api_id,
+                    api_entities: {
+                        user_entities: {
+                            id: userId
+                        }
+                    }
                 }
             },
             status: {

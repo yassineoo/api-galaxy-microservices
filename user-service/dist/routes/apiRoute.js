@@ -1,0 +1,26 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.userApiRouter = void 0;
+const express_1 = require("express");
+const apiController_1 = require("../controllers/apiController");
+const authenticate_middleware_1 = __importDefault(require("../services/middlewares/authenticate.middleware"));
+const userApiRouter = (0, express_1.Router)();
+exports.userApiRouter = userApiRouter;
+userApiRouter.use(authenticate_middleware_1.default);
+userApiRouter.get("/reviewReports", apiController_1.getReviwesReports);
+userApiRouter.get("/adminReports", apiController_1.getReportsForAdmin);
+userApiRouter.get("/deleteReviewReport/:reportId", apiController_1.deleteReportReview);
+userApiRouter.get("/:userId", apiController_1.getAllApis);
+userApiRouter.post("/likeApi/:api_id", apiController_1.likeApi);
+userApiRouter.post("/dislikeApi/:api_id", apiController_1.dislikeApi);
+userApiRouter.get("/getReviews/:apiId", apiController_1.getAPIReview);
+userApiRouter.post("/createReview/:apiId", apiController_1.createReview);
+userApiRouter.get("/getRating/:apiId", apiController_1.getAPIRating);
+userApiRouter.get("/admin/:adminId", apiController_1.getAPISforAdmin);
+userApiRouter.get("/myApis/:userId", apiController_1.getUserApis);
+userApiRouter.get("/myFollowingApis/:userId", apiController_1.getUserFollowingsApis);
+userApiRouter.post("/reportAPI/:apiId", apiController_1.reportAnAPI);
+userApiRouter.post("/reportComment/:commentId", apiController_1.reportAnComment);

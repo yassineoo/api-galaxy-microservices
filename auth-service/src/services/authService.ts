@@ -13,6 +13,8 @@ import {
 } from "./grpcClient/notifService";
 import userService from "./UAMService";
 import { sendEMail } from "../utils/email";
+import env from "../utils/env";
+import { ENV } from "./../utils/env";
 require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
@@ -37,7 +39,7 @@ class ApiError extends Error {
 export default class authService {
   static register = async (data: register, role: Role) => {
     try {
-      const {email,password,username} = data
+      const { email, password, username } = data
       const userEmail = await userModel.getUserByEmail(email);
       if (userEmail) {
         throw new ApiError("Email already exists", 409);
@@ -90,9 +92,9 @@ export default class authService {
       }
 
       // Generate the token
-      const tokenSecret = "your_secret_key"; // Replace with your actual secret key
-      const tokenExpiry = "1h"; // Replace with your desired token expiry time
-      const { token, expiry } = generateAuthToken(
+      const tokenSecret = ENV.JWT_SECRET; // Replace with your actual secret key
+      const tokenExpiry = ENV.JWT_EXPIRATION; // Replace with your desired token expiry time
+      const { token, expiry } = await generateAuthToken(
         Number(user.id),
         user.email,
         tokenSecret,
@@ -137,7 +139,7 @@ export default class authService {
         });
         userModel.updateUser(Number(user.id), { verified: true });
       }
-       // Generate the token
+      // Generate the token
 
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
