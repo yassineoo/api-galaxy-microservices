@@ -168,9 +168,17 @@ func (h *ApiHandler) GetUserAPIs(c *gin.Context) {
 }
 
 func (h *ApiHandler) GetSearchApis(c *gin.Context) {
-	// Extract the search query parameter from the URL query string.
-	search := c.Query("search")
-	apis, err := h.service.SearchByName(c, search)
+      // Extract the search query parameter from the URL query string.
+	  search := c.Query("search")
+	  log.Println("search ==============",search)
+	  apis, err := h.service.SearchByName(c, search)
+
+	  // Call the SearchByName method to search for APIs.
+	  if err != nil {
+		  // Return a customized error message to the client
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user Searched APIs"})
+		  return
+	  }
 
 	// Call the SearchByName method to search for APIs.
 	if err != nil {

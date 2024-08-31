@@ -13,10 +13,9 @@ import (
 	"local_packages/database"
 	"log"
 
-
 	//"log"
 	//"os"
-    "local_packages/grpc"
+	"local_packages/grpc"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	gorm "gorm.io/gorm"
@@ -68,9 +67,10 @@ func main() {
 	swaggerURL := ginSwagger.URL("http://localhost:8088/swagger/doc.json")
 
 	router.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerURL))
-
-	// Start the server in a separate goroutine
-	port := ":8000"
+	
+		
+// Start the server in a separate goroutine
+	port := ":9000"
 	// Start the server
 	// Register service with API Gateway
 	serviceName := "apis-service"
@@ -78,12 +78,12 @@ func main() {
 	log.Println("Starting service registration...")
 
 	// Register the service every 15 seconds
-	go func() {
-		for {
-			registerService(serviceName, serviceVersion, port)
-			time.Sleep(15 * time.Second)
-		}
-	}()
+    go func() {
+        for {
+            registerService(serviceName, serviceVersion, port)
+            time.Sleep(40 * time.Second)
+        }
+    }()
 	log.Println("Starting service registrationstooooop")
 
 	//go func() {

@@ -14,7 +14,6 @@ import { GrpcAuthServer } from "./grpc/grpc-auth.server";
 require("dotenv").config();
 const app = express();
 
-
 ValidateEnv();
 
 const server = http.createServer(app);
@@ -53,26 +52,29 @@ server.on("listening", () => {
   const addr = server.address();
   const PORT = typeof addr === "string" ? addr : addr?.port;
   const registerService = () =>
-    axios.put(
-      //  `http://localhost:3001/register/${logConfig.serviceName}/${
-      `http://service-registry:3001/register/${logConfig.serviceName}/${logConfig.version
-      }/${
-      //  server?.address()?.port ||
-      Number(PORT)
-      }`
-    )
-      .catch((err: any) => console.log({ err }));//log.fatal(err));
+    axios
+      .put(
+        //  `http://localhost:3001/register/${logConfig.serviceName}/${
+        `http://service-registry:3001/register/${logConfig.serviceName}/${
+          logConfig.version
+        }/${
+          //  server?.address()?.port ||
+          Number(PORT)
+        }`
+      )
+      .catch((err: any) => console.log({ err })); //log.fatal(err));
 
   const unregisterService = () =>
     axios
       .delete(
-        `http://service-registry:3001/register/${logConfig.serviceName}/${logConfig.version
+        `http://service-registry:3001/register/${logConfig.serviceName}/${
+          logConfig.version
         }/${
-        //  server?.address()?.port ||
-        PORT
+          //  server?.address()?.port ||
+          PORT
         }`
       )
-      .catch((err: any) => console.log({ err }))//log.fatal(err));
+      .catch((err: any) => console.log({ err })); //log.fatal(err));
 
   registerService();
   const interval = setInterval(registerService, 15 * 1000);
@@ -103,11 +105,10 @@ server.on("listening", () => {
 
   log.info(
     `Hi there! I'm listening on port ${
-    //  server?.address()?.port ||
-    PORT
+      //  server?.address()?.port ||
+      PORT
     } in ${app.get("env")} mode.`
   );
 });
 
-
-GrpcAuthServer.init()
+GrpcAuthServer.init();

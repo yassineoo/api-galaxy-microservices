@@ -206,3 +206,19 @@ export const deleteReportReview = async (req: AuthRequest, res: Response, next: 
         next(error)
     }
 }
+
+
+export const getCategories = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await apiService.getCategories();
+      //console.log(response)
+      return res.status(200).json(response);
+    } catch (error: any) {
+      console.log(error.message);
+      next(error);
+    }
+  };

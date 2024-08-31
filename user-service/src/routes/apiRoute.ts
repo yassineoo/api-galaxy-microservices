@@ -1,9 +1,9 @@
 import { Router } from "express"
-import { createReview, deleteReportReview, dislikeApi, getAllApis, getAPIRating, getAPIReview, getAPISforAdmin, getReportsForAdmin, getReviwesReports, getUserApis, getUserFollowingsApis, likeApi, reportAnAPI, reportAnComment } from "../controllers/apiController"
+import { createReview,getCategories, deleteReportReview, dislikeApi, getAllApis, getAPIRating, getAPIReview, getAPISforAdmin, getCategories, getReportsForAdmin, getReviwesReports, getUserApis, getUserFollowingsApis, likeApi, reportAnAPI, reportAnComment } from "../controllers/apiController"
 import authenticate from "../services/middlewares/authenticate.middleware"
 
 const userApiRouter = Router()
-
+userApiRouter.get("/categories", getCategories);
 userApiRouter.use(authenticate)
 
 userApiRouter.get("/reviewReports", getReviwesReports)

@@ -261,6 +261,7 @@ model user_entities {
   payment_method_entities       payment_method_entities[]
   profile_entities              profile_entities[]
   review_reports_entities       review_reports_entities[]
+  settings_entities             settings_entities[]
   user_chatroom_entities        user_chatroom_entities[]
 }
 
@@ -392,4 +393,14 @@ model user_chatroom_entities {
 
   @@unique([user_id, chatroom_id])
   @@index([user_id, chatroom_id])
+}
+
+model settings_entities {
+  id                 Int            @id @default(autoincrement())
+  earning_percentage Float?         @db.Real
+  termsAndConditions String?
+  privacyAndPolicy   String?
+  updated_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  admin_id           BigInt?
+  user_entities      user_entities? @relation(fields: [admin_id], references: [id], onDelete: Cascade, map: "settings_entities_adminId_fkey")
 }
