@@ -1,0 +1,1 @@
+pnpm proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=src/grpc/out src/grpc/proto/*.proto

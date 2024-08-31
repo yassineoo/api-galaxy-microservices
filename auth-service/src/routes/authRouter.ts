@@ -9,6 +9,8 @@ import {
   resetPassword,
 } from "../controllers/authController";
 import { verifyAuth } from "../controllers/permissionController";
+import { generateAuthToken } from "../utils/token";
+import { ENV } from "../utils/env";
 
 const authRouter = express.Router();
 
@@ -178,5 +180,11 @@ authRouter.get("/resend-email", verifyAuth, resendVerificationEmail);
 authRouter.post("/verifyEmail/:token", verifyEmail);
 authRouter.post("/verifyEmail", verifyEmail);
 authRouter.patch("/resetPassword", verifyAuth, resetPassword);
+
+authRouter.get("/hello", async (req: any, res: any) => {
+  const token = await generateAuthToken(1, "jy_attou@esi.dz", ENV.JWT_SECRET, "1hr")
+  console.log({ token })
+  return res.json({ token })
+})
 
 export default authRouter;

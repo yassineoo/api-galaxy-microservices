@@ -13,7 +13,10 @@ import ChatsGateway from "./routes/chats/chats.gateway";
 
 import { Server } from "socket.io";
 import ChatroomsRouter from "./routes/chats/chatrooms.routes";
+import GrpcAuthClient from "./grpc/grpc-auth.client";
+import ValidateEnv, { ENV } from "./utils/env";
 
+ValidateEnv()
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -53,6 +56,7 @@ chatsGateway.initListeners();
 
 server.listen(port);
 // Important - a service should not have a fixed port but should randomly choose one
+
 
 server.on("listening", () => {
   const addr = server.address();
@@ -123,3 +127,6 @@ server.on("listening", () => {
     console.log("Kafka connection failed");
   }
 });
+
+
+GrpcAuthClient.init();

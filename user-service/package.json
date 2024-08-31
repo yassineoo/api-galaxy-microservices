@@ -4,6 +4,7 @@
   "description": "user service to add user actions",
   "main": "index.js",
   "scripts": {
+    "compile:proto": "sh src/grpc/compile.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/app.ts",
     "build": "tsc",
@@ -12,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@grpc/grpc-js": "^1.11.1",
+    "@grpc/proto-loader": "^0.7.13",
     "@prisma/client": "^5.18.0",
     "axios": "^1.7.4",
     "body-parser": "^1.20.2",
@@ -20,6 +23,7 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "joi": "^17.13.3",
     "ip": "^2.0.1",
     "kafkajs": "^2.2.4",
     "node-cron": "^3.0.3",
