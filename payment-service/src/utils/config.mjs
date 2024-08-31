@@ -3,7 +3,7 @@ import bunyan from "bunyan";
 
 // Get some meta info from the package.json
 const serviceName = "payment-service";
-const version = "1.0.0";
+const version = "v1";
 
 // Set up a logger
 const getLogger = (serviceName, serviceVersion, level) =>

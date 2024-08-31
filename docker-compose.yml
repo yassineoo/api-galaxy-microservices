@@ -10,6 +10,18 @@ services:
       - NODE_ENV=development
     networks:
       - app-network
+  apis-service:
+    build: ./apis-service
+    container_name: apis-service
+    depends_on:
+      - service-registry
+    ports:
+      - "8000:8000"
+    environment:
+      - GIN_MODE=release
+    command: sh -c "sleep 15 && ./main"
+    networks:
+      - app-network
 
   auth-service:
     build: ./auth-service
@@ -45,11 +57,12 @@ services:
       - "7004:7004"
     environment:
       - NODE_ENV=development
+    networks:
+      - app-network
 
-
-  statistics-service:
-    build: ./stat-service
-    container_name: statistics-service
+  stats-service:
+    build: ./stats-service
+    container_name: stats-service
     depends_on:
       - service-registry
     ports:
@@ -59,18 +72,6 @@ services:
     networks:
       - app-network
 
-  apis-service:
-    build: ./apis-service
-    container_name: apis-service
-    depends_on:
-      - service-registry
-    ports:
-      - "8000:8000"
-    environment:
-      - GIN_MODE=release
-    networks:
-      - app-network
-  
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -90,7 +91,7 @@ services:
     depends_on:
       - service-registry
       - auth-service
-      - statistics-service
+      - stats-service
     ports:
       - "5000:5000"
     environment:
@@ -98,7 +99,7 @@ services:
     command: sh -c "sleep 60 && pnpm run dev"
     networks:
       - app-network
-  
+
   redpanda:
     image: docker.redpanda.com/vectorized/redpanda:v22.2.2
     container_name: redpanda_example_broker

@@ -74,10 +74,6 @@ func main() {
     // Register service with API Gateway
 	serviceName := "apis-service"
 	serviceVersion := "v1"
-    // I start Comment here 
-    /*
-    serviceName := "apis-service"
-	serviceVersion := "v1"
 	log.Println("Starting service registration...")
 
 	// Register the service every 15 seconds
@@ -88,8 +84,8 @@ func main() {
         }
     }()
 	log.Println("Starting service registrationstooooop")
-	*/
-	// I finished here
+	
+	
 	//go func() {
 		if err := router.Run(port); err != nil {
 			log.Fatalf("Failed to run server: %v", err)
@@ -182,4 +178,3 @@ func handleShutdown(serviceName, serviceVersion, port string) {
 		os.Exit(0)
 	}()
 }
-

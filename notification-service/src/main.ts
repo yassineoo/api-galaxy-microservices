@@ -3,18 +3,29 @@ import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { Transport } from '@nestjs/microservices';
 import axios from 'axios';
-import { Logger,ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 dotenv.config();
 
 const logger = new Logger('Main');
 
-async function registerService(serviceName: string, serviceVersion: string, servicePort: number) {
+async function registerService(
+  serviceName: string,
+  serviceVersion: string,
+  servicePort: number,
+) {
   try {
-    await axios.put(`http://service-registry:3001/register/${serviceName}/${serviceVersion}/${servicePort}`);
-    console.log(`Successfully registered ${serviceName} with version ${serviceVersion} on port ${servicePort}`);
+    await axios.put(
+      `http://service-registry:3001/register/${serviceName}/${serviceVersion}/${servicePort}`,
+    );
+    console.log(
+      `Successfully registered ${serviceName} with version ${serviceVersion} on port ${servicePort}`,
+    );
   } catch (error) {
-    console.error(`Failed to register service ${serviceName}:`, error.message || error);
+    console.error(
+      `Failed to register service ${serviceName}:`,
+      error.message || error,
+    );
   }
 }
 
@@ -25,7 +36,7 @@ async function unregisterService(
 ) {
   try {
     const response = await axios.delete(
-      `http://localhost:3001/register/${serviceName}/${version}/${port}`,
+      `http://service-registry:3001/register/${serviceName}/${version}/${port}`,
     );
     if (response.status === 200) {
       logger.log('Service unregistered successfully');
@@ -34,8 +45,6 @@ async function unregisterService(
     logger.error('Failed to unregister service', error.message);
   }
 }
-
-
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice(AppModule, {
@@ -66,15 +75,12 @@ async function bootstrap() {
       process.exit(0);
     }
   };
-  
+
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 }
 
 bootstrap();
-
-
-
 
 /*async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -30,7 +30,6 @@ type UserEntity struct {
 	PasswordHash  string              `gorm:"size:60"`
 	DateCreated   time.Time           `gorm:"default:CURRENT_TIMESTAMP"`
 	LastLogin     time.Time
-]ApiEntity `gorm:"foreignKey:ProviderID"`
 
 	IsActive      bool                `gorm:"default:true"`
 	IsTwoFactor   bool                `gorm:"default:false"`

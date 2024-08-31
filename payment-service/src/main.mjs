@@ -1,11 +1,11 @@
+import axios from "axios";
+
 import express from "express";
-import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
 import stripeRouter from "./routes/stripeRouter.mjs";
 import http from "http";
 import config from "./utils/config.mjs";
-import axios from "axios";
 
 dotenv.config();
 const app = express();

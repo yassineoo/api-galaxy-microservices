@@ -9,8 +9,6 @@ const PORT = 5000;
 app.use(cors({ origin: "*" }));
 app.use(cors({ origin: true, credentials: true }));
 
-
-
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
@@ -37,15 +35,13 @@ const services = [
   { name: "auth-service", version: "v1", path: "/auth" },
   { name: "apis-service", version: "v1", path: "/apis-service" },
   {
-    name: "notifications-service",
+    name: "notification-service",
     version: "v1",
-    path: "/notifications-service",
+    path: "/notification-service",
   },
-  { name: "statistics-service", version: "v1", path: "/stats-service" },
+  { name: "stats-service", version: "v1", path: "/stats-service" },
   { name: "user-service", version: "v1", path: "/user-service" },
-  { name: "notifications", version: "v1", path: "/notifications" },
-  { name: "abonnements", version: "v1", path: "/abonnements" },
-  { name: "paiements", version: "v1", path: "/paiements" },
+  { name: "payment-service", version: "v1", path: "/payment-service" },
   // Add more services as needed
 ];
 
@@ -54,12 +50,11 @@ async function createServiceProxy(service) {
     service.name,
     service.version
   );
-  console.log(`serviceInfo  for ${service.name} is : ${serviceInfo}`);
 
   if (serviceInfo) {
     //let serviceIp = serviceInfo.ip;
     let serviceIp = service.name;
-    const port = serviceInfo.port !== ":8000" ? serviceInfo.port : "8000";
+    const port = serviceInfo.port !== ":9000" ? serviceInfo.port : "9000";
 
     // if (serviceIp === "[::1]") {
     //  serviceIp = "127.0.0.1";
