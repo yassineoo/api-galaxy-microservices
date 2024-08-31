@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { handleErrors } from "./utils/errorHandler";
 import http from "http";
-import {kafka, sendMessage} from "./utils/kafka"
+import { kafka, sendMessage } from "./utils/kafka";
 require("dotenv").config();
 const app = express();
 import config from "./utils/config";
@@ -24,7 +24,7 @@ app.use(
 app.use(cors({ origin: "*" }));
 app.use(cors({ origin: true, credentials: true }));
 
-console.log("hello from app.ts")
+console.log("hello from app.ts");
 
 // Add this line to parse JSON bodies
 app.use(express.json());
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 });
 app.use("/userApi", userApiRouter);
 app.use("/chatrooms", ChatroomsRouter);
-app.use("/admin",adminRouter)
+app.use("/admin", adminRouter);
 app.use(handleErrors);
 
 const server = http.createServer(app);
@@ -56,65 +56,70 @@ server.listen(port);
 
 server.on("listening", () => {
   const addr = server.address();
-  console.log(envConfig.version)
+  console.log(envConfig.version);
   const PORT = 7002;
-  const registerService = () =>
-    axios
-      .put(
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          Number(PORT)
-        }`
-      )
-      .catch((err: any) => log.fatal(err));
 
-  const unregisterService = () =>
-    axios
-      .delete(
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          PORT
-        }`
-      )
-      .catch((err: any) => log.fatal(err));
+  try {
+    const registerService = () =>
+      axios
+        .put(
+          `http://service-registry:3001/register/${envConfig.serviceName}/${
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
+          }/${
+            //  server?.address()?.port ||
+            Number(PORT)
+          }`
+        )
+        .catch((err: any) => log.fatal(err));
 
-  registerService();
-  const interval = setInterval(registerService, 15 * 1000);
+    const unregisterService = () =>
+      axios
+        .delete(
+          `http://service-registry:3001/register/${envConfig.serviceName}/${
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
+          }/${
+            //  server?.address()?.port ||
+            PORT
+          }`
+        )
+        .catch((err: any) => log.fatal(err));
 
-  const cleanup = async () => {
-    let clean = false;
-    if (!clean) {
-      clean = true;
-      clearInterval(interval);
-      await unregisterService();
-    }
-  };
+    registerService();
+    const interval = setInterval(registerService, 15 * 1000);
 
-  process.on("uncaughtException", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    const cleanup = async () => {
+      let clean = false;
+      if (!clean) {
+        clean = true;
+        clearInterval(interval);
+        await unregisterService();
+      }
+    };
 
-  process.on("SIGINT", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    process.on("uncaughtException", async () => {
+      await cleanup();
+      process.exit(0);
+    });
 
-  process.on("SIGTERM", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    process.on("SIGINT", async () => {
+      await cleanup();
+      process.exit(0);
+    });
 
-  log.info(
-    `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
-    } in ${app.get("env")} mode.`
-  );
+    process.on("SIGTERM", async () => {
+      await cleanup();
+      process.exit(0);
+    });
+
+    log.info(
+      `Hi there! I'm listening on port ${
+        //  server?.address()?.port ||
+        PORT
+      } in ${app.get("env")} mode.`
+    );
+  } catch (e) {
+    console.log("Kafka connection failed");
+  }
 });
