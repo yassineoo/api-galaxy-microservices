@@ -7,6 +7,8 @@ import {
   signup,
   verifyEmail,
   resetPassword,
+  activateTwoFactors,
+  verifyOTP,
 } from "../controllers/authController";
 import { verifyAuth } from "../controllers/permissionController";
 
@@ -178,5 +180,8 @@ authRouter.get("/resend-email", verifyAuth, resendVerificationEmail);
 authRouter.post("/verifyEmail/:token", verifyEmail);
 authRouter.post("/verifyEmail", verifyEmail);
 authRouter.patch("/resetPassword", verifyAuth, resetPassword);
+
+authRouter.put("/activate-two-factors/:userId",activateTwoFactors)
+authRouter.post("/verifyOTP",verifyOTP)
 
 export default authRouter;

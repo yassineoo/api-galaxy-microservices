@@ -69,7 +69,7 @@ func main() {
 	
 		
 // Start the server in a separate goroutine
-	port := ":8000"
+	port := ":9000"
 	// Start the server
     // Register service with API Gateway
 	serviceName := "apis-service"
@@ -84,7 +84,7 @@ func main() {
     go func() {
         for {
             registerService(serviceName, serviceVersion, port)
-            time.Sleep(15 * time.Second)
+            time.Sleep(40 * time.Second)
         }
     }()
 	log.Println("Starting service registrationstooooop")

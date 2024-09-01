@@ -30,6 +30,7 @@ type UserEntity struct {
 	PasswordHash  string              `gorm:"size:60"`
 	DateCreated   time.Time           `gorm:"default:CURRENT_TIMESTAMP"`
 	LastLogin     time.Time
+
 	IsActive      bool                `gorm:"default:true"`
 	IsTwoFactor   bool                `gorm:"default:false"`
 	Role          string              `gorm:"size:50"`
@@ -41,6 +42,10 @@ type UserEntity struct {
 	Likes         []LikeEntity        `gorm:"foreignKey:UserID"`
 	ApiReports    []ApiReportEntity   `gorm:"foreignKey:UserID"`
 	ReviewReports []ReviewReportsEntity `gorm:"foreignKey:UserID"`
+
+	Settings          []SettingsEntity         `gorm:"foreignKey:AdminID"`
+	Notifications    []NotificationEntity `gorm:"foreignKey:RecipientID"`
+
 }
 
 // ApiEntity represents the Apis table
@@ -83,6 +88,17 @@ type LikeEntity struct {
 	ApiID   int       `gorm:"null"`
 	Api     ApiEntity `gorm:"foreignKey:ApiID;onDelete:CASCADE"`
 	User    UserEntity `gorm:"foreignKey:UserID;onDelete:CASCADE"`
+}
+
+
+type SettingsEntity struct {
+    ID                 int        `gorm:"primaryKey;autoIncrement"`
+	AdminID        int                   `gorm:"not null"`
+    EarningPercentage  *float32   `gorm:"type:real"`                   // Corresponds to `Float? @db.Real`
+    TermsAndConditions  *string    `gorm:"type:text"`                   // Corresponds to `String?`
+    PrivacyAndPolicy   *string    `gorm:"type:text"`                   // Corresponds to `String?`
+    UpdatedAt          time.Time   `gorm:"default:CURRENT_TIMESTAMP"` // Corresponds to `DateTime? @db.Timestamptz(6) @default(now())`
+	User                UserEntity            `gorm:"foreignKey:AdminID"`
 }
 
 // ApiDocsEntity represents the ApiDocsEntities table
@@ -215,6 +231,7 @@ type PlanEntity struct {
 	Rate           int
 	RateUnite      string
 	RecomndedPlan  bool
+
 	Price          float64               `gorm:"type:decimal(10,2)"`
 	StripePriceId string                `gorm:"size:255"`
 	Subscriptions  []SubscriptionEntity  `gorm:"foreignKey:PlanID"`
@@ -253,6 +270,7 @@ type EndpointObjectEntity struct {
 
 // SubscriptionEntity represents the SubscriptionEntities table
 type SubscriptionEntity struct {
+
 	ID             int                   `gorm:"primaryKey;autoIncrement"`
 	UserID         int                   `gorm:"not null"`
 	PlanID         int                   `gorm:"not null"`
@@ -263,6 +281,7 @@ type SubscriptionEntity struct {
 	StripeSubId string					 `gorm:"size:255"`
 	UsageLogs      []UsageLogEntity      `gorm:"foreignKey:SubscriptionID;onDelete:CASCADE"`
 	Plan           PlanEntity            `gorm:"foreignKey:PlanID"`
+
 }
 
 // UsageLogEntity represents the UsageLogEntities table
@@ -278,6 +297,7 @@ type UsageLogEntity struct {
 
 // InvoiceEntity represents the InvoiceEntities table
 type InvoiceEntity struct {
+
 	ID              uint                    `gorm:"primaryKey;autoIncrement"`
 	SubscriptionID  uint
 	TotalAmount     float64                 `gorm:"type:decimal(10,2)"`
@@ -288,18 +308,21 @@ type InvoiceEntity struct {
 	BillingHistory  []BillingHistoryEntity  `gorm:"foreignKey:InvoiceID"`
 	Subscription    SubscriptionEntity      `gorm:"foreignKey:SubscriptionID;constraint:OnUpdate:RESTRICT"`
 	Transactions    []TransactionEntity     `gorm:"foreignKey:InvoiceID"`
+
 }
 
 // PaymentMethodEntity represents the PaymentMethodEntities table
 type PaymentMethodEntity struct {
 	ID              uint                    `gorm:"primaryKey;autoIncrement"`
 	UserID          uint
+
 	Provider        string                  `gorm:"type:varchar(255)"`
 	AccountDetails  string                  `gorm:"type:text"`
 	StripePaymentMethodId  string                  `gorm:"type:varchar(255)"`
 	IsDefault       bool                    `gorm:"default:false"`
 	User            UserEntity              `gorm:"foreignKey:UserID;constraint:OnUpdate:RESTRICT"`
 	Transactions    []TransactionEntity     `gorm:"foreignKey:PaymentMethodID"`
+
 }
 
 // BillingHistoryEntity represents the BillingHistoryEntities table
@@ -362,4 +385,15 @@ type ApiKeyEntity struct {
 	CreationDate    time.Time               `gorm:"default:current_timestamp"`
 	IsActive        bool                    `gorm:"default:true"`
 	User            UserEntity              `gorm:"foreignKey:UserID"`
+}
+
+
+// add notification 
+type NotificationEntity struct {
+    ID           int            `gorm:"primaryKey;autoIncrement;column:id"`
+    RecipientID  *int64         `gorm:"column:recipient_id"`   // Nullable BigInt equivalent
+    Title        *string        `gorm:"column:title"`          // Nullable String equivalent
+    Message      *string        `gorm:"column:message"`        // Nullable String equivalent
+	IsRead      bool                `gorm:"default:true"`
+    UserEntity   *UserEntity    `gorm:"foreignKey:RecipientID;constraint:onUpdate:CASCADE,onDelete:CASCADE;references:ID"`
 }

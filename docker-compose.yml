@@ -8,6 +8,20 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=development
+    networks:
+      - app-network
+  apis-service:
+    build: ./apis-service
+    container_name: apis-service
+    depends_on:
+      - service-registry
+    ports:
+      - "8000:8000"
+    environment:
+      - GIN_MODE=release
+    command: sh -c "sleep 15 && ./main"
+    networks:
+      - app-network
 
   auth-service:
     build: ./auth-service
@@ -18,6 +32,9 @@ services:
       - "7000:7000"
     environment:
       - NODE_ENV=development
+    networks:
+      - app-network
+
   user-service:
     build: ./user-service
     container_name: user-service
@@ -28,25 +45,45 @@ services:
     environment:
       - NODE_ENV=development
 
-  statistics-service:
-    build: ./stat-service
-    container_name: statistics-service
+    networks:
+      - app-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    depends_on:
+      - service-registry
+    ports:
+      - "7004:7004"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  stats-service:
+    build: ./stats-service
+    container_name: stats-service
     depends_on:
       - service-registry
     ports:
       - "7001:7001"
     environment:
       - NODE_ENV=development
+    networks:
+      - app-network
 
-  apis-service:
-    build: ./apis-service
-    container_name: apis-service
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
     depends_on:
       - service-registry
+      - redpanda
     ports:
-      - "8000:8000"
+      - "8088:8088"
     environment:
-      - GIN_MODE=release
+      - NODE_ENV=development
+    networks:
+      - app-network
 
   api-gateway:
     build: ./api-gateway
@@ -54,9 +91,27 @@ services:
     depends_on:
       - service-registry
       - auth-service
-      - statistics-service
+      - stats-service
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=development
-    command: sh -c "sleep 30 && pnpm run dev"
+    command: sh -c "sleep 60 && pnpm run dev"
+    networks:
+      - app-network
+
+  redpanda:
+    image: docker.redpanda.com/vectorized/redpanda:v22.2.2
+    container_name: redpanda_example_broker
+    command:
+      - redpanda start
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092
+    ports:
+      - "29092:29092"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

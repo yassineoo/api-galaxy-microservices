@@ -1,11 +1,14 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { statusCodes } from "../utils/http";
 import authService from "../services/authService";
 import { Role } from "../models/enum";
 import { Request } from "../types";
-import { log } from "console";
-
+import { sendMessage,connectProducer } from "../config/kafka"
 require("dotenv").config();
+
+
+// connect producer 
+//connectProducer()
 
 export const signup = (role: string) => {
   return async (req: Request, res: Response) => {
@@ -21,30 +24,25 @@ export const signup = (role: string) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const token = await authService.login(req.body);
+    const token = await authService.login(req.body) as any;
+    console.log("token",token)
     if (!token.message) {
       return res.status(statusCodes.ok).send({ ...token });
     } else {
       return res.json({ message: token?.message });
     }
   } catch (error: any) {
+    console.log("hello 2")
     res.status(statusCodes.badRequest).send({ error: error?.message });
   }
 };
 
 export const Oauthlogin = async (req: Request, res: Response) => {
   try {
-<<<<<<< HEAD
-    console.log("called from backend")
+    //console.log("called from backend");
     const token = await authService.OathUser(req.body);
-    console.log("token",token)
-      return res.status(statusCodes.ok).json({ ...token });
-=======
-    console.log("called from backend");
-    const token = await authService.OathUser(req.body);
-    console.log("token", token);
+    //console.log("token", token);
     return res.status(statusCodes.ok).json({ ...token });
->>>>>>> 4b181f5396d54ed40342175d97b994cd7c6dcfbf
   } catch (error: any) {
     res.status(statusCodes.badRequest).send({ message: error.message });
   }
@@ -115,3 +113,28 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
+export const activateTwoFactors = async(req:Request,res:Response,next:NextFunction)=>{
+  try {
+    const userId = req.params.userId
+    if(!userId){
+      throw Error("invalid userId")
+    }
+    await authService.activateTwoFactors(userId)
+    return res.status(200).send(true)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const verifyOTP=async (req:Request,res:Response,next:NextFunction)=>{
+  try {
+    const {otp,userId} = req.body
+    await authService.verifyOTP(userId,otp)
+    res.status(200).send(true)
+  } catch (error) {
+    next(error)
+  }
+}
