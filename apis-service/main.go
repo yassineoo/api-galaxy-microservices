@@ -59,7 +59,6 @@ func main() {
 
 	router := gin.Default()
 	api.SetupRoutes(router, svc)
-
 	router.StaticFile("/koko", "./docs/swagger.json")
 	router.StaticFile("/swagger/doc.json", "./docs/swagger.json")
 
@@ -175,4 +174,3 @@ func handleShutdown(serviceName, serviceVersion, port string) {
 		os.Exit(0)
 	}()
 }
-

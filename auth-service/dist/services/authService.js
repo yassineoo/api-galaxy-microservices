@@ -55,6 +55,7 @@ authService.register = (data, role) => __awaiter(void 0, void 0, void 0, functio
         return { id: user.id, message: "User created successfully" };
     }
     catch (error) {
+        console.log({ error });
         throw error;
     }
 });

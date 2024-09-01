@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,13 +14,11 @@ import (
 
 type CategoryHandler struct {
 	service *services.Service
-
 }
 
 func NewCategoryHandler(s *services.Service) *CategoryHandler {
 	return &CategoryHandler{service: s}
 }
-
 
 // @Summary Get all categories
 // @Description Retrieves a paginated list of categories
@@ -34,7 +33,6 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 	// Default values for pagination
 	defaultPage := 1
 	defaultLimit := 10
-
 	// Extract query parameters
 	page, err := strconv.Atoi(c.DefaultQuery("page", strconv.Itoa(defaultPage)))
 	if err != nil {
@@ -47,6 +45,8 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
 		return
 	}
+	fmt.Println(gin.H{"page": page, "limit": limit})
+	
 
 	// Call the GetAll service method
 	data, err := h.service.GetAllCategories(c, page, limit)
@@ -54,7 +54,7 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching data"})
 		return
 	}
-
+	fmt.Println(gin.H{"data": data})
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
 
@@ -75,7 +75,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.CreateCategory(c,category )
+	result, err := h.service.CreateCategory(c, category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating API Catgory"})
 		return
@@ -83,8 +83,6 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, result)
 }
-
-
 
 // @Summary Update a category
 // @Description Updates an existing category with the given ID
@@ -110,7 +108,6 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-
 	updatedApi, err := h.service.UpdateCategory(c, id, category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating API Category"})
@@ -119,7 +116,6 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updatedApi)
 }
-
 
 // @Summary Delete a category
 // @Description Deletes the category with the provided ID
@@ -141,12 +137,12 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	if err != nil {
 		// Check if the error message indicates "not found"
 		if strings.Contains(err.Error(), "not found") {
-		 c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-	 } else {
-		 c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API Category"})
-	 }
-	 return
- }
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API Category"})
+		}
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
 }
