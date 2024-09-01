@@ -2,33 +2,45 @@ import { NextFunction, Response } from "express";
 import AuthClient from "../../grpc/grpc-auth.client";
 import { AuthRequest } from "../../types/auth-request";
 
-export default async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+class UserError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UserError";
+  }
+}
 
-    const authHeader = req.headers.authorization
+export default async function authenticate(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const authHeader = req.headers.authorization;
 
-    if (!authHeader) throw new Error("Unauthorized")
+    if (!authHeader) {
+      throw new UserError("Unauthorized: Missing authorization header");
+    }
 
-    const token = authHeader.split(" ")[1]
+    const token = authHeader.split(" ")[1];
 
-    if (!token) throw new Error("Unauthorized")
+    if (!token) {
+      throw new UserError("Unauthorized: Missing token");
+    }
 
-    const authClient = AuthClient.client
+    const authClient = AuthClient.client;
 
-    authClient.Authenticate({
-        authHeader: token
-    }, (error, payload) => {
-        console.log({ error, payload })
-        if (error) {
-            console.log({ error })
-            next(new Error("Unauthorized"))
+    authClient.Authenticate(
+      { authHeader: token },
+      (error: any, payload: any) => {
+        if (error || !payload || !payload.valid) {
+          return next(new UserError("Unauthorized: Invalid or expired token"));
         }
-        if (payload) {
-            // error will be throw in first condifition, the code will not access this line if error exists , so payload.valid always will be true , and payload.userId will always has value
-            if (!payload.valid) next(new Error("Unauthorized"))
 
-            req.userId = payload.userId
-            next()
-        }
-    })
-
-} 
+        req.userId = payload.userId;
+        next();
+      }
+    );
+  } catch (err) {
+    next(err);
+  }
+}
