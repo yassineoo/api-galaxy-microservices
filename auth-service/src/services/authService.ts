@@ -14,18 +14,17 @@ import {
 import userService from "./UAMService";
 import { sendEMail } from "../utils/email";
 import userVerification from "../models/userVerification";
+import env from "../utils/env";
+import { ENV } from "./../utils/env";
 require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
 
-type register = {
+interface IRegisterInput {
   username: string;
   email: string;
   password: string;
-  //PhoneNumber: string;
-  //FullName: string;
-  //DateOfBirth: string;
-};
+}
 
 class ApiError extends Error {
   statusCode: number;
@@ -36,20 +35,20 @@ class ApiError extends Error {
 }
 
 export default class authService {
-  static register = async (data: register, role: Role) => {
+  static register = async (data: IRegisterInput, role: Role) => {
     try {
-      const {email,password,username} = data
+      const { email, password, username } = data;
       const userEmail = await userModel.getUserByEmail(email);
       if (userEmail) {
         throw new ApiError("Email already exists", 409);
       }
 
-      const hashedPassword = (await hashPassword(password)).toString();
+      const hashedPassword = await hashPassword(password);
       const user = await userModel.AddUser({
         Username: username,
         Email: email,
         PasswordHash: hashedPassword,
-        role: role
+        role: role,
       });
 
       if (!user) {
@@ -68,12 +67,13 @@ export default class authService {
 
       return { id: user.id.toString(), message: "User created successfully" };
     } catch (error: any) {
+      console.log({ error });
       throw error;
     }
   };
   static login = async (data: { email: string; password: string }) => {
     try {
-      console.log("called")
+      console.log("called");
       const user = await userModel.getUserByEmail(data.email);
       if (!user || !user.is_active) {
         throw new Error("Email or password is incorrect");
@@ -86,23 +86,23 @@ export default class authService {
         data.password,
         dbHashedPassword?.toString() || ""
       );
-console.log(isMatch)
+      console.log(isMatch);
       if (!isMatch) {
         throw new Error("Email or password is incorrect");
       }
 
       // Generate the token
-      const tokenSecret = "your_secret_key"; // Replace with your actual secret key
-      const tokenExpiry = "1h"; // Replace with your desired token expiry time
-      const { token, expiry } = generateAuthToken(
+      const tokenSecret = ENV.JWT_SECRET; // Replace with your actual secret key
+      const tokenExpiry = ENV.JWT_EXPIRATION; // Replace with your desired token expiry time
+      const { token, expiry } = await generateAuthToken(
         Number(user.id),
         user.email,
         tokenSecret,
         tokenExpiry
       );
 
-      // send a otp to his mail 
-      const otp=Math.floor(1000 + Math.random() * 9000)
+      // send a otp to his mail
+      const otp = Math.floor(1000 + Math.random() * 9000);
       const message = `
       Hi ${user.username},
 
@@ -118,20 +118,27 @@ If you have any questions or need assistance, our support team is here to help.
 
 Thank you for using our application,
 The Galaxy Team
-      `
-      await sendEMail("Your application Login Verification Code",message,user.email)
-      await userVerification.addVerification(+user.id.toString(),otp.toString())
+      `;
+      await sendEMail(
+        "Your application Login Verification Code",
+        message,
+        user.email
+      );
+      await userVerification.addVerification(
+        +user.id.toString(),
+        otp.toString()
+      );
       return {
         email: user?.email,
         username: user?.username,
         userId: user.id.toString(),
         verified: user.verified,
-        twoFactorEnabled:user.is_two_factor,
+        twoFactorEnabled: user.is_two_factor,
         token,
         tokenExpiry: expiry,
       };
     } catch (error: any) {
-    throw error
+      throw error;
     }
   };
 
@@ -158,7 +165,7 @@ The Galaxy Team
         });
         userModel.updateUser(Number(user.id), { verified: true });
       }
-       // Generate the token
+      // Generate the token
 
       const tokenSecret = "your_secret_key"; // Replace with your actual secret key
       const tokenExpiry = "1h"; // Replace with your desired token expiry time
@@ -170,9 +177,9 @@ The Galaxy Team
         tokenExpiry || ""
       );
       userModel.setLastLogin(Number(user?.id)!);
-       // send a otp to his mail 
-       const otp=Math.floor(1000 + Math.random() * 9000)
-       const message = `
+      // send a otp to his mail
+      const otp = Math.floor(1000 + Math.random() * 9000);
+      const message = `
        Hi ${user.username},
  
  We noticed a login attempt to your account from a new device or location.
@@ -187,19 +194,26 @@ The Galaxy Team
  
  Thank you for using our application,
  The Galaxy Team
-       `
-       await sendEMail("Your application Login Verification Code",message,user.email)
-       await userVerification.addVerification(+user.id.toString(),otp.toString())
+       `;
+      await sendEMail(
+        "Your application Login Verification Code",
+        message,
+        user.email
+      );
+      await userVerification.addVerification(
+        +user.id.toString(),
+        otp.toString()
+      );
       return {
         Email: user?.email,
         Name: user?.username,
         userId: Number(user?.id),
         token,
-        twoFactorEnabled : user.is_two_factor,
-        tokenExpiry
+        twoFactorEnabled: user.is_two_factor,
+        tokenExpiry,
       };
     } catch (error: any) {
-      throw error
+      throw error;
     }
   };
 
@@ -308,35 +322,36 @@ The Galaxy Team
       };
     }
   };
-  static async activateTwoFactors(userId:string){
+  static async activateTwoFactors(userId: string) {
     try {
-      const user = await userModel.getUserById(+userId)
-      await userModel.updateUser(+userId,{
-        is_two_factor: !user?.is_two_factor
-      })
-      return true
+      const user = await userModel.getUserById(+userId);
+      await userModel.updateUser(+userId, {
+        is_two_factor: !user?.is_two_factor,
+      });
+      return true;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  static async verifyOTP(userId:number, otp:string) {
+  static async verifyOTP(userId: number, otp: string) {
     try {
-      const userverification = await userVerification.getUserVerification(
+      const userverification = (await userVerification.getUserVerification(
         userId
-      ) as any
-      console.log("user id",userId)
+      )) as any;
+      console.log("user id", userId);
       if (!userverification) {
-        throw new Error('no verification found');
+        throw new Error("no verification found");
       }
       if (userverification?.id) {
-        const otpExpired = new Date(userverification.expired).getTime() < Date.now();
+        const otpExpired =
+          new Date(userverification.expired).getTime() < Date.now();
         if (otpExpired) {
-          console.log("called 2")
+          console.log("called 2");
           await userVerification.deleteUserVerification(userId);
-          throw new Error('OTP expired');
+          throw new Error("OTP expired");
         }
-        console.log(userverification)
+        console.log(userverification);
         const isEqual = userverification.otp == otp;
         if (isEqual) {
           //delete from db
@@ -347,11 +362,10 @@ The Galaxy Team
           return true;
         } else {
           //console.log("wiii")
-          throw new Error('OTP entered is wrong');
+          throw new Error("OTP entered is wrong");
         }
-
       }
-      return true
+      return true;
     } catch (error) {
       throw error;
     }

@@ -29,17 +29,20 @@ const checkPassword = async (
 };
 
 //this is the function that will generate the token
-const generateAuthToken = (
+const generateAuthToken = async (
   userId: number,
   email: string,
   tokenSecret: string,
   tokenExpiry: string | number
-): { token: string; expiry: string | number } => {
-  const authToken: string = randomBytes(32).toString();
+): Promise<{ token: string; expiry: string | number }> => {
+  const authToken: string = (await randomBytes(32)).toString("hex");
   const tokenData: TokenData = { userId, email, authToken };
-  const signedToken: string = jwt.sign(tokenData, tokenSecret, {
-    expiresIn: tokenExpiry,
-  });
+  const signedToken: string = jwt.sign(
+    tokenData,
+    tokenSecret,
+    {
+      expiresIn: tokenExpiry,
+    });
 
   return { token: signedToken, expiry: tokenExpiry };
 };
@@ -63,18 +66,18 @@ const generateEmailToken = (
 const decodeAuthToken = (
   token: string,
   tokenSecret: string
-): TokenData | string => {
+) => {
   try {
     // Attempt to verify and decode the token
     const decoded = jwt.verify(token, tokenSecret) as TokenData;
     return decoded;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      return "Token has expired";
+      throw new Error("Token has expired");
     } else if (error instanceof jwt.JsonWebTokenError) {
-      return "Invalid token";
+      throw new Error("Invalid token");
     } else {
-      return "Token verification failed";
+      throw new Error("Token verification failed");
     }
   }
 };

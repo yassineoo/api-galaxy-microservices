@@ -13,7 +13,10 @@ import ChatsGateway from "./routes/chats/chats.gateway";
 
 import { Server } from "socket.io";
 import ChatroomsRouter from "./routes/chats/chatrooms.routes";
+import GrpcAuthClient from "./grpc/grpc-auth.client";
+import ValidateEnv, { ENV } from "./utils/env";
 
+ValidateEnv();
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -58,63 +61,70 @@ server.on("listening", () => {
   const addr = server.address();
   console.log(envConfig.version)
   const PORT = 7002;
-  const registerService = () =>
-    axios
-      .put(
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          Number(PORT)
-        }`
-      )
-      .catch((err: any) => log.fatal(err));
 
-  const unregisterService = () =>
-    axios
-      .delete(
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          PORT
-        }`
-      )
-      .catch((err: any) => log.fatal(err));
+  try {
+    const registerService = () =>
+      axios
+        .put(
+          `http://service-registry:3001/register/${envConfig.serviceName}/${
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
+          }/${
+            //  server?.address()?.port ||
+            Number(PORT)
+          }`
+        )
+        .catch((err: any) => log.fatal(err));
 
-  registerService();
-  const interval = setInterval(registerService, 15 * 1000);
+    const unregisterService = () =>
+      axios
+        .delete(
+          `http://service-registry:3001/register/${envConfig.serviceName}/${
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
+          }/${
+            //  server?.address()?.port ||
+            PORT
+          }`
+        )
+        .catch((err: any) => log.fatal(err));
 
-  const cleanup = async () => {
-    let clean = false;
-    if (!clean) {
-      clean = true;
-      clearInterval(interval);
-      await unregisterService();
-    }
-  };
+    registerService();
+    const interval = setInterval(registerService, 15 * 1000);
 
-  process.on("uncaughtException", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    const cleanup = async () => {
+      let clean = false;
+      if (!clean) {
+        clean = true;
+        clearInterval(interval);
+        await unregisterService();
+      }
+    };
 
-  process.on("SIGINT", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    process.on("uncaughtException", async () => {
+      await cleanup();
+      process.exit(0);
+    });
 
-  process.on("SIGTERM", async () => {
-    await cleanup();
-    process.exit(0);
-  });
+    process.on("SIGINT", async () => {
+      await cleanup();
+      process.exit(0);
+    });
 
-  log.info(
-    `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
-    } in ${app.get("env")} mode.`
-  );
+    process.on("SIGTERM", async () => {
+      await cleanup();
+      process.exit(0);
+    });
+
+    log.info(
+      `Hi there! I'm listening on port ${
+        //  server?.address()?.port ||
+        PORT
+      } in ${app.get("env")} mode.`
+    );
+  } catch (e) {
+    console.log("Kafka connection failed");
+  }
 });
+
+GrpcAuthClient.init();

@@ -3,7 +3,8 @@ import { ID } from "../../validators/chats/_common";
 import { connect_user_event_validator } from "../../validators/chats/chatrooms/connect-user/connect-user.request";
 import { disconnect_user_event_validator } from "../../validators/chats/chatrooms/disconnect-user/disconnect-user.request";
 import { create_chatroom_message_event_validator } from "../../validators/chats/messages/create-chatroom-message/create-chatroom-message.request";
-import http from "http";
+import { Server } from "http";
+import GrpcAuthClient from "../../grpc/grpc-auth.client";
 
 export default class ChatsGateway {
   private _instance: SocketServer;
@@ -24,11 +25,31 @@ export default class ChatsGateway {
     return this._connected_users;
   }
 
-  attatchServer(server: http.Server) {
+  attatchServer(server: Server) {
     this.io.attach(server, { cors: { origin: "*" } });
   }
 
+  auth() {
+    this.io.use(async (socket, next) => {
+      const token = socket.handshake.auth.token;
+      if (!token) next(new Error("Unauthorized"))
+      GrpcAuthClient.client.Authenticate({
+        authHeader: token
+      }, (error, payload) => {
+        if (error) {
+          next(new Error("Unauthorized"))
+        }
+        if (payload) {
+          if (!payload.valid) next(new Error("Unauthorized"))
+          next()
+        }
+      })
+    })
+  }
+
   initListeners() {
+    this.auth()
+
     const io = this.io;
     io.on("connection", (socket) => {
       socket.on("connect_user", (data) => {

@@ -43,6 +43,9 @@ func NewService(db *pgxpool.Pool, gormDB *gorm.DB) *Service {
 func (s *Service) SearchByName(ctx context.Context, search string) ([]models.ApiEntity, error) {
     var apis []models.ApiEntity
 
+    // log
+    log.Println("search ============== dddd ",search)
+
     // Modify your database query to select only the required fields (ID, Name, ImagePath).
     // This can help optimize the query by fetching only the necessary data.
     if err := s.gormDB.

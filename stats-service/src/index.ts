@@ -12,7 +12,10 @@ require("dotenv").config();
 const app = express();
 
 import config from "./utils/config";
+import ValidateEnv, { ENV } from "./infrastructure/env";
 
+ValidateEnv()
+console.log({ ENV })
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,11 +41,10 @@ server.on("listening", () => {
     axios
       .put(
         //  `http://localhost:3001/register/${envConfig.serviceName}/${
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          envConfig.version
+        `http://service-registry:3001/register/${envConfig.serviceName}/${envConfig.version
         }/${
-          //  server?.address()?.port ||
-          Number(PORT)
+        //  server?.address()?.port ||
+        Number(PORT)
         }`
       )
       .catch((err: any) => log.fatal(err));
@@ -50,11 +52,10 @@ server.on("listening", () => {
   const unregisterService = () =>
     axios
       .delete(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
+        `http://service-registry:3001/register/${envConfig.serviceName}/${envConfig.version
         }/${
-          //  server?.address()?.port ||
-          PORT
+        //  server?.address()?.port ||
+        PORT
         }`
       )
       .catch((err: any) => log.fatal(err));
@@ -88,8 +89,8 @@ server.on("listening", () => {
 
   log.info(
     `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
+    //  server?.address()?.port ||
+    PORT
     } in ${app.get("env")} mode.`
   );
 });

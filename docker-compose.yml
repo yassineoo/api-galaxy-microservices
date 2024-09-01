@@ -16,7 +16,7 @@ services:
     depends_on:
       - service-registry
     ports:
-      - "8000:8000"
+      - "9000:9000"
     environment:
       - GIN_MODE=release
     command: sh -c "sleep 15 && ./main"

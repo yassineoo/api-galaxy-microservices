@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import {
   Oauthlogin,
   getUserSession,
@@ -11,6 +11,11 @@ import {
   verifyOTP,
 } from "../controllers/authController";
 import { verifyAuth } from "../controllers/permissionController";
+import { generateAuthToken } from "../utils/token";
+import { ENV } from "../utils/env";
+
+import { statusCodes } from "../utils/http";
+import { prismaClientSingleton } from "../utils/prismaClient";
 
 const authRouter = express.Router();
 
@@ -181,7 +186,46 @@ authRouter.post("/verifyEmail/:token", verifyEmail);
 authRouter.post("/verifyEmail", verifyEmail);
 authRouter.patch("/resetPassword", verifyAuth, resetPassword);
 
-authRouter.put("/activate-two-factors/:userId",activateTwoFactors)
-authRouter.post("/verifyOTP",verifyOTP)
+authRouter.put("/activate-two-factors/:userId", activateTwoFactors);
+authRouter.post("/verifyOTP", verifyOTP);
+
+authRouter.get(
+  "/api-collections",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const api_collections =
+      await prismaClientSingleton.api_collection_entities.findMany({
+        include: {
+          api_collections_apis: {
+            include: {
+              api_entities: true,
+            },
+          },
+        },
+      });
+    console.log({ api_collections });
+    return res.status(statusCodes.ok).json(api_collections);
+  }
+);
+
+authRouter.get(
+  "/categories",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const api_categories =
+      await prismaClientSingleton.category_entities.findMany();
+    console.log({ api_collections: api_categories });
+    return res.status(statusCodes.ok).json(api_categories);
+  }
+);
+
+authRouter.get("/hello", async (req: any, res: any) => {
+  const token = await generateAuthToken(
+    1,
+    "jy_attou@esi.dz",
+    ENV.JWT_SECRET,
+    "1hr"
+  );
+  console.log({ token });
+  return res.json({ token });
+});
 
 export default authRouter;

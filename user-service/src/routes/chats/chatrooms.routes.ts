@@ -1,8 +1,10 @@
 import { Router } from "express";
 import ChatroomsController from "../../controllers/chats/chatrooms.controller";
 import MessagesController from "../../controllers/chats/messages.controller";
+import authenticate from "../../services/middlewares/authenticate.middleware";
 
 const ChatroomsRouter = Router();
+ChatroomsRouter.use(authenticate)
 
 // Messages Route
 ChatroomsRouter.route("/:chatroomId/messages")

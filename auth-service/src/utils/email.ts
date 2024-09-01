@@ -23,9 +23,9 @@ export const sendEMail = (
     if (err) {
       console.log("email errors");
 
-      console.log(err);
+      // console.log({ err });
     } else {
-      console.log(info);
+      // console.log({ info });
     }
   });
 };
