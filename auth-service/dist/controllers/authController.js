@@ -20,6 +20,7 @@ const signup = (role) => {
     return (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const tokenData = yield authService_1.default.register(req.body, role);
+
             console.log({ tokenData });
             return res.status(http_1.statusCodes.ok).json({ id: Number(tokenData.id), message: tokenData.message });
         }
@@ -28,6 +29,7 @@ const signup = (role) => {
             const { message, statusCode = http_1.statusCodes.badRequest } = error;
             // HADI MCHFTHACH MAIS M3LICH 500 IS ENOUGH
             return res.status(500).json({ message });
+
         }
     });
 };

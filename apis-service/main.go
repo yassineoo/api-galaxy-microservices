@@ -174,3 +174,4 @@ func handleShutdown(serviceName, serviceVersion, port string) {
 		os.Exit(0)
 	}()
 }
+

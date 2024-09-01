@@ -11,6 +11,7 @@ import {
 import { verifyAuth } from "../controllers/permissionController";
 import { generateAuthToken } from "../utils/token";
 import { ENV } from "../utils/env";
+
 import { statusCodes } from "../utils/http";
 import { prismaClientSingleton } from "../utils/prismaClient";
 
@@ -182,6 +183,7 @@ authRouter.get("/resend-email", verifyAuth, resendVerificationEmail);
 authRouter.post("/verifyEmail/:token", verifyEmail);
 authRouter.post("/verifyEmail", verifyEmail);
 authRouter.patch("/resetPassword", verifyAuth, resetPassword);
+
 
 authRouter.get("/api-collections", async (req: Request, res: Response, next: NextFunction) => {
   const api_collections = await prismaClientSingleton.api_collection_entities.findMany({

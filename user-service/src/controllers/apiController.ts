@@ -1,3 +1,4 @@
+
 import { Response, NextFunction } from "express"
 import { AuthRequest } from "../types/auth-request"
 import { SystemError, UserError } from "../utils/errorHandler"
@@ -81,38 +82,6 @@ export const createReview = async (req: AuthRequest, res: Response, next: NextFu
     } catch (error: any) {
         console.log(error.message)
         next(error)
-    }
-}
-
-export const getAPIRating = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-        const { apiId } = req.params
-        if (!apiId) {
-            throw new UserError("something went wrong")
-        }
-        const response = await apiService.getAPIRating(Number(apiId))
-        res.status(200).json(response)
-    } catch (error) {
-        next(error)
-    }
-}
-
-export const getAPISforAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-        const { adminId } = req.params
-        const { page, limit, search } = req.query
-        if (!adminId) {
-            throw new SystemError("something went wrong")
-        }
-        const apis = await apiService.getApisFoAdmin(Number(adminId), page, limit, search)
-        res.status(200).send(apis)
-    } catch (error: any) {
-        console.log(error.message)
-        next(error)
-    }
-}
-
-
 export const getUserApis = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const { userId } = req.params
@@ -170,8 +139,10 @@ export const reportAnComment = async (req: AuthRequest, res: Response, next: Nex
         res.status(201).send(true)
     } catch (error) {
         next(error)
+
     }
 }
+
 
 
 export const getReportsForAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -222,3 +193,4 @@ export const getCategories = async (
       next(error);
     }
   };
+

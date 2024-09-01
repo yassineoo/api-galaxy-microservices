@@ -1,6 +1,8 @@
 "use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 const zod_1 = require("zod");
+
 /* password ^: Asserts the position at the beginning of the string.
 (?=.*[a-z]): Ensures at least one lowercase letter exists.
 (?=.*[A-Z]): Ensures at least one uppercase letter exists.
@@ -8,6 +10,7 @@ const zod_1 = require("zod");
 (?=.*[\^$*.\[\]{}()?\-"!@#%&/,><':;|_~\])`: Ensures at least one special character exists.
 .{8,}: Ensures that there are at least 8 of any character (except newline).
 $: Asserts the position at the end of the string.$  */
+
 const passwordPattern = /[@#$%^&*()_+{}\[\]|\\:;'"<>,.?/~`]/;
 const passwordValidator = zod_1.z.string()
     .min(8, 'Password must be at least 8 characters long.')
@@ -42,4 +45,5 @@ exports.default = {
     loginSchema: loginValidator,
     signUpSchema: signupValidator,
     EmailSchema
+
 };

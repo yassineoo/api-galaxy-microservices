@@ -40,13 +40,17 @@ const authService = {
     Authenticate: (call, callback) => {
         try {
             const decodeTokenResult = (0, token_1.decodeAuthToken)(call.request.authHeader, env_1.ENV.JWT_SECRET);
+
             console.log({ decodeTokenResult });
+
             return callback(null, { valid: true, userId: decodeTokenResult.userId });
         }
         catch (err) {
             console.log({ err });
             const error = new Error("Unauthorized");
+
             console.log({ error });
+
             return callback(error, { valid: false, userId: 0 });
         }
     }

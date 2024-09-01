@@ -34,6 +34,8 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	router.PATCH("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
 	router.DELETE("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
 
+
+
 	// API routes
 	apisGroup := router.Group("/apis")
 	{
@@ -77,11 +79,13 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// Category routes
 	categoriesGroup := router.Group("/categoriesk")
 	{
+
 		categoriesGroup.
 			GET("/", CategoryHandler.GetAllCategories).
 			POST("/", middlewares.AuthMiddleware(), CategoryHandler.CreateCategory).
 			PATCH("/:id", middlewares.AuthMiddleware(), CategoryHandler.UpdateCategory).
 			DELETE("/:id", middlewares.AuthMiddleware(), CategoryHandler.DeleteCategory)
+
 	}
 
 	// Endpoints routes
@@ -170,6 +174,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// API Collection routes
 	apiCollectionGroup := router.Group("/api-collections")
 	{
+
 		apiCollectionGroup.
 			GET("/", ApiCollectionHandler.GetCollections).
 			POST("/", middlewares.AuthMiddleware(), ApiCollectionHandler.CreateCollection).

@@ -187,7 +187,9 @@ func (h *ApiHandler) GetSearchApis(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user Searched APIs"})
 		return
 	}
+
 	fmt.Println(gin.H{"data": apis})
+
 	c.JSON(http.StatusOK, gin.H{"data": apis})
 }
 

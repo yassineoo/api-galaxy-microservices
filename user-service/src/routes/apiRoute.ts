@@ -1,3 +1,4 @@
+
 import { Router } from "express"
 import { createReview,getCategories, deleteReportReview, dislikeApi, getAllApis, getAPIRating, getAPIReview, getAPISforAdmin, getCategories, getReportsForAdmin, getReviwesReports, getUserApis, getUserFollowingsApis, likeApi, reportAnAPI, reportAnComment } from "../controllers/apiController"
 import authenticate from "../services/middlewares/authenticate.middleware"
@@ -5,6 +6,7 @@ import authenticate from "../services/middlewares/authenticate.middleware"
 const userApiRouter = Router()
 userApiRouter.get("/categories", getCategories);
 userApiRouter.use(authenticate)
+
 
 userApiRouter.get("/reviewReports", getReviwesReports)
 userApiRouter.get("/adminReports", getReportsForAdmin)
@@ -21,4 +23,6 @@ userApiRouter.get("/myFollowingApis/:userId", getUserFollowingsApis)
 userApiRouter.post("/reportAPI/:apiId", reportAnAPI)
 userApiRouter.post("/reportComment/:commentId", reportAnComment)
 
+
 export { userApiRouter }
+
