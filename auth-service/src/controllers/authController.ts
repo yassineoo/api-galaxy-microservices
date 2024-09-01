@@ -53,17 +53,53 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = await authService.login(req.body);
-    console.log({ token });
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log(token);
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
+    console.log("----------------------------------");
 
-    if (!token.message) {
-      return res
-        .status(statusCodes.ok)
-        .send({ ...token, id: Number(token.id), token: token.token });
-    } else {
-      return res
-        .status(statusCodes.badRequest)
-        .json({ message: token?.message });
-    }
+    return res
+      .status(statusCodes.ok)
+      .send({ ...token, userId: Number(token.userId), token: token.token });
   } catch (error: any) {
     return res.status(statusCodes.badRequest).send({ error: error?.message });
   }
