@@ -1,9 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+
 Object.defineProperty(exports, "__esModule", { value: true });
-const joi_1 = __importDefault(require("joi"));
+const zod_1 = require("zod");
+
 /* password ^: Asserts the position at the beginning of the string.
 (?=.*[a-z]): Ensures at least one lowercase letter exists.
 (?=.*[A-Z]): Ensures at least one uppercase letter exists.
@@ -11,32 +10,40 @@ const joi_1 = __importDefault(require("joi"));
 (?=.*[\^$*.\[\]{}()?\-"!@#%&/,><':;|_~\])`: Ensures at least one special character exists.
 .{8,}: Ensures that there are at least 8 of any character (except newline).
 $: Asserts the position at the end of the string.$  */
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\^$*.\[\]{}()?\-"!@#%&/,><':;|_~`\\]).{8,}$/;
-const passwordSchema = joi_1.default.string().pattern(passwordPattern).message('Password must have at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character');
-const signup = {
-    Username: joi_1.default.string(),
-    FullName: joi_1.default.string(),
-    DateOfBirth: joi_1.default.date(),
-    Email: joi_1.default.string().email().messages({
-        "string.email": "Email must be a valid email"
-    }),
-    password: passwordSchema,
-    phoneNumber: joi_1.default.string(),
-};
-const login = {
-    Email: joi_1.default.string().email().required().messages({
-        "string.email": "Email must be a valid email"
-    }),
-    password: passwordSchema,
-    Username: joi_1.default.string()
-};
-const Email = {
-    Email: joi_1.default.string().email().required().messages({
-        "string.email": "Email must be a valid email"
-    })
-};
+
+const passwordPattern = /[@#$%^&*()_+{}\[\]|\\:;'"<>,.?/~`]/;
+const passwordValidator = zod_1.z.string()
+    .min(8, 'Password must be at least 8 characters long.')
+    .refine(value => /[A-Z]/.test(value), 'Password must contain at least one uppercase letter.')
+    .refine(value => /[a-z]/.test(value), 'Password must contain at least one lowercase letter.')
+    .refine(value => passwordPattern.test(value), 'Password must contain at least one special symbol.');
+const emailValidator = zod_1.z
+    .string()
+    .email()
+    .min(1, 'Email is required');
+const usernameValidator = zod_1.z.string();
+// const signupValidator = {
+// Username: Joi.string(),
+// // FullName: Joi.string(),
+// // DateOfBirth: Joi.date(),
+// Email: emailSchema,
+// password: passwordSchema,
+// // phoneNumber: Joi.string(),
+// }
+const signupValidator = zod_1.z.object({
+    username: usernameValidator,
+    email: emailValidator,
+    password: passwordValidator
+});
+const loginValidator = zod_1.z.object({
+    email: emailValidator,
+    password: passwordValidator,
+    username: usernameValidator
+});
+const EmailSchema = zod_1.z.object({ email: emailValidator });
 exports.default = {
-    loginSchema: joi_1.default.object(login),
-    signUpSchema: joi_1.default.object(signup),
-    EmailSchema: joi_1.default.object(Email)
+    loginSchema: loginValidator,
+    signUpSchema: signupValidator,
+    EmailSchema
+
 };

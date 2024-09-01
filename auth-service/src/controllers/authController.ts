@@ -4,31 +4,69 @@ import authService from "../services/authService";
 import { Role } from "../models/enum";
 import { Request } from "../types";
 import { log } from "console";
+import { loginValidator, signupValidator } from "../validators/UAuthValidator";
+import formatZodErrors from "../utils/zod.validation";
 
 require("dotenv").config();
 
 export const signup = (role: string) => {
   return async (req: Request, res: Response) => {
     try {
-      const tokenData = await authService.register(req.body, role as Role);
-      return res.status(statusCodes.ok).json(tokenData);
-    } catch (error: any) {
-      const { message, statusCode = statusCodes.badRequest } = error;
-      return res.status(statusCode).json({ message });
+      const validation = signupValidator.safeParse(req.body)
+      if (!validation.success) {
+        console.log({ validation_error: validation.error })
+        return res
+          .status(statusCodes.badRequest)
+          .json({ errors: formatZodErrors(validation.error) })
+      }
+
+      const tokenData = await authService.register(validation.data, role as Role);
+      console.log({ tokenData })
+
+      return res
+        .status(statusCodes.ok)
+        .json({
+          id: Number(tokenData.id),
+          message: tokenData.message
+        });
+    }
+    catch (error: any) {
+      console.log({ error })
+      const { message } = error;
+      // HADI MCHFTHACH MAIS M3LICH 500 IS ENOUGH
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message });
     }
   };
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
+    const validation = loginValidator.safeParse(req.body)
+    if (!validation.success) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ errors: formatZodErrors(validation.error) })
+    }
+
     const token = await authService.login(req.body);
+    console.log({ token })
+
     if (!token.message) {
-      return res.status(statusCodes.ok).send({ ...token });
-    } else {
-      return res.json({ message: token?.message });
+      return res
+        .status(statusCodes.ok)
+        .send({ ...token, id: Number(token.id), token: token.token });
+    }
+    else {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: token?.message });
     }
   } catch (error: any) {
-    res.status(statusCodes.badRequest).send({ error: error?.message });
+    return res
+      .status(statusCodes.badRequest)
+      .send({ error: error?.message });
   }
 };
 
