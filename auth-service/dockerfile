@@ -26,4 +26,4 @@ COPY . .
 EXPOSE 7000
 
 # Start the Node.js app in development mode
-CMD ["pnpm", "run", "dev"]
+CMD ["pnpm", "start"]

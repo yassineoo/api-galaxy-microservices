@@ -13,10 +13,9 @@ import (
 	"local_packages/database"
 	"log"
 
-
 	//"log"
 	//"os"
-    "local_packages/grpc"
+	"local_packages/grpc"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	gorm "gorm.io/gorm"
@@ -60,7 +59,6 @@ func main() {
 
 	router := gin.Default()
 	api.SetupRoutes(router, svc)
-
 	router.StaticFile("/koko", "./docs/swagger.json")
 	router.StaticFile("/swagger/doc.json", "./docs/swagger.json")
 
@@ -175,4 +173,3 @@ func handleShutdown(serviceName, serviceVersion, port string) {
 		os.Exit(0)
 	}()
 }
-

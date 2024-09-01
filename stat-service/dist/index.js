@@ -64,7 +64,7 @@ server.on("listening", () => {
     Number(PORT)}`)
         .catch((err) => log.fatal(err));
     const unregisterService = () => axios_1.default
-        .delete(`http://localhost:3001/register/${envConfig.serviceName}/${envConfig.version}/${
+        .delete(`http://service-registry:3001/register/${envConfig.serviceName}/${envConfig.version}/${
     //  server?.address()?.port ||
     PORT}`)
         .catch((err) => log.fatal(err));

@@ -34,8 +34,6 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	router.PATCH("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
 	router.DELETE("/services/:api-id/*path", ApiHandler.HandleSendRequest2)
 
-	router.Use(middlewares.AuthMiddleware()).GET("/hi", ApiHandler.HandleRequest)
-
 	// API routes
 	apisGroup := router.Group("/apis")
 	{
@@ -79,13 +77,11 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// Category routes
 	categoriesGroup := router.Group("/categoriesk")
 	{
-		categoriesGroup.GET("/", CategoryHandler.GetAllCategories)
-
 		categoriesGroup.
-			Use(middlewares.AuthMiddleware()).
-			POST("/", CategoryHandler.CreateCategory).
-			PATCH("/:id", CategoryHandler.UpdateCategory).
-			DELETE("/:id", CategoryHandler.DeleteCategory)
+			GET("/", CategoryHandler.GetAllCategories).
+			POST("/", middlewares.AuthMiddleware(), CategoryHandler.CreateCategory).
+			PATCH("/:id", middlewares.AuthMiddleware(), CategoryHandler.UpdateCategory).
+			DELETE("/:id", middlewares.AuthMiddleware(), CategoryHandler.DeleteCategory)
 	}
 
 	// Endpoints routes
@@ -174,16 +170,14 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// API Collection routes
 	apiCollectionGroup := router.Group("/api-collections")
 	{
-		// Protected
 		apiCollectionGroup.
-			Use(middlewares.AuthMiddleware()).
-			POST("/", ApiCollectionHandler.CreateCollection).
-			PATCH("/:id", ApiCollectionHandler.UpdateCollection).
-			DELETE("/:id", ApiCollectionHandler.DeleteCollection).
-			POST("/:id/addApis", ApiCollectionHandler.AddApisToCollection).
-			POST("/:id/removeApis", ApiCollectionHandler.RemoveApisFromCollection)
+			GET("/", ApiCollectionHandler.GetCollections).
+			POST("/", middlewares.AuthMiddleware(), ApiCollectionHandler.CreateCollection).
+			PATCH("/:id", middlewares.AuthMiddleware(), ApiCollectionHandler.UpdateCollection).
+			DELETE("/:id", middlewares.AuthMiddleware(), ApiCollectionHandler.DeleteCollection).
+			POST("/:id/addApis", middlewares.AuthMiddleware(), ApiCollectionHandler.AddApisToCollection).
+			POST("/:id/removeApis", middlewares.AuthMiddleware(), ApiCollectionHandler.RemoveApisFromCollection)
 
-		apiCollectionGroup.GET("/", ApiCollectionHandler.GetCollections)
 	}
 
 }
@@ -198,7 +192,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, PATCH, OPTIONS, GET, PUT, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)

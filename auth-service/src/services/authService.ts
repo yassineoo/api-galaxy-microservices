@@ -19,13 +19,10 @@ require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
 
-type register = {
+interface IRegisterInput {
   username: string;
   email: string;
   password: string;
-  //PhoneNumber: string;
-  //FullName: string;
-  //DateOfBirth: string;
 };
 
 class ApiError extends Error {
@@ -37,7 +34,7 @@ class ApiError extends Error {
 }
 
 export default class authService {
-  static register = async (data: register, role: Role) => {
+  static register = async (data: IRegisterInput, role: Role) => {
     try {
       const { email, password, username } = data
       const userEmail = await userModel.getUserByEmail(email);
@@ -45,7 +42,7 @@ export default class authService {
         throw new ApiError("Email already exists", 409);
       }
 
-      const hashedPassword = (await hashPassword(password)).toString();
+      const hashedPassword = await hashPassword(password)
       const user = await userModel.AddUser({
         Username: username,
         Email: email,
@@ -69,6 +66,7 @@ export default class authService {
 
       return { id: user.id, message: "User created successfully" };
     } catch (error: any) {
+      console.log({ error })
       throw error;
     }
   };
