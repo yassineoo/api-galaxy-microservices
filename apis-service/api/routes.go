@@ -41,7 +41,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	{
 		apisGroup.GET("/search", ApiHandler.GetSearchApis)
 		apisGroup.GET("/", ApiHandler.GetAllApis)
-		apisGroup.Use(middlewares.AuthMiddleware()).GET("/:id", ApiHandler.GetApi)
+		apisGroup.GET("/:id", ApiHandler.GetApi)
 		apisGroup.GET("/user-apis/:user_id", ApiHandler.GetUserAPIs)
 
 		// Protected
@@ -54,24 +54,26 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// API Docs routes
 	apisDocsGroup := router.Group("/apis-docs")
 	{
+		apisDocsGroup.GET("/:api-id", ApiDocsHandler.GetApiDocs)
+
 		apisDocsGroup.Use(middlewares.AuthMiddleware()).
 			POST("/", ApiDocsHandler.CreateApiDocs).
 			PATCH("/:id", ApiDocsHandler.UpdateApiDocs).
 			DELETE("/:id", ApiDocsHandler.DeleteApiDocs)
 
-		apisDocsGroup.GET("/:api-id", ApiDocsHandler.GetApiDocs)
 	}
 	// apiLogs routes
 	//apis-healthcheck
 	apiLogsGroup := router.Group("/apis-logs")
 	{
+		apiLogsGroup.GET("/:api-id", ApiLogsHandler.GetApiLogs)
+
 		apiLogsGroup.
 			Use(middlewares.AuthMiddleware()).
 			POST("/statss", ApiLogsHandler.GetLast7DaysStats).
 			POST("/stats", ApiLogsHandler.GetStatisticsByTimeFilter)
 
 		// categoriesGroup.POST("/", CategoryHandler.CreateCategory)
-		apiLogsGroup.GET("/:api-id", ApiLogsHandler.GetApiLogs)
 		// categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)
 		//  categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory)
 	}
@@ -91,6 +93,9 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// Endpoints routes
 	endpointsGroup := router.Group("/endpoints")
 	{
+
+		endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpoints)
+
 		// Protected
 		endpointsGroup.
 			Use(middlewares.AuthMiddleware()).
@@ -99,12 +104,14 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 			PATCH("/:id", EndpointsHandler.UpdateApiEndpoints).
 			DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
 
-		endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpoints)
 	}
 
 	// Endpoints Group routes
 	endpointsGroupGroup := router.Group("/endpoints-group")
 	{
+
+		endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
+
 		// Protected
 		endpointsGroupGroup.
 			Use(middlewares.AuthMiddleware()).
@@ -112,12 +119,14 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 			PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup).
 			DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
 
-		endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
 	}
 
 	// Endpoints Parameter routes
 	endpointsParameterGroup := router.Group("/endpoints-parameter")
 	{
+
+		endpointsParameterGroup.GET("/:endpoint-id", EndpointsHandler.GetEndpointParameters)
+
 		// Protected
 		endpointsParameterGroup.
 			Use(middlewares.AuthMiddleware()).
@@ -125,12 +134,16 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 			PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter).
 			DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
 
-		endpointsParameterGroup.GET("/:endpoint-id", EndpointsHandler.GetEndpointParameters)
 	}
 
 	// Health Check routes
 	healthCheckGroup := router.Group("/apis-healthcheck")
 	{
+
+		healthCheckGroup.
+			GET("/health-stats", HealthCheckHandler.GetApiHealthStats).
+			GET("/:api-id", HealthCheckHandler.GetApiHealthCheck).
+			GET("/:api-id/success-percentage", HealthCheckHandler.GetHealthCheckSuccessPercentage)
 		// Protected
 		healthCheckGroup.
 			Use(middlewares.AuthMiddleware()).
@@ -138,10 +151,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 			PATCH("/:id", HealthCheckHandler.UpdateHealthCheck).
 			DELETE("/:id", HealthCheckHandler.DeleteHealthCheck)
 
-		healthCheckGroup.
-			GET("/health-stats", HealthCheckHandler.GetApiHealthStats).
-			GET("/:api-id", HealthCheckHandler.GetApiHealthCheck).
-			GET("/:api-id/success-percentage", HealthCheckHandler.GetHealthCheckSuccessPercentage)
+		
 	}
 
 	// Plan routes
