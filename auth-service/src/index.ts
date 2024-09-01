@@ -48,7 +48,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 server.listen(7000);
 
-/*
+
 server.on("listening", () => {
   const addr = server.address();
   const PORT = typeof addr === "string" ? addr : addr?.port;
@@ -111,5 +111,5 @@ server.on("listening", () => {
     } in ${app.get("env")} mode.`
   );
 });
-*/
+
 GrpcAuthServer.init();
