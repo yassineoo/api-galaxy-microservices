@@ -163,20 +163,20 @@ The Galaxy Team
           role: data.role || "Client",
           Image: data.image,
         });
-        userModel.updateUser(Number(user.id), { verified: true });
+        await userModel.updateUser(Number(user.id), { verified: true });
       }
       // Generate the token
 
-      const tokenSecret = "your_secret_key"; // Replace with your actual secret key
-      const tokenExpiry = "1h"; // Replace with your desired token expiry time
+      const tokenSecret = ENV.JWT_SECRET; // Replace with your actual secret key
+      const tokenExpiry = ENV.JWT_EXPIRATION; // Replace with your desired token expiry time
       //console.log( "number is :",Number(user.id))
-      const token = generateAuthToken(
+      const token = await generateAuthToken(
         Number(user.id),
         user.email,
         tokenSecret || "",
         tokenExpiry || ""
       );
-      userModel.setLastLogin(Number(user?.id)!);
+      await userModel.setLastLogin(Number(user?.id)!);
       // send a otp to his mail
       const otp = Math.floor(1000 + Math.random() * 9000);
       const message = `
