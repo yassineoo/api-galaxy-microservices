@@ -1,80 +1,79 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { statusCodes } from "../utils/http";
 import authService from "../services/authService";
 import { Role } from "../models/enum";
 import { Request } from "../types";
+import { sendMessage, connectProducer } from "../config/kafka";
 import { log } from "console";
 import { loginValidator, signupValidator } from "../validators/UAuthValidator";
 import formatZodErrors from "../utils/zod.validation";
 
 require("dotenv").config();
 
+// connect producer
+//connectProducer()
+
 export const signup = (role: string) => {
   return async (req: Request, res: Response) => {
     try {
-      const validation = signupValidator.safeParse(req.body)
+      const validation = signupValidator.safeParse(req.body);
       if (!validation.success) {
-        console.log({ validation_error: validation.error })
+        console.log({ validation_error: validation.error });
         return res
           .status(statusCodes.badRequest)
-          .json({ errors: formatZodErrors(validation.error) })
+          .json({ errors: formatZodErrors(validation.error) });
       }
 
-      const tokenData = await authService.register(validation.data, role as Role);
-      console.log({ tokenData })
+      const tokenData = await authService.register(
+        validation.data,
+        role as Role
+      );
+      console.log({ tokenData });
 
-      return res
-        .status(statusCodes.ok)
-        .json({
-          id: Number(tokenData.id),
-          message: tokenData.message
-        });
-    }
-    catch (error: any) {
-      console.log({ error })
+      return res.status(statusCodes.ok).json({
+        id: Number(tokenData.id),
+        message: tokenData.message,
+      });
+    } catch (error: any) {
+      console.log({ error });
       const { message } = error;
       // HADI MCHFTHACH MAIS M3LICH 500 IS ENOUGH
-      return res
-        .status(statusCodes.badRequest)
-        .json({ message });
+      return res.status(statusCodes.badRequest).json({ message });
     }
   };
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const validation = loginValidator.safeParse(req.body)
+    const validation = loginValidator.safeParse(req.body);
     if (!validation.success) {
       return res
         .status(statusCodes.badRequest)
-        .json({ errors: formatZodErrors(validation.error) })
+        .json({ errors: formatZodErrors(validation.error) });
     }
 
     const token = await authService.login(req.body);
-    console.log({ token })
+    console.log({ token });
 
     if (!token.message) {
       return res
         .status(statusCodes.ok)
         .send({ ...token, id: Number(token.id), token: token.token });
-    }
-    else {
+    } else {
       return res
         .status(statusCodes.badRequest)
         .json({ message: token?.message });
     }
   } catch (error: any) {
-    return res
-      .status(statusCodes.badRequest)
-      .send({ error: error?.message });
+    return res.status(statusCodes.badRequest).send({ error: error?.message });
   }
 };
 
 export const Oauthlogin = async (req: Request, res: Response) => {
   try {
-    console.log("called from backend");
+    //console.log("called from backend");
     const token = await authService.OathUser(req.body);
-    console.log("token", token);
+    //console.log("token", token);
     return res.status(statusCodes.ok).json({ ...token });
   } catch (error: any) {
     res.status(statusCodes.badRequest).send({ message: error.message });
@@ -144,5 +143,36 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(statusCodes.badRequest).json({
       message: error.message,
     });
+  }
+};
+
+export const activateTwoFactors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      throw Error("invalid userId");
+    }
+    await authService.activateTwoFactors(userId);
+    return res.status(200).send(true);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { otp, userId } = req.body;
+    await authService.verifyOTP(userId, otp);
+    res.status(200).send(true);
+  } catch (error) {
+    next(error);
   }
 };

@@ -253,6 +253,7 @@ model user_entities {
   profile_entities              profile_entities[]
   review_reports_entities       review_reports_entities[]
   settings_entities             settings_entities[]
+  userVerification_entities     userVerification_entities[]
   user_chatroom_entities        user_chatroom_entities[]
 }
 
@@ -402,6 +403,14 @@ model settings_entities {
   updated_at         DateTime?      @default(now()) @db.Timestamptz(6)
   admin_id           BigInt?
   user_entities      user_entities? @relation(fields: [admin_id], references: [id], onDelete: Cascade, map: "settings_entities_adminId_fkey")
+}
+
+model userVerification_entities {
+  id            Int            @id @default(autoincrement())
+  userId        BigInt?
+  otp           String?
+  expired       DateTime?      @db.Timestamptz(6)
+  user_entities user_entities? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model user_chatroom_entities {
