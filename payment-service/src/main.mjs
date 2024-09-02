@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 import stripeRouter from "./routes/stripeRouter.mjs";
 import http from "http";
 import config from "./utils/config.mjs";
+import subscriptionRouter from "./routes/subscriptionRouter.mjs";
+import transactionRouter from "./routes/transcationRouter.mjs";
+import stripeCrudRouter from "./routes/stripeCrudRouter.mjs";
 
 dotenv.config();
 const app = express();
@@ -29,9 +32,12 @@ app.use(
 );
 
 app.use("/stripe-subscription", stripeRouter);
+app.use("/stripeCRUD", stripeCrudRouter);
+app.use("/subscription", subscriptionRouter);
+app.use("/transcation", transactionRouter);
 
 app.use("/", (req, res) => {
-  res.send("Hello World");
+  res.send("payment service");
 });
 
 server.listen(7004);
