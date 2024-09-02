@@ -5,12 +5,16 @@ import {
   updateCustomer,
   deleteCustomer,
   listCustomers,
+
 } from '../controllers/customerController.mjs';
+
 import {
   createPrice,
   getPrices,
   getCustomerTransactionHistory,
+
 } from '../controllers/priceController.mjs';
+
 import {
   getProducts,
   getProductById,
@@ -18,7 +22,9 @@ import {
   updateProduct,
   deleteProduct,
   createProductWithPrice,
+
 } from '../controllers/productController.mjs';
+
 
 const stripeCrudRouter = express.Router();
 

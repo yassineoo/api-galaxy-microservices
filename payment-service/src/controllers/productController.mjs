@@ -1,4 +1,6 @@
+
 import { productModel } from "../models/stripe/products.mjs";
+
 
 // Get all products
 export const getProducts = async (req, res) => {

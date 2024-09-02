@@ -1,6 +1,7 @@
 import { priceModel } from "./prices.mjs";
 import stripe from "./stripeInstance.mjs";
 
+
 export class productModel {
     static getProducts = async () => {
         const products = await stripe.products.list();

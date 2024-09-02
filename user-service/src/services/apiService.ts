@@ -5,6 +5,7 @@ import ReviewModel from "../models/reviewModel";
 import { Report } from "../types/report";
 import ReportModel from "../models/reportModel";
 import ApiCategoryModel from "../models/ApiCategoryModel";
+import userModel from "../models/userModel";
 export default class apiService {
   static async likeAPI(user_id: number | bigint, api_id: number | bigint) {
     try {
@@ -96,6 +97,17 @@ export default class apiService {
     try {
       const userApis = await APIModel.getAPISForUser(userId);
       return userApis;
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async getProviderInfos(userId: number) {
+    try {
+      const userApis = await userModel.getProviderInfos(userId);
+      const jsonString = JSON.stringify(userApis, (key, value) =>
+        typeof value == "bigint" ? value.toString() : value
+      );
+      return jsonString;
     } catch (error) {
       throw error;
     }

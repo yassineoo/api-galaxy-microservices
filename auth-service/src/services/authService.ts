@@ -136,6 +136,7 @@ The Galaxy Team
         twoFactorEnabled: user.is_two_factor,
         token,
         tokenExpiry: expiry,
+        role: user.role,
       };
     } catch (error: any) {
       throw error;
@@ -160,7 +161,7 @@ The Galaxy Team
         user = await userModel.AddUser({
           Username: data.Username,
           Email: data.Email,
-          role: data.role || "Client",
+          role: data.role || "userClient",
           Image: data.image,
         });
         await userModel.updateUser(Number(user.id), { verified: true });
@@ -208,6 +209,7 @@ The Galaxy Team
         Email: user?.email,
         Name: user?.username,
         userId: Number(user?.id),
+        role: user?.role,
         token,
         twoFactorEnabled: user.is_two_factor,
         tokenExpiry,

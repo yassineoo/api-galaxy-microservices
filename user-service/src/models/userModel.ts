@@ -23,7 +23,7 @@ export default class userModel {
           date_created: currentDate.toISOString(),
           last_login: currentDate.toISOString(),
           is_active: true,
-          role: data.role || "customer",
+          role: data.role || "userClient",
         },
       });
       return user;
@@ -65,6 +65,22 @@ export default class userModel {
     }
   };
 
+  static getProviderInfos = async (id: number) => {
+    try {
+      const user = await prismaClientSingleton.user_entities.findUnique({
+        where: {
+          id: id,
+        },
+      });
+      if (!user) {
+        console.log("No data found for getUserById");
+      }
+      return user;
+    } catch (error) {
+      console.error("Error in getUserById:", error);
+      throw error;
+    }
+  };
   static getUserByEmail = async (email: string) => {
     try {
       if (!email) {

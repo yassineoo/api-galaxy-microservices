@@ -57,7 +57,8 @@ export const getAllApis = async (
       Number(userId),
       limit,
       page,
-      search
+      search,
+      Number(filter)
     );
     //console.log(response)
     return res.status(200).send(response);
@@ -148,6 +149,23 @@ export const getAPISforAdmin = async (
   }
 };
 
+export const getProviderInfos = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      throw new SystemError("something went wrong");
+    }
+
+    const apis = await apiService.getProviderInfos(Number(userId));
+    res.status(200).json(apis);
+  } catch (error) {
+    next(error);
+  }
+};
 export const getUserApis = async (
   req: AuthRequest,
   res: Response,

@@ -8,6 +8,7 @@ import {
   getAPIReview,
   getAPISforAdmin,
   getCategories,
+  getProviderInfos,
   getReportsForAdmin,
   getReviwesReports,
   getUserApis,
@@ -23,7 +24,9 @@ userApiRouter.get("/categories", getCategories);
 userApiRouter.get("/:userId", getAllApis);
 userApiRouter.get("/getReviews/:apiId", getAPIReview);
 userApiRouter.get("/adminReports", getReportsForAdmin);
+userApiRouter.get("/adminReviwesReports", getReviwesReports);
 userApiRouter.get("/myApis/:userId", getUserApis);
+userApiRouter.get("/provider/:userId", getProviderInfos);
 userApiRouter.get("/getRating/:apiId", getAPIRating);
 
 userApiRouter.get("/myFollowingApis/:userId", getUserFollowingsApis);

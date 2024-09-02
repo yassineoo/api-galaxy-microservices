@@ -8,7 +8,7 @@ export default class userModel {
     PasswordHash?: string;
     // PhoneNumber?: string;
     role?: string;
-    Image?:string
+    Image?: string;
   }) => {
     try {
       const user = await prismaClientSingleton.user_entities.create({
@@ -22,7 +22,7 @@ export default class userModel {
           date_created: currentDate.toISOString(),
           last_login: currentDate.toISOString(),
           is_active: true,
-          role: data.role || "customer",
+          role: data.role || "userClient",
         },
       });
       return user;
