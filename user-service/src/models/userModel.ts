@@ -23,7 +23,7 @@ export default class userModel {
           date_created: currentDate.toISOString(),
           last_login: currentDate.toISOString(),
           is_active: true,
-          role: data.role || "customer",
+          role: data.role || "userClient",
         },
       });
       return user;
