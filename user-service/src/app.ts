@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { handleErrors } from "./utils/errorHandler";
 import http from "http";
-import {kafka, sendMessage} from "./utils/kafka"
+import { kafka, sendMessage } from "./utils/kafka";
 require("dotenv").config();
 const app = express();
 import config from "./utils/config";
@@ -11,7 +11,6 @@ import { adminRouter } from "./routes/admin/adminRoute";
 import axios from "axios";
 import ChatsGateway from "./routes/chats/chats.gateway";
 
-import { Server } from "socket.io";
 import ChatroomsRouter from "./routes/chats/chatrooms.routes";
 import GrpcAuthClient from "./grpc/grpc-auth.client";
 import ValidateEnv, { ENV } from "./utils/env";
@@ -27,7 +26,7 @@ app.use(
 app.use(cors({ origin: "*" }));
 app.use(cors({ origin: true, credentials: true }));
 
-console.log("hello from app.ts")
+console.log("hello from app.ts");
 
 // Add this line to parse JSON bodies
 app.use(express.json());
@@ -37,7 +36,7 @@ app.use((req, res, next) => {
 });
 app.use("/userApi", userApiRouter);
 app.use("/chatrooms", ChatroomsRouter);
-app.use("/admin",adminRouter)
+app.use("/admin", adminRouter);
 app.use(handleErrors);
 
 const server = http.createServer(app);
@@ -59,7 +58,7 @@ server.listen(port);
 
 server.on("listening", () => {
   const addr = server.address();
-  console.log(envConfig.version)
+  console.log(envConfig.version);
   const PORT = 7002;
 
   try {

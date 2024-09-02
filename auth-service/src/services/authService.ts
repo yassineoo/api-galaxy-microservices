@@ -136,6 +136,7 @@ The Galaxy Team
         twoFactorEnabled: user.is_two_factor,
         token,
         tokenExpiry: expiry,
+        role: user.role,
       };
     } catch (error: any) {
       throw error;
