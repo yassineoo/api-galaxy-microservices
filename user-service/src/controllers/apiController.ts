@@ -161,7 +161,7 @@ export const getProviderInfos = async (
     }
 
     const apis = await apiService.getProviderInfos(Number(userId));
-    res.status(200).send(apis);
+    res.status(200).json(apis);
   } catch (error) {
     next(error);
   }

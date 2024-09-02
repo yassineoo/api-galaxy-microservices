@@ -104,7 +104,10 @@ export default class apiService {
   static async getProviderInfos(userId: number) {
     try {
       const userApis = await userModel.getProviderInfos(userId);
-      return userApis;
+      const jsonString = JSON.stringify(userApis, (key, value) =>
+        typeof value == "bigint" ? value.toString() : value
+      );
+      return jsonString;
     } catch (error) {
       throw error;
     }
