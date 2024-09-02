@@ -1,4 +1,4 @@
-import stripe from "./stripeInstance";
+import stripe from "./stripeInstance.mjs";
 
 export class customerModel {
   // Create a new customer
