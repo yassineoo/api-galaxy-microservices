@@ -1,5 +1,6 @@
-import { priceModel } from "./prices";
-import stripe from "./stripeInstance";
+import { priceModel } from "./prices.mjs";
+import stripe from "./stripeInstance.mjs";
+
 
 export class productModel {
     static getProducts = async () => {
