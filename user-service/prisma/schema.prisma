@@ -269,7 +269,7 @@ model api_review_entities {
   id                      BigInt                    @id @default(autoincrement())
   api_id                  BigInt
   user_id                 BigInt
-  rating                  BigInt
+  rating                  Float?         @db.Real   @default(0)
   comment                 String?
   date_rated              DateTime?                 @default(now()) @db.Timestamptz(6)
   api_entities            api_entities              @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_reviews")

@@ -57,7 +57,8 @@ export const getAllApis = async (
       Number(userId),
       limit,
       page,
-      search
+      search,
+      Number(filter)
     );
     //console.log(response)
     return res.status(200).send(response);
