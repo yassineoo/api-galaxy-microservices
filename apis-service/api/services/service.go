@@ -43,6 +43,9 @@ func NewService(db *pgxpool.Pool, gormDB *gorm.DB) *Service {
 func (s *Service) SearchByName(ctx context.Context, search string) ([]models.ApiEntity, error) {
     var apis []models.ApiEntity
 
+    // log
+    log.Println("search ============== dddd ",search)
+
     // Modify your database query to select only the required fields (ID, Name, ImagePath).
     // This can help optimize the query by fetching only the necessary data.
     if err := s.gormDB.
@@ -122,7 +125,11 @@ func (s *Service) GetAll(ctx context.Context, page int, limit int , filter int ,
 func (s *Service) GetUserAPIs(ctx context.Context, userID int) ([]models.ApiEntity, error) {
     // Retrieve the APIs associated with the specified user ID as the provider
     var userApis []models.ApiEntity
-    if err := s.gormDB.Where("provider_id = ?", userID).Find(&userApis).Error; err != nil {
+    // if err := s.gormDB.Where("provider_id = ?", userID).Find(&userApis).Error; err != nil {
+    //     return nil, err
+    // }
+
+    if err:= s.gormDB.Where(&models.ApiEntity{ProviderID: userID}).Find(&userApis).Error; err != nil {
         return nil, err
     }
 

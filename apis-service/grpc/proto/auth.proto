@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "example.com/proto";
+
+service AuthService {
+    rpc Authenticate (AuthenticateRequest) returns (AuthenticateResponse){}
+}
+
+message AuthenticateRequest{
+    string authHeader = 1;
+}
+
+message AuthenticateResponse{
+    bool valid = 1;
+    uint32 userId = 2;
+}

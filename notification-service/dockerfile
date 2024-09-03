@@ -1,0 +1,38 @@
+# Dockerfile
+
+# Step 1: Use an appropriate Node.js image
+FROM node:20.16.0-alpine
+
+# Step 2: Set the working directory
+WORKDIR /app
+
+# Step 3: Copy the package.json and package-lock.json (if you have one)
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+# Step 4: Install the dependencies
+RUN npm install
+
+# Step 5: Copy the rest of your application code
+COPY . .
+
+# Copy .env file into the Docker image
+COPY .env /app/.env
+
+# Set environment variables from the .env file
+ENV $(cat /app/.env | xargs)
+
+
+RUN npx prisma db pull
+
+# Step 6: Run Prisma generate
+RUN npx prisma generate
+
+# Step 7: Build the application
+RUN npm run build
+
+# Step 8: Expose the port the app runs on
+EXPOSE 8088
+
+# Step 9: Start the application
+CMD ["npm", "run", "start:prod"]

@@ -40,8 +40,8 @@ func InitDB() (*pgxpool.Pool, *gorm.DB) {
 		os.Exit(1)
 	}
 
-	// Perform database migration
-	 err = MigrateDatabase(gormDB)
+	//Perform database migration
+    //err = MigrateDatabase(gormDB)
 
 	
 	if err != nil {

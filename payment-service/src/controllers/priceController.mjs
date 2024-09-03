@@ -1,3 +1,4 @@
+
 import { priceModel } from "../models/stripe/prices";
 import { productModel } from "../models/stripe/products";
 
@@ -8,6 +9,7 @@ const stripeObject = stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 const getCustomerTransactionHistory = async (req, res) => {
+
   const customerId = req.body.customerId;
   try {
     const charges = await stripeObject.charges.list({

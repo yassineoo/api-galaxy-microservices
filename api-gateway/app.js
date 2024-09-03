@@ -23,7 +23,8 @@ app.use((req, res, next) => {
 async function fetchServiceUrlFromRegistry(servicename, serviceversion) {
   try {
     const response = await axios.get(
-      `http://localhost:3001/find/${servicename}/${serviceversion}`
+      //   `http://localhost:3001/find/${servicename}/${serviceversion}`
+      `http://service-registry:3001/find/${servicename}/${serviceversion}`
     );
     return response.data; // Assuming the response is a single service URL
   } catch (error) {
@@ -36,15 +37,13 @@ const services = [
   { name: "auth-service", version: "v1", path: "/auth" },
   { name: "apis-service", version: "v1", path: "/apis-service" },
   {
-    name: "notifications-service",
+    name: "notification-service",
     version: "v1",
-    path: "/notifications-service",
+    path: "/notification-service",
   },
   { name: "stats-service", version: "v1", path: "/stats-service" },
-  { name: "users", version: "v1", path: "/users" },
-  { name: "notifications", version: "v1", path: "/notifications" },
-  { name: "abonnements", version: "v1", path: "/abonnements" },
-  { name: "paiements", version: "v1", path: "/paiements" },
+  { name: "user-service", version: "v1", path: "/user-service" },
+  { name: "payment-service", version: "v1", path: "/payment-service" },
   // Add more services as needed
 ];
 
@@ -53,9 +52,11 @@ async function createServiceProxy(service) {
     service.name,
     service.version
   );
+
   if (serviceInfo) {
-    let serviceIp = serviceInfo.ip;
-    const port = serviceInfo.port !== ":8000" ? serviceInfo.port : "8000";
+    //let serviceIp = serviceInfo.ip;
+    let serviceIp = service.name;
+    const port = serviceInfo.port !== ":9000" ? serviceInfo.port : "9000";
 
     // if (serviceIp === "[::1]") {
     //  serviceIp = "127.0.0.1";
@@ -102,7 +103,7 @@ app.get("/services/:name", async (req, res) => {
   try {
     const serviceInfo = await fetchServiceUrlFromRegistry(name, "v1");
     if (serviceInfo) {
-      const serviceUrl = `http://${serviceInfo.ip}:${serviceInfo.port}`;
+      const serviceUrl = `http://${name}:${serviceInfo.port}`;
       res.status(200).json(serviceUrl);
     }
   } catch (error) {

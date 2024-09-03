@@ -1,0 +1,426 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model api_collection_entities {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  description          String?
+  image_path           String?
+  api_collections_apis api_collections_apis[]
+}
+
+model api_collections_apis {
+  api_entity_id            BigInt
+  api_collection_entity_id BigInt
+  api_collection_entities  api_collection_entities @relation(fields: [api_collection_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_collection_entity")
+  api_entities             api_entities            @relation(fields: [api_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_entity")
+
+  @@id([api_entity_id, api_collection_entity_id])
+}
+
+model api_docs_entities {
+  id           BigInt       @id @default(autoincrement())
+  api_id       BigInt
+  content      String?
+  last_updated DateTime?    @default(now()) @db.Timestamptz(6)
+  api_entities api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_docs")
+}
+
+model api_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  provider_id              BigInt
+  name                     String                     @db.VarChar(255)
+  image_path               String?
+  description              String?
+  category_id              BigInt?
+  status                   String?                    @default("active") @db.VarChar(20)
+  date_created             DateTime?                  @default(now()) @db.Timestamptz(6)
+  last_updated             DateTime?                  @db.Timestamptz(6)
+  date_deleted             DateTime?                  @db.Timestamptz(6)
+  keywords                 String?
+  api_url                  String?
+  visibility               Boolean?                   @default(false)
+  rating                   Decimal?                   @default(0) @db.Decimal
+  stripe_product_id        String?                    @db.VarChar(255)
+  api_collections_apis     api_collections_apis[]
+  api_docs_entities        api_docs_entities[]
+  category_entities        category_entities?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_entities_apis")
+  user_entities            user_entities              @relation(fields: [provider_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_entities_apis")
+  api_report_entities      api_report_entities[]
+  api_review_entities      api_review_entities[]
+  api_version_entities     api_version_entities[]
+  endpoints_group_entities endpoints_group_entities[]
+  health_check_entities    health_check_entities?
+  user_likes               like_entities[]
+  object_plan_entities     object_plan_entities[]
+  plan_entities            plan_entities[]
+}
+
+model api_key_entities {
+  id              BigInt        @id @default(autoincrement())
+  subscription_id BigInt
+  api_key         String        @unique @db.VarChar(255)
+  creation_date   DateTime?     @default(now()) @db.Timestamptz(6)
+  is_active       Boolean?      @default(true)
+  user_id         BigInt
+  api_key_id      BigInt        @default(autoincrement())
+  user_entities   user_entities @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_key_entities_user")
+}
+
+model api_version_entities {
+  id             BigInt       @id @default(autoincrement())
+  api_id         BigInt
+  version_number String       @db.VarChar(255)
+  release_date   DateTime?    @db.Timestamptz(6)
+  whats_new      String?
+  api_entities   api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_versions")
+}
+
+model body_param_entities {
+  id                 BigInt             @id @default(autoincrement())
+  endpoint_id        BigInt
+  content_type       String             @db.VarChar(255)
+  text_body          String?
+  media_file_id      BigInt?
+  endpoints_entities endpoints_entities @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_body_param")
+}
+
+model category_entities {
+  id            BigInt         @id @default(autoincrement())
+  category_name String         @db.VarChar(255)
+  description   String?
+  api_entities  api_entities[]
+}
+
+model cross_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  limit_fee            BigInt?
+  limit_type           String?
+  price                Decimal?             @db.Decimal(10, 2)
+  quota_type           String?
+  quota_value          BigInt?
+  add                  Boolean?             @default(false)
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_cross")
+}
+
+model endpoint_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  endpoints_id         BigInt
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_endpoint_list")
+}
+
+model endpoints_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  group_id                     BigInt
+  methode                      String                         @db.VarChar(255)
+  url                          String                         @db.VarChar(255)
+  description                  String?
+  name                         String?                        @db.VarChar(255)
+  body_param_entities          body_param_entities[]
+  endpoints_group_entities     endpoints_group_entities       @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_group_entities_endpoints")
+  endpoints_parameter_entities endpoints_parameter_entities[]
+  health_check_entities        health_check_entities[]
+  usage_log_entities           usage_log_entities[]
+}
+
+model endpoints_group_entities {
+  id                 BigInt               @id @default(autoincrement())
+  group              String?
+  api_id             BigInt
+  description        String?
+  endpoints_entities endpoints_entities[]
+  api_entities       api_entities         @relation(fields: [api_id], references: [id], onDelete: Cascade, map: "fk_api_entities_groups")
+}
+
+model endpoints_parameter_entities {
+  id                 BigInt              @id @default(autoincrement())
+  endpoint_id        BigInt?
+  key                String              @db.VarChar(255)
+  value_type         String?             @db.VarChar(255)
+  parameter_type     String?             @db.VarChar(255)
+  example_value      String?             @db.VarChar(255)
+  required           Boolean?            @default(false)
+  endpoints_entities endpoints_entities? @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_parameters")
+}
+
+model health_check_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  api_id                       BigInt                         @unique
+  schedule                     String?                        @db.VarChar(50)
+  last_status                  String?                        @default("pending") @db.VarChar(20)
+  last_checked_at              DateTime?                      @db.Timestamptz(6)
+  alerts_enabled               Boolean?
+  endpoint_id                  BigInt
+  email                        String?
+  api_entities                 api_entities                   @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_health_check")
+  endpoints_entities           endpoints_entities             @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_health_check")
+  health_check_result_entities health_check_result_entities[]
+}
+
+model health_check_result_entities {
+  id                    BigInt                @id @default(autoincrement())
+  health_check_id       BigInt
+  status                String                @db.VarChar(20)
+  response_time         BigInt?
+  status_message        String?
+  checked_at            DateTime?             @default(now()) @db.Timestamptz(6)
+  health_check_entities health_check_entities @relation(fields: [health_check_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_health_check_entities_results")
+}
+
+model object_plan_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  api_id                   BigInt
+  name                     String                     @db.VarChar(255)
+  description              String?
+  all_endpoints            Boolean?
+  cross_object_entities    cross_object_entities[]
+  endpoint_object_entities endpoint_object_entities[]
+  api_entities             api_entities               @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_object_plan")
+}
+
+model plan_entities {
+  id                    BigInt                  @id @default(autoincrement())
+  api_id                BigInt
+  name                  String                  @db.VarChar(255)
+  active                Boolean?
+  visibility            Boolean?
+  type                  String?
+  rate                  BigInt?
+  rate_unite            String?
+  recomnded_plan        Boolean?
+  price                 Decimal?                @db.Decimal(10, 2)
+  stripe_price_id       String?                 @db.VarChar(255)
+  api_entities          api_entities            @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_plans")
+  subscription_entities subscription_entities[]
+}
+
+model like_entities {
+  id      BigInt         @id @default(autoincrement())
+  user_id BigInt?
+  api_id  BigInt?
+  api     api_entities?  @relation(fields: [api_id], references: [id], onDelete: Cascade)
+  user    user_entities? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, api_id])
+}
+
+model subscription_entities {
+  id                 BigInt               @id @default(autoincrement())
+  user_id            BigInt
+  plan_id            BigInt
+  start_date         DateTime?            @db.Timestamptz(6)
+  end_date           DateTime?            @db.Timestamptz(6)
+  used_calls         BigInt?
+  status             String?              @db.VarChar(50)
+  stripe_sub_id      String?              @db.VarChar(255)
+  invoice_entities   invoice_entities[]
+  plan_entities      plan_entities        @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_plan_entities_subscriptions")
+  usage_log_entities usage_log_entities[]
+}
+
+model usage_log_entities {
+  id                    BigInt                @id @default(autoincrement())
+  subscription_id       BigInt
+  timestamp             DateTime?             @default(now()) @db.Timestamptz(6)
+  endpoint_id           BigInt
+  status                BigInt?
+  response_time         BigInt?
+  endpoints_entities    endpoints_entities    @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_logs")
+  subscription_entities subscription_entities @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscription_entities_usage_logs")
+}
+
+model user_entities {
+  id                            BigInt                          @id @default(autoincrement())
+  username                      String                          @db.VarChar(255)
+  email                         String                          @unique @db.VarChar(255)
+  password_hash                 String?                         @db.VarChar(60)
+  date_created                  DateTime?                       @default(now()) @db.Timestamptz(6)
+  last_login                    DateTime?                       @db.Timestamptz(6)
+  is_active                     Boolean?                        @default(true)
+  is_two_factor                 Boolean?                        @default(false)
+  role                          String?                         @db.VarChar(50)
+  phone_number                  String?                         @unique @db.VarChar(20)
+  verified                      Boolean?                        @default(false)
+  image                         String?                         @db.VarChar(255)
+  stripe_customer_id            String?                         @db.VarChar(255)
+  api_entities                  api_entities[]
+  api_key_entities              api_key_entities[]
+  api_report_entities           api_report_entities[]
+  api_review_entities           api_review_entities[]
+  billing_history_entities      billing_history_entities[]
+  likes                         like_entities[]
+  message_entities              message_entities[]
+  moderator_permission_entities moderator_permission_entities[]
+  notification_entities         notification_entities[]
+
+  payment_method_entities       payment_method_entities[]
+
+  profile_entities              profile_entities[]
+  review_reports_entities       review_reports_entities[]
+  settings_entities             settings_entities[]
+  userVerification_entities     userVerification_entities[]
+  user_chatroom_entities        user_chatroom_entities[]
+}
+
+model api_review_entities {
+  id                      BigInt                    @id @default(autoincrement())
+  api_id                  BigInt
+  user_id                 BigInt
+  rating                  Float                     @default(0) @db.Real
+  comment                 String?
+  date_rated              DateTime?                 @default(now()) @db.Timestamptz(6)
+  api_entities            api_entities              @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_reviews")
+  user_entities           user_entities             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_review_entities_user")
+  review_reports_entities review_reports_entities[]
+}
+
+model billing_history_entities {
+  id               BigInt            @id @default(autoincrement())
+  user_id          BigInt?
+  invoice_id       BigInt?
+  payment_date     DateTime?         @db.Timestamptz(6)
+  amount           Decimal?          @db.Decimal(10, 2)
+  user_entities    user_entities?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_billing_history_entities_user")
+  invoice_entities invoice_entities? @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_billing_history")
+}
+
+model invoice_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  subscription_id          BigInt?
+  total_amount             Decimal?                   @db.Decimal(10, 2)
+  date_issued              DateTime?                  @default(now()) @db.Timestamptz(6)
+  due_date                 DateTime?                  @db.Timestamptz(6)
+  status                   String?                    @db.VarChar(50)
+  stripe_invoice_id        String?                    @db.VarChar(255)
+  billing_history_entities billing_history_entities[]
+  subscription_entities    subscription_entities?     @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_invoice_entities_subscription")
+  transaction_entities     transaction_entities[]
+}
+
+model moderator_permission_entities {
+  id                  BigInt               @id @default(autoincrement())
+  user_id             BigInt?
+  permission_id       BigInt?
+  user_entities       user_entities?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_moderator_permission_entities_user")
+  permission_entities permission_entities? @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permission_entities_moderator_permissions")
+}
+
+model payment_method_entities {
+  id                       BigInt                 @id @default(autoincrement())
+  provider                 String?                @db.VarChar(255)
+  account_details          String?
+  is_default               Boolean?               @default(false)
+  stripe_payment_method_id String?                @db.VarChar(255)
+  transaction_entities     transaction_entities[]
+}
+
+model permission_entities {
+  id                            BigInt                          @id @default(autoincrement())
+  name                          String?                         @db.VarChar(255)
+  description                   String?
+  moderator_permission_entities moderator_permission_entities[]
+}
+
+model profile_entities {
+  id              BigInt         @id @default(autoincrement())
+  user_id         BigInt?
+  full_name       String?        @db.VarChar(255)
+  bio             String?
+  profile_picture String?        @db.VarChar(255)
+  date_of_birth   DateTime?      @db.Date
+  location        String?        @db.VarChar(255)
+  user_entities   user_entities? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_profile_entities_user")
+}
+
+model transaction_entities {
+  id                      BigInt                   @id @default(autoincrement())
+  invoice_id              BigInt?
+  amount                  Decimal?                 @db.Decimal(10, 2)
+  transaction_date        DateTime?                @default(now()) @db.Timestamptz(6)
+  payment_method_id       BigInt?
+  status                  String?                  @db.VarChar(50)
+  invoice_entities        invoice_entities?        @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_transactions")
+  payment_method_entities payment_method_entities? @relation(fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_method_entities_transactions")
+}
+
+model api_report_entities {
+  id            Int            @id @default(autoincrement())
+  user_id       BigInt?
+  api_id        BigInt?
+  description   String?
+  screenshots   String[]
+  api_entities  api_entities?  @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_entities user_entities? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model review_reports_entities {
+  id                  Int                  @id @default(autoincrement())
+  user_id             BigInt?
+  review_id           BigInt?
+  description         String?
+  reason              String?
+  api_review_entities api_review_entities? @relation(fields: [review_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_entities       user_entities?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model chatroom_entities {
+  id                     BigInt                   @id @default(autoincrement())
+  message_entities       message_entities[]
+  user_chatroom_entities user_chatroom_entities[]
+}
+
+model message_entities {
+  id                BigInt            @id @default(autoincrement())
+  chatroom_id       BigInt
+  user_id           BigInt
+  message           String
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  chatroom_entities chatroom_entities @relation(fields: [chatroom_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_entities     user_entities     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_chatroom_entities {
+  id                BigInt            @id @default(autoincrement())
+  user_id           BigInt
+  chatroom_id       BigInt
+  chatroom_entities chatroom_entities @relation(fields: [chatroom_id], references: [id], onDelete: Cascade)
+  user_entities     user_entities     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, chatroom_id])
+  @@index([user_id, chatroom_id])
+}
+
+model settings_entities {
+  id                 Int            @id @default(autoincrement())
+  earning_percentage Float?         @db.Real
+  termsAndConditions String?
+  privacyAndPolicy   String?
+  updated_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  admin_id           BigInt?
+  user_entities      user_entities? @relation(fields: [admin_id], references: [id], onDelete: Cascade, map: "settings_entities_adminId_fkey")
+}
+
+model notification_entities {
+  id            Int            @id(map: "notification_pkey") @default(autoincrement())
+  recipient_id  BigInt?
+  title         String?
+  message       String?
+  isRead        Boolean?       @default(false)
+  user_entities user_entities? @relation(fields: [recipient_id], references: [id], onDelete: Cascade)
+}
+
+model userVerification_entities {
+  id            Int            @id @default(autoincrement())
+  userId        BigInt?
+  otp           String?
+  expired       DateTime?      @db.Timestamptz(6)
+  user_entities user_entities? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -27,7 +28,6 @@ func (h *ApiHandler) HandleRequest(c *gin.Context) {
 	result := "h.myservice.Hello()"
 	c.JSON(200, gin.H{"message": result})
 }
-
 
 // @Summary Get all APIs
 // @Description Retrieves a paginated list of APIs
@@ -62,9 +62,8 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 	}
 	search := c.Query("search")
 
-
 	// Call the GetAll service method
-	data, err := h.service.GetAll(c, page, limit,filter,search)
+	data, err := h.service.GetAll(c, page, limit, filter, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching data"})
 		return
@@ -72,7 +71,6 @@ func (h *ApiHandler) GetAllApis(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
-
 
 // @Summary Create API
 // @Description Creates a new API from the provided data
@@ -123,7 +121,6 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-
 	api, err := h.service.GetOne(c, id)
 	if err != nil {
 		// Log the actual error
@@ -137,9 +134,6 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 	c.JSON(http.StatusOK, api)
 }
 
-
-
-
 // @Summary Get APIs by User ID (Provider ID)
 // @Description Retrieves APIs associated with the specified user ID (Provider ID)
 // @Produce json
@@ -150,37 +144,34 @@ func (h *ApiHandler) GetApi(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /user-apis/{user_id} [get]
 func (h *ApiHandler) GetUserAPIs(c *gin.Context) {
-    userID, err := strconv.Atoi(c.Param("user_id"))
-    if err != nil {
-        // Log the actual error
-        log.Println("Error retrieving user APIs:", err)
+	userID, err := strconv.Atoi(c.Param("user_id"))
+	if err != nil {
+		// Log the actual error
+		log.Println("Error retrieving user APIs:", err)
 
-        // Return a customized error message to the client
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
-        return
-    }
+		// Return a customized error message to the client
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
+		return
+	}
 
-    // Call the GetUserAPIs service method
-    userAPIs, err := h.service.GetUserAPIs(c, userID)
-    if err != nil {
-        // Log the actual error
-        log.Println("Error fetching user APIs:", err)
+	// Call the GetUserAPIs service method
+	userAPIs, err := h.service.GetUserAPIs(c, userID)
+	if err != nil {
+		// Log the actual error
+		log.Println("Error fetching user APIs:", err)
 
-        // Return a customized error message to the client
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user APIs"})
-        return
-    }
+		// Return a customized error message to the client
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user APIs"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"data": userAPIs})
+	c.JSON(http.StatusOK, gin.H{"data": userAPIs})
 }
-
-
-
-
 
 func (h *ApiHandler) GetSearchApis(c *gin.Context) {
       // Extract the search query parameter from the URL query string.
 	  search := c.Query("search")
+	  log.Println("search ==============",search)
 	  apis, err := h.service.SearchByName(c, search)
 
 	  // Call the SearchByName method to search for APIs.
@@ -190,14 +181,17 @@ func (h *ApiHandler) GetSearchApis(c *gin.Context) {
 		  return
 	  }
 
-   
+	// Call the SearchByName method to search for APIs.
+	if err != nil {
+		// Return a customized error message to the client
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user Searched APIs"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"data": apis})
+	fmt.Println(gin.H{"data": apis})
+
+	c.JSON(http.StatusOK, gin.H{"data": apis})
 }
-
-
-
-
 
 // @Summary Update API by ID
 // @Description Updates the API with the given ID
@@ -269,35 +263,18 @@ func (h *ApiHandler) DeleteApi(c *gin.Context) {
 		log.Println("Error creating API:", err)
 
 		// Return a customized error message to the client
-		   // Check if the error message indicates "not found"
-		   if strings.Contains(err.Error(), "not found") {
-            c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-        } else {
+		// Check if the error message indicates "not found"
+		if strings.Contains(err.Error(), "not found") {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
 			log.Println("Error creating API:", err)
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
-        }
-        return
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting API"})
+		}
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "API deleted successfully"})
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
 	var requestData types.RequestData
@@ -326,19 +303,18 @@ func (h *ApiHandler) HandleSendRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"RequestHeader": requestHeader,
 		"statusCode":    response.StatusCode,
-		"RequestBody":          string(body),
+		"RequestBody":   string(body),
 	})
 }
 
-
 func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
-    // Extract API ID and Endpoint URL from the request path
+	// Extract API ID and Endpoint URL from the request path
 	path := c.Param("path")
-    apiID, _ := strconv.Atoi(c.Param("api-id"))
-    //endpointURL := c.Param("endpointsUrl")
+	apiID, _ := strconv.Atoi(c.Param("api-id"))
+	//endpointURL := c.Param("endpointsUrl")
 
-    // Extract HTTP method from the incoming request
-    method := c.Request.Method
+	// Extract HTTP method from the incoming request
+	method := c.Request.Method
 
 	// Extract headers from the incoming request
 	headers := make(map[string]string)
@@ -346,17 +322,14 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
 		headers[k] = strings.Join(v, ", ")
 	}
 
-	
-    // Access a specific header value
-    XEndpointKey, ok := headers["X-Endpoint-Key"]
-    if ok {
-        // Header found, do something with specificHeaderValue
-        log.Println("Specific header value:", XEndpointKey)
-    }
-    // Delete a specific header
-    delete(headers, "X-Endpoint-Key")
-
-   
+	// Access a specific header value
+	XEndpointKey, ok := headers["X-Endpoint-Key"]
+	if ok {
+		// Header found, do something with specificHeaderValue
+		log.Println("Specific header value:", XEndpointKey)
+	}
+	// Delete a specific header
+	delete(headers, "X-Endpoint-Key")
 
 	// Extract query parameters from the incoming request
 	params := make(map[string]string)
@@ -364,25 +337,24 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
 		params[k] = strings.Join(v, ", ")
 	}
 
-	log.Println("result ",path )
-	log.Println("result ",apiID )
-	log.Println("result ",method)
-	log.Println("result ",headers )
-	log.Println("result ",params )
+	log.Println("result ", path)
+	log.Println("result ", apiID)
+	log.Println("result ", method)
+	log.Println("result ", headers)
+	log.Println("result ", params)
 
-    // Extract request body (if present)
-    var requestBody map[string]string
-    if c.Request.Body != nil {
-        body, _ := ioutil.ReadAll(
+	// Extract request body (if present)
+	var requestBody map[string]string
+	if c.Request.Body != nil {
+		body, _ := ioutil.ReadAll(
 			c.Request.Body)
-        c.Request.Body.Close()
-        json.Unmarshal(body, &requestBody)
-    }
-	log.Println("result ", requestBody) 
-	
+		c.Request.Body.Close()
+		json.Unmarshal(body, &requestBody)
+	}
+	log.Println("result ", requestBody)
 
-    // Create a RequestData struct with the extracted information
-    
+	// Create a RequestData struct with the extracted information
+
 	endpointID, _ := strconv.Atoi(XEndpointKey)
 	requestData := types.RequestData{
 		Method:     method,
@@ -396,49 +368,41 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
 
 	log.Println("result ", requestData)
 
-	
+	// Pass the RequestData struct to your service
+	response, err := h.service.SendRequest(c, requestData)
+	if err != nil {
+		// Handle the error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-   // Pass the RequestData struct to your service
-   response, err := h.service.SendRequest(c, requestData)
-   if err != nil {
-	   // Handle the error
-	   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	   return
-   }
+	// Copy the headers from the response to the Gin context
+	// Copy the headers from the response to the Gin context, replacing existing headers if needed
+	for key, values := range response.Header {
+		// Remove existing header with the same key
+		c.Writer.Header().Del(key)
+		// Add or set the new header value(s)
+		for _, value := range values {
+			c.Writer.Header().Set(key, value)
+		}
+	}
 
-   // Copy the headers from the response to the Gin context
- // Copy the headers from the response to the Gin context, replacing existing headers if needed
-for key, values := range response.Header {
-    // Remove existing header with the same key
-    c.Writer.Header().Del(key)
-    // Add or set the new header value(s)
-    for _, value := range values {
-        c.Writer.Header().Set(key, value)
-    }
+	// Set the status code
+	c.Writer.WriteHeader(response.StatusCode)
+
+	// Copy the response body to the Gin context
+	_, err = io.Copy(c.Writer, response.Body)
+	if err != nil {
+		// Handle the error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Close the response body
+	response.Body.Close()
 }
 
-   // Set the status code
-   c.Writer.WriteHeader(response.StatusCode)
-
-   // Copy the response body to the Gin context
-   _, err = io.Copy(c.Writer, response.Body)
-   if err != nil {
-	   // Handle the error
-	   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	   return
-   }
-
-   // Close the response body
-   response.Body.Close()
-}
-
-
-
-
-
-
-
-func (h* ApiHandler) HandleHealthCheackSendRequest(c *gin.Context) {
+func (h *ApiHandler) HandleHealthCheackSendRequest(c *gin.Context) {
 
 	var requestData types.HealthRequestData
 	if err := c.BindJSON(&requestData); err != nil {
@@ -449,16 +413,12 @@ func (h* ApiHandler) HandleHealthCheackSendRequest(c *gin.Context) {
 	// Handle the health check request logic here
 	log.Printf("Received health check request: %+v", requestData)
 
-
-
 	response, err := h.service.HealthCheackSendRequest(c, requestData.ApiID, requestData.EndpointID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": response })
-
-
+	c.JSON(http.StatusOK, gin.H{"message": response})
 
 }
