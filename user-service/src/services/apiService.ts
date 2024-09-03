@@ -131,6 +131,14 @@ export default class apiService {
     }
   }
 
+  static async updateStatusApi(api_id: number) {
+    try {
+      await APIModel.updateStatus(api_id);
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
   static async reportAnComment(
     reason: string,
     description: string,

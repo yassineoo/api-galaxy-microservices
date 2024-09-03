@@ -201,6 +201,21 @@ export default class APIModel {
     }
   }
 
+  static async updateStatus(api_id: number) {
+    try {
+      const updatedApi = await prismaClientSingleton.api_entities.update({
+        where: {
+          id: api_id,
+        },
+        data: {
+          status: "active",
+        },
+      });
+      return updatedApi;
+    } catch (error) {
+      throw error;
+    }
+  }
   static async getSettings() {
     try {
       const settings = await prismaClientSingleton.settings_entities.findFirst({

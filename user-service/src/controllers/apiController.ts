@@ -317,3 +317,18 @@ export const getCategories = async (
     next(error);
   }
 };
+
+export const updateStatusApi = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    await apiService.updateStatusApi(Number(id));
+    res.status(201).send(true);
+  } catch (error) {
+    next(error);
+  }
+};

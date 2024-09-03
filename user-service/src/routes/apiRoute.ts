@@ -16,11 +16,13 @@ import {
   likeApi,
   reportAnAPI,
   reportAnComment,
+  updateStatusApi,
 } from "../controllers/apiController";
 import authenticate from "../services/middlewares/authenticate.middleware";
 import { getUserNotifications } from "../controllers/notifController";
 
 const userApiRouter = Router();
+userApiRouter.get("/update-status/:id", updateStatusApi);
 userApiRouter.get("/notifications/:id", getUserNotifications);
 userApiRouter.get("/categories", getCategories);
 userApiRouter.get("/:userId", getAllApis);
