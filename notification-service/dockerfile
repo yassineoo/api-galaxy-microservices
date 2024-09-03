@@ -16,6 +16,15 @@ RUN npm install
 # Step 5: Copy the rest of your application code
 COPY . .
 
+# Copy .env file into the Docker image
+COPY .env /app/.env
+
+# Set environment variables from the .env file
+ENV $(cat /app/.env | xargs)
+
+
+RUN npx prisma db pull
+
 # Step 6: Run Prisma generate
 RUN npx prisma generate
 
@@ -26,4 +35,4 @@ RUN npm run build
 EXPOSE 8088
 
 # Step 9: Start the application
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:prod"]

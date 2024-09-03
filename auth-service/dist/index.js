@@ -1,5 +1,4 @@
 "use strict";
-
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -17,9 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const cors_1 = __importDefault(require("cors"));
-
 const axios_1 = __importDefault(require("axios"));
-
 const http_1 = __importDefault(require("http"));
 const authRouter_1 = __importDefault(require("./routes/authRouter"));
 const userRouter_1 = __importDefault(require("./routes/userRouter"));
@@ -53,11 +49,11 @@ app.get("/hello", (req, res) => res.send("hello"));
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.specs));
 // Important - a service should not have a fixed port but should randomly choose one
 server.listen(7000);
-
 server.on("listening", () => {
     const addr = server.address();
     const PORT = typeof addr === "string" ? addr : addr === null || addr === void 0 ? void 0 : addr.port;
-    const registerService = () => axios_1.default.put(
+    const registerService = () => axios_1.default
+        .put(
     //  `http://localhost:3001/register/${logConfig.serviceName}/${
     `http://service-registry:3001/register/${logConfig.serviceName}/${logConfig.version}/${
     //  server?.address()?.port ||
@@ -94,5 +90,4 @@ server.on("listening", () => {
     //  server?.address()?.port ||
     PORT} in ${app.get("env")} mode.`);
 });
-
 grpc_auth_server_1.GrpcAuthServer.init();

@@ -6,9 +6,13 @@
   "scripts": {
     "compile:proto": "sh src/grpc/compile.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/app.ts",
+    "start": "node ./dist/app.js",
     "build": "tsc",
-    "dev": "nodemon src/app.ts"
+    "prestart": "pnpm run build",
+    "dev": "nodemon src/app.ts",
+    "predev":"pnpm prisma db pull && pnpm prisma generate",
+    "prebuild":"rm -rf ./dist",
+    "postbuild": "pnpm dlx ncp ./src/grpc/proto ./dist/grpc/proto"
   },
   "author": "",
   "license": "ISC",
@@ -23,8 +27,8 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "joi": "^17.13.3",
     "ip": "^2.0.1",
+    "joi": "^17.13.3",
     "kafkajs": "^2.2.4",
     "node-cron": "^3.0.3",
     "prisma": "^5.18.0",
@@ -39,6 +43,7 @@
     "@types/node": "^22.4.1",
     "@types/node-cron": "^3.0.11",
     "@types/uuid": "^10.0.0",
+    "ncp": "^2.0.0",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
