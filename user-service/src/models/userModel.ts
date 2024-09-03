@@ -116,18 +116,29 @@ export default class userModel {
     }
   };
 
-  static getAllUsers = async () => {
+  static async getAllUsers(limit: string = "10", page: string = "1") {
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
     try {
-      const users = await prismaClientSingleton.user_entities.findMany();
+      const users = await prismaClientSingleton.user_entities.findMany({
+        skip: (pageInt - 1) * limitInt,
+        take: limitInt,
+      });
+
       if (users.length === 0) {
         console.log("No data found for getAllUsers");
       }
-      return users;
+      const finalUsers = JSON.stringify(users, (key, value) =>
+        typeof value == "bigint" ? value.toString() : value
+      );
+      //console.log(jsonString)
+      return finalUsers;
     } catch (error) {
       console.error("Error in getAllUsers:", error);
       throw error;
     }
-  };
+  }
 
   static deleteUser = async (id: number) => {
     try {
