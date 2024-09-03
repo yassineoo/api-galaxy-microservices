@@ -15,11 +15,11 @@ import config from "./utils/config";
 import ValidateEnv, { ENV } from "./infrastructure/env";
 
 ValidateEnv()
-console.log({ ENV })
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
+app.use("/hello", (_, res: any) => res.send("Hello"))
 app.use("/stats/endpoints", EndpointsStatsRouter);
 app.use("/stats/apis", ApisStatsRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
@@ -36,6 +36,7 @@ console.log("log port", process.env.PORT);
 server.on("listening", () => {
   const addr = server.address();
   const PORT = typeof addr === "string" ? addr : addr?.port;
+  console.log({ PORT })
   console.log(`Listening onnnnn ${PORT}`);
   const registerService = () =>
     axios

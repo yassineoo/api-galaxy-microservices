@@ -1,39 +1,43 @@
 import { prismaClientSingleton } from "../utils/prisma"
 
-async function getAllApisByCategory({ id, page }: { id: number, page: number }) {
-    const categoryName = await prismaClientSingleton.api_collection_entities.findFirst({
+async function getAllApisByCategory({ id }: { id: number }) {
+    await prismaClientSingleton.$connect()
+    console.log({ prisma: prismaClientSingleton })
+    const collectionName = await prismaClientSingleton.api_collection_entities.findFirst({
         where: { id },
         select: { name: true }
     }).then(r => r?.name)
-    console.log({ categoryName })
+    console.log({ collectionName })
     const apis = await prismaClientSingleton.api_entities.findMany({
         where: {
             api_collections_apis: {
-                "some": {
-                    "api_collection_entity_id": id
+                every: {
+                    api_collection_entity_id: id
                 }
             },
         },
-        take: 10,
-        skip: (page - 1) * 10
     })
     console.log({ apis })
     const totalCount = await prismaClientSingleton.api_entities.aggregate({
         _count: {
-            "id": true
+            id: true
         },
         where: {
             api_collections_apis: {
-                "some": {
+                every: {
                     api_collection_entity_id: id
                 }
             }
         }
     })
-    console.log({ totalCount })
     return {
-        categoryName,
-        data: apis,
+        collectionName,
+        data: apis.map(a => ({
+            ...a,
+            id: Number(a.id),
+            provider_id: Number(a.provider_id),
+            category_id: Number(a.category_id)
+        })),
         pages: Math.ceil(totalCount?._count?.id / 10)
     }
 }

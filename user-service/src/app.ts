@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { handleErrors } from "./utils/errorHandler";
 import http from "http";
-import { kafka, sendMessage } from "./utils/kafka";
+// import { kafka, sendMessage } from "./utils/kafka";
 require("dotenv").config();
 const app = express();
 import config from "./utils/config";
@@ -16,6 +16,8 @@ import GrpcAuthClient from "./grpc/grpc-auth.client";
 import ValidateEnv, { ENV } from "./utils/env";
 import CollectionsRouter from "./routes/collections.route"
 ValidateEnv();
+// GrpcAuthClient.init();
+
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -34,6 +36,9 @@ app.use((req, res, next) => {
   console.log(`API Gateway received: ${req.method} ${req.url}`);
   next();
 });
+
+app.use("/hello", (_, res: any) => res.send("Hello World!"))
+
 app.use("/userApi", userApiRouter);
 app.use("/chatrooms", ChatroomsRouter);
 app.use("/admin", adminRouter);
@@ -61,7 +66,6 @@ server.on("listening", () => {
   const addr = server.address();
   console.log(envConfig.version);
   const PORT = 7002;
-
   try {
     const registerService = () =>
       axios
@@ -75,7 +79,6 @@ server.on("listening", () => {
           }`
         )
         .catch((err: any) => log.fatal(err));
-
     const unregisterService = () =>
       axios
         .delete(
@@ -88,10 +91,8 @@ server.on("listening", () => {
           }`
         )
         .catch((err: any) => log.fatal(err));
-
     registerService();
     const interval = setInterval(registerService, 15 * 1000);
-
     const cleanup = async () => {
       let clean = false;
       if (!clean) {
@@ -100,22 +101,18 @@ server.on("listening", () => {
         await unregisterService();
       }
     };
-
     process.on("uncaughtException", async () => {
       await cleanup();
       process.exit(0);
     });
-
     process.on("SIGINT", async () => {
       await cleanup();
       process.exit(0);
     });
-
     process.on("SIGTERM", async () => {
       await cleanup();
       process.exit(0);
     });
-
     log.info(
       `Hi there! I'm listening on port ${
       //  server?.address()?.port ||
@@ -127,4 +124,3 @@ server.on("listening", () => {
   }
 });
 
-GrpcAuthClient.init();

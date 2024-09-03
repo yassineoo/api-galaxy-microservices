@@ -31,7 +31,7 @@ services:
     ports:
       - "7000:7000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
     networks:
       - app-network
 
@@ -43,7 +43,7 @@ services:
     ports:
       - "7002:7002"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
 
     networks:
       - app-network
@@ -68,7 +68,7 @@ services:
     ports:
       - "7001:7001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
     networks:
       - app-network
 

@@ -13,6 +13,12 @@ COPY package.json pnpm-lock.yaml* ./
 # Install dependencies
 RUN pnpm install
 
+# Copy .env file into the Docker image
+COPY .env /app/.env
+
+# Set environment variables from the .env file
+ENV $(cat /app/.env | xargs)
+
 # Copy the Prisma schema files
 COPY prisma ./prisma/
 
