@@ -18,8 +18,10 @@ import {
   reportAnComment,
 } from "../controllers/apiController";
 import authenticate from "../services/middlewares/authenticate.middleware";
+import { getUserNotifications } from "../controllers/notifController";
 
 const userApiRouter = Router();
+userApiRouter.get("/notifications/:id", getUserNotifications);
 userApiRouter.get("/categories", getCategories);
 userApiRouter.get("/:userId", getAllApis);
 userApiRouter.get("/getReviews/:apiId", getAPIReview);
