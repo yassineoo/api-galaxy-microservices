@@ -48,6 +48,7 @@ async function getAllApisByCategory({ id }: { id: number }) {
         collectionName: collection?.name,
         data: apis,
         pages: Math.ceil((apis?.length || 0) / 10)
+
     }
 }
 
