@@ -10,13 +10,19 @@ interface Chatroom {
     name: string;
     avatar: string | null;
   }[];
-  lastMessage: {
-    id: number;
-    message: string;
-    chatroom_id: number;
-    createdAt: Date;
-    user_id: number;
-  } | null;
+  messages: {
+    id: number,
+    userId: number,
+    message: string,
+    chatroomId: number
+  }[]
+  // lastMessage: {
+  //   id: number;
+  //   message: string;
+  //   chatroom_id: number;
+  //   createdAt: Date;
+  //   user_id: number;
+  // } | null;
 }
 
 export default class ChatroomsRepository {
@@ -54,40 +60,38 @@ export default class ChatroomsRepository {
         include: {
           user_chatroom_entities: {
             include: {
-              user_entities: {
-                include: {
-                  profile_entities: true,
-                },
-              },
+              user_entities: true,
             },
           },
+          message_entities: true
         },
       });
 
-      const lastMessage = await prismaClientSingleton.message_entities
-        .findMany({
-          where: {
-            chatroom_id: {
-              in: chatrooms.map((chatroom) => chatroom.id),
-            },
-          },
-          orderBy: {
-            created_at: "desc",
-          },
-          take: 1,
-          select: {
-            message: true,
-            id: true,
-            created_at: true,
-            chatroom_id: true,
-            user_entities: {
-              select: {
-                id: true,
-              },
-            },
-          },
-        })
-        .then((r) => r?.[0]);
+      // const lastMessage = await prismaClientSingleton.message_entities
+      // .findMany({
+      // where: {
+      // chatroom_id: {
+      // in: chatrooms.map((chatroom) => chatroom.id),
+      // },
+      // },
+      // orderBy: {
+      // created_at: "desc",
+      // },
+      // take: 1,
+      // select: {
+      // message: true,
+      // id: true,
+      // created_at: true,
+      // chatroom_id: true,
+      // user_entities: {
+      // select: {
+      // id: true,
+      // },
+      // },
+      // },
+      // })
+      // .then((r) => r?.[0]);
+
 
       const prettyChatrooms: Chatroom[] = chatrooms.map((chatroom) => ({
         id: Number(chatroom.id),
@@ -96,16 +100,13 @@ export default class ChatroomsRepository {
           name: user_chatroom.user_entities.username,
           avatar: user_chatroom.user_entities.image,
         })),
-        lastMessage: lastMessage
-          ? {
-              id: Number(lastMessage.id),
-              message: lastMessage.message,
-              chatroom_id: Number(lastMessage.chatroom_id),
-              user_id: Number(lastMessage.user_entities.id),
-              createdAt: lastMessage.created_at,
-            }
-          : null,
-      }));
+        messages: chatroom.message_entities.map(message => ({
+          message: message.message,
+          id: Number(message.id),
+          chatroomId: Number(message.chatroom_id),
+          userId: Number(message.user_id)
+        }))
+      }))
       return prettyChatrooms;
     });
   };
@@ -131,6 +132,7 @@ export default class ChatroomsRepository {
           },
         }
       );
+
 
       if (!chatroom || !chatroom.id) throw new Error("Chatroom doesn't exist");
 

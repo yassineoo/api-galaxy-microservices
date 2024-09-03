@@ -6,9 +6,14 @@
   "scripts": {
     "compile:proto": "sh src/grpc/compile.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/app.ts",
     "build": "tsc",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "start": "node ./dist/app.js",
+    "prestart": "pnpm run build",
+    "predev":"pnpm prisma db pull && pnpm prisma generate",
+    "prebuild":"rm -rf ./dist",
+    "postbuild": "pnpm dlx ncp ./src/grpc/proto ./dist/grpc/proto"
   },
   "author": "",
   "license": "ISC",
