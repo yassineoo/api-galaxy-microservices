@@ -47,6 +47,7 @@ model api_entities {
   api_url                  String?
   visibility               Boolean?                   @default(false)
   rating                   Decimal?                   @default(0) @db.Decimal
+  stripe_product_id        String?                    @db.VarChar(255)
   api_collections_apis     api_collections_apis[]
   api_docs_entities        api_docs_entities[]
   category_entities        category_entities?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_entities_apis")

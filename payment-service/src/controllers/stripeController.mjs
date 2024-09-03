@@ -44,11 +44,12 @@ export const createCheckoutSession = async (req, res) => {
         },
       ],
       // ?session_id={CHECKOUT_SESSION_ID} means the redirect will have the session ID set as a query param
-      success_url: `${domainURL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${domainURL}/cancelled`,
+      success_url: `${domainURL}/${req.body.success_url}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${domainURL}/${req.body.cancel_url}`,
       // automatic_tax: { enabled: true }
     });
-    return res.redirect(303, session.url);
+    console.log(session);
+    return res.json({ url: session.url });;
   } catch (e) {
     res.status(400);
     console.log(e);

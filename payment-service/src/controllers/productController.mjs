@@ -1,3 +1,4 @@
+import { updateApiEntity } from "../models/local-db/extra.mjs";
 import { productModel } from "../models/stripe/products.mjs";
 
 // Get all products
@@ -25,10 +26,14 @@ export const getProductById = async (req, res) => {
 
 // Create a new product
 export const createProduct = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, apiId } = req.body;
   try {
     const product = await productModel.createProduct(name, description);
     res.status(201).json({ success: true, data: product });
+    //add productID to entity
+    const updatedApiEntity = await updateApiEntity(apiId, {
+      stripe_product_id: product.id,
+    });
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).json({ success: false, error: error.message });
