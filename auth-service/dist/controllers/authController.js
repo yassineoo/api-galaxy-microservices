@@ -12,40 +12,98 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPassword = exports.verifyEmail = exports.resendVerificationEmail = exports.getUserSession = exports.Oauthlogin = exports.login = exports.signup = void 0;
+exports.verifyOTP = exports.activateTwoFactors = exports.resetPassword = exports.verifyEmail = exports.resendVerificationEmail = exports.getUserSession = exports.Oauthlogin = exports.login = exports.signup = void 0;
 const http_1 = require("../utils/http");
 const authService_1 = __importDefault(require("../services/authService"));
+const UAuthValidator_1 = require("../validators/UAuthValidator");
+const zod_validation_1 = __importDefault(require("../utils/zod.validation"));
 require("dotenv").config();
+// connect producer
+//connectProducer()
 const signup = (role) => {
     return (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const tokenData = yield authService_1.default.register(req.body, role);
-
+            const validation = UAuthValidator_1.signupValidator.safeParse(req.body);
+            if (!validation.success) {
+                console.log({ validation_error: validation.error });
+                return res
+                    .status(http_1.statusCodes.badRequest)
+                    .json({ errors: (0, zod_validation_1.default)(validation.error) });
+            }
+            const tokenData = yield authService_1.default.register(validation.data, role);
             console.log({ tokenData });
-            return res.status(http_1.statusCodes.ok).json({ id: Number(tokenData.id), message: tokenData.message });
+            return res.status(http_1.statusCodes.ok).json({
+                id: Number(tokenData.id),
+                message: tokenData.message,
+            });
         }
         catch (error) {
             console.log({ error });
-            const { message, statusCode = http_1.statusCodes.badRequest } = error;
+            const { message } = error;
             // HADI MCHFTHACH MAIS M3LICH 500 IS ENOUGH
-            return res.status(500).json({ message });
-
+            return res.status(http_1.statusCodes.badRequest).json({ message });
         }
     });
 };
 exports.signup = signup;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const validation = UAuthValidator_1.loginValidator.safeParse(req.body);
+        if (!validation.success) {
+            return res
+                .status(http_1.statusCodes.badRequest)
+                .json({ errors: (0, zod_validation_1.default)(validation.error) });
+        }
         const token = yield authService_1.default.login(req.body);
-        if (!token.message) {
-            return res.status(http_1.statusCodes.ok).send(Object.assign({}, token));
-        }
-        else {
-            return res.json({ message: token === null || token === void 0 ? void 0 : token.message });
-        }
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log(token);
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        console.log("----------------------------------");
+        return res
+            .status(http_1.statusCodes.ok)
+            .send(Object.assign(Object.assign({}, token), { userId: Number(token.userId), token: token.token }));
     }
     catch (error) {
-        res.status(http_1.statusCodes.badRequest).send({ error: error === null || error === void 0 ? void 0 : error.message });
+        return res.status(http_1.statusCodes.badRequest).send({ error: error === null || error === void 0 ? void 0 : error.message });
     }
 });
 exports.login = login;
@@ -53,7 +111,8 @@ const Oauthlogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         console.log("called from backend");
         const token = yield authService_1.default.OathUser(req.body);
-        console.log("token", token);
+        //console.log("token", token);
+        console.log({ token });
         return res.status(http_1.statusCodes.ok).json(Object.assign({}, token));
     }
     catch (error) {
@@ -127,3 +186,28 @@ const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.resetPassword = resetPassword;
+const activateTwoFactors = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
+            throw Error("invalid userId");
+        }
+        yield authService_1.default.activateTwoFactors(userId);
+        return res.status(200).send(true);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.activateTwoFactors = activateTwoFactors;
+const verifyOTP = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { otp, userId } = req.body;
+        yield authService_1.default.verifyOTP(userId, otp);
+        res.status(200).send(true);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.verifyOTP = verifyOTP;

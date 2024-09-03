@@ -10,6 +10,7 @@
     "build": "tsc",
     "prestart": "pnpm run build",
     "dev": "nodemon src/app.ts",
+    "predev":"pnpm prisma db pull && pnpm prisma generate",
     "prebuild":"rm -rf ./dist",
     "postbuild": "pnpm dlx ncp ./src/grpc/proto ./dist/grpc/proto"
   },

@@ -17,6 +17,8 @@ const authController_1 = require("../controllers/authController");
 const permissionController_1 = require("../controllers/permissionController");
 const token_1 = require("../utils/token");
 const env_1 = require("../utils/env");
+const http_1 = require("../utils/http");
+const prismaClient_1 = require("../utils/prismaClient");
 const authRouter = express_1.default.Router();
 /**
  * @swagger
@@ -183,6 +185,26 @@ authRouter.get("/resend-email", permissionController_1.verifyAuth, authControlle
 authRouter.post("/verifyEmail/:token", authController_1.verifyEmail);
 authRouter.post("/verifyEmail", authController_1.verifyEmail);
 authRouter.patch("/resetPassword", permissionController_1.verifyAuth, authController_1.resetPassword);
+authRouter.put("/activate-two-factors/:userId", authController_1.activateTwoFactors);
+authRouter.post("/verifyOTP", authController_1.verifyOTP);
+authRouter.get("/api-collections", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const api_collections = yield prismaClient_1.prismaClientSingleton.api_collection_entities.findMany({
+        include: {
+            api_collections_apis: {
+                include: {
+                    api_entities: true,
+                },
+            },
+        },
+    });
+    console.log({ api_collections });
+    return res.status(http_1.statusCodes.ok).json(api_collections);
+}));
+authRouter.get("/categories", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const api_categories = yield prismaClient_1.prismaClientSingleton.category_entities.findMany();
+    console.log({ api_collections: api_categories });
+    return res.status(http_1.statusCodes.ok).json(api_categories);
+}));
 authRouter.get("/hello", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const token = yield (0, token_1.generateAuthToken)(1, "jy_attou@esi.dz", env_1.ENV.JWT_SECRET, "1hr");
     console.log({ token });
