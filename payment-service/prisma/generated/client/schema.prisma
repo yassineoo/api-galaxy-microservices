@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model api_collection_entities {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  description          String?
+  api_collections_apis api_collections_apis[]
+}
+
+model api_collections_apis {
+  api_entity_id            BigInt
+  api_collection_entity_id BigInt
+  api_collection_entities  api_collection_entities @relation(fields: [api_collection_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_collection_entity")
+  api_entities             api_entities            @relation(fields: [api_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_collections_apis_api_entity")
+
+  @@id([api_entity_id, api_collection_entity_id])
+}
+
+model api_docs_entities {
+  id           BigInt       @id @default(autoincrement())
+  api_id       BigInt
+  content      String?
+  last_updated DateTime?    @default(now()) @db.Timestamptz(6)
+  api_entities api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_docs")
+}
+
+model api_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  provider_id              BigInt
+  name                     String                     @db.VarChar(255)
+  image_path               String?
+  description              String?
+  category_id              BigInt?
+  status                   String?                    @default("active") @db.VarChar(20)
+  date_created             DateTime?                  @default(now()) @db.Timestamptz(6)
+  last_updated             DateTime?                  @db.Timestamptz(6)
+  date_deleted             DateTime?                  @db.Timestamptz(6)
+  keywords                 String?
+  api_url                  String?
+  visibility               Boolean?                   @default(false)
+  api_collections_apis     api_collections_apis[]
+  api_docs_entities        api_docs_entities[]
+  category_entities        category_entities?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_entities_apis")
+  api_rating_entities      api_rating_entities[]
+  api_version_entities     api_version_entities[]
+  endpoints_group_entities endpoints_group_entities[]
+  object_plan_entities     object_plan_entities[]
+  plan_entities            plan_entities[]
+}
+
+model api_key_entities {
+  id                    BigInt                @id @default(autoincrement())
+  subscription_id       BigInt
+  api_key               String                @unique @db.VarChar(255)
+  creation_date         DateTime?             @default(now()) @db.Timestamptz(6)
+  is_active             Boolean?              @default(true)
+  subscription_entities subscription_entities @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscription_entities_api_keys")
+}
+
+model api_rating_entities {
+  id           BigInt       @id @default(autoincrement())
+  api_id       BigInt
+  user_id      BigInt
+  rating       BigInt
+  comment      String?
+  date_rated   DateTime?    @default(now()) @db.Timestamptz(6)
+  api_entities api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_ratings")
+}
+
+model api_version_entities {
+  id             BigInt       @id @default(autoincrement())
+  api_id         BigInt
+  version_number String       @db.VarChar(255)
+  release_date   DateTime?    @db.Timestamptz(6)
+  whats_new      String?
+  api_entities   api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_api_versions")
+}
+
+model body_param_entities {
+  id                 BigInt             @id @default(autoincrement())
+  endpoint_id        BigInt
+  content_type       String             @db.VarChar(255)
+  text_body          String?
+  media_file_id      BigInt?
+  endpoints_entities endpoints_entities @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_body_param")
+}
+
+model category_entities {
+  id            BigInt         @id @default(autoincrement())
+  category_name String         @db.VarChar(255)
+  description   String?
+  api_entities  api_entities[]
+}
+
+model cross_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  limit_fee            BigInt?
+  limit_type           String?
+  price                Decimal?             @db.Decimal(10, 2)
+  quota_type           String?
+  quota_value          Decimal?             @db.Decimal(10, 2)
+  add                  Boolean?             @default(false)
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_cross")
+}
+
+model endpoint_object_entities {
+  id                   BigInt               @id @default(autoincrement())
+  object_id            BigInt
+  endpoints_id         BigInt
+  object_plan_entities object_plan_entities @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_object_plan_entities_endpoint_list")
+}
+
+model endpoints_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  group_id                     BigInt
+  methode                      String                         @db.VarChar(255)
+  url                          String                         @db.VarChar(255)
+  description                  String?
+  name                         String?                        @db.VarChar(255)
+  body_param_entities          body_param_entities[]
+  endpoints_group_entities     endpoints_group_entities       @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_group_entities_endpoints")
+  endpoints_parameter_entities endpoints_parameter_entities[]
+  usage_log_entities           usage_log_entities[]
+}
+
+model endpoints_group_entities {
+  id                 BigInt               @id @default(autoincrement())
+  group              String?
+  api_id             BigInt
+  description        String?
+  endpoints_entities endpoints_entities[]
+  api_entities       api_entities         @relation(fields: [api_id], references: [id], onDelete: Cascade, map: "fk_api_entities_groups")
+}
+
+model endpoints_parameter_entities {
+  id                 BigInt              @id @default(autoincrement())
+  endpoint_id        BigInt?
+  key                String              @db.VarChar(255)
+  value_type         String?             @db.VarChar(255)
+  parameter_type     String?             @db.VarChar(255)
+  example_value      String?             @db.VarChar(255)
+  required           Boolean?            @default(false)
+  endpoints_entities endpoints_entities? @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_parameters")
+}
+
+model health_check_entities {
+  id                           BigInt                         @id @default(autoincrement())
+  api_id                       BigInt                         @unique
+  url                          String                         @db.VarChar(2048)
+  schedule                     String                         @db.VarChar(50)
+  last_status                  String?                        @default("pending") @db.VarChar(20)
+  last_checked_at              DateTime?                      @db.Timestamptz(6)
+  alerts_enabled               Boolean?
+  health_check_result_entities health_check_result_entities[]
+}
+
+model health_check_result_entities {
+  id                    BigInt                @id @default(autoincrement())
+  health_check_id       BigInt
+  status                String                @db.VarChar(20)
+  response_time         BigInt?
+  status_message        String?
+  checked_at            DateTime?             @default(now()) @db.Timestamptz(6)
+  health_check_entities health_check_entities @relation(fields: [health_check_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_health_check_entities_results")
+}
+
+model object_plan_entities {
+  id                       BigInt                     @id @default(autoincrement())
+  api_id                   BigInt
+  name                     String                     @db.VarChar(255)
+  description              String?
+  all_endpoints            Boolean?
+  cross_object_entities    cross_object_entities[]
+  endpoint_object_entities endpoint_object_entities[]
+  api_entities             api_entities               @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_object_plan")
+}
+
+model plan_entities {
+  id             BigInt       @id @default(autoincrement())
+  api_id         BigInt
+  name           String       @db.VarChar(255)
+  active         Boolean?
+  visibility     Boolean?
+  type           String?
+  rate           BigInt?
+  rate_unite     String?
+  recomnded_plan Boolean?
+  price          Decimal?     @db.Decimal(10, 2)
+  api_entities   api_entities @relation(fields: [api_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_api_entities_plans")
+}
+
+model subscription_entities {
+  id                 BigInt               @id @default(autoincrement())
+  user_id            BigInt
+  api_id             BigInt
+  plan_id            BigInt
+  start_date         DateTime?            @db.Timestamptz(6)
+  end_date           DateTime?            @db.Timestamptz(6)
+  status             String?              @db.VarChar(50)
+  api_key_entities   api_key_entities[]
+  usage_log_entities usage_log_entities[]
+}
+
+model usage_log_entities {
+  id                    BigInt                @id @default(autoincrement())
+  subscription_id       BigInt
+  timestamp             DateTime?             @default(now()) @db.Timestamptz(6)
+  endpoint_id           BigInt
+  status                BigInt?
+  response_time         BigInt?
+  endpoints_entities    endpoints_entities    @relation(fields: [endpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_endpoints_entities_logs")
+  subscription_entities subscription_entities @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscription_entities_usage_logs")
+}

@@ -1,9 +1,11 @@
 import dotenv from "dotenv";
 import stripeTypes from "../validation/stripeTypes.mjs";
-import Stripe from "stripe";
+
+
 dotenv.config();
 
-const stripeObject = Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripeObject = stripe(process.env.STRIPE_SECRET_KEY, {
+
   apiVersion: "2020-08-27",
 });
 

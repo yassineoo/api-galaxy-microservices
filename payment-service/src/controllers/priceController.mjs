@@ -1,15 +1,15 @@
-import { priceModel } from "../models/stripe/prices.mjs";
-import { productModel } from "../models/stripe/products.mjs";
-import dotenv from "dotenv";
-import Stripe from "stripe";
+
+import { priceModel } from "../models/stripe/prices";
+import { productModel } from "../models/stripe/products";
 
 dotenv.config();
 
-const stripeObject = Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripeObject = stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
 });
 
-export const getCustomerTransactionHistory = async (req, res) => {
+const getCustomerTransactionHistory = async (req, res) => {
+
   const customerId = req.body.customerId;
   try {
     const charges = await stripeObject.charges.list({

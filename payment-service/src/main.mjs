@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 import express from "express";
@@ -17,6 +18,7 @@ const server = http.createServer(app);
 const envConfig = config["development"];
 const log = envConfig.log();
 
+
 app.use(express.urlencoded());
 app.use(cors());
 app.use(
@@ -32,6 +34,7 @@ app.use(
 );
 
 app.use("/stripe-subscription", stripeRouter);
+
 app.use("/stripeCRUD", stripeCrudRouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/transcation", transactionRouter);
@@ -103,4 +106,5 @@ server.on("listening", () => {
       PORT
     } in ${app.get("env")} mode.`
   );
+
 });
