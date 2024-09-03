@@ -27,7 +27,7 @@ userModel.AddUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
                 date_created: currentDate.toISOString(),
                 last_login: currentDate.toISOString(),
                 is_active: true,
-                role: data.role || "customer",
+                role: data.role || "userClient",
             },
         });
         return user;

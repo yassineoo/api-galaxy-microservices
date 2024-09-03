@@ -19,6 +19,11 @@ COPY prisma ./prisma/
 # Generate Prisma Client
 RUN pnpm prisma generate
 
+COPY .env /app/.env
+
+# Set environment variables from the .env file
+ENV $(cat /app/.env | xargs)
+
 # Copy the rest of the application files
 COPY . .
 

@@ -42,22 +42,22 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     switch(topic){
         case "update-earning-percentage":
             this.notificationService.create({
-                "message":`earning percentage will be updated to ${message}`,
-                "title":"important !",
+                "message":`earning percentage will be updated after 7 days from now to ${message}`,
+                "title":"Earning percentage",
                 "recipient_id":null
             })
             break;
         case "update-terms-conditions":
             this.notificationService.create({
                 "message":"Dear sir, our terms and conditions has been modified",
-                "title":"important !",
+                "title":"Terms and conditions Update",
                 "recipient_id":0
             })
             break;
         case "update-privacy-policy":
             this.notificationService.create({
-                "message":"Dear sir, our privacy and policy has been modified",
-                "title":"important !",
+                "message":"Dear sir, our privacy policy has been modified",
+                "title":"Privacy  Policy",
                 "recipient_id":0
             })
             break;

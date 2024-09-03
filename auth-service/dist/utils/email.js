@@ -19,12 +19,10 @@ const sendEMail = (subject, token, destEmail) => {
     transporter.sendMail(message, function (err, info) {
         if (err) {
             console.log("email errors");
-
             // console.log({ err });
         }
         else {
             // console.log({ info });
-
         }
     });
 };

@@ -1,40 +1,54 @@
 import { prismaClientSingleton } from "../utils/prisma"
 
-async function getAllApisByCategory({ id, page }: { id: number, page: number }) {
-    const categoryName = await prismaClientSingleton.api_collection_entities.findFirst({
+async function getAllApisByCategory({ id }: { id: number }) {
+    await prismaClientSingleton.$connect().then(console.log)
+    // await prismaClientSingleton.api_collections_apis.create({
+    //     data:
+    //     {
+    //         "api_collection_entity_id": 2,
+    //         "api_entity_id": 2
+    //     }
+    // })
+    // const updatess = await prismaClientSingleton.api_collections_apis.create({
+    //     data:
+    //     {
+    //         "api_collection_entity_id": 2,
+    //         "api_entity_id": 19
+    //     }
+    // })
+    // const updatesss = await prismaClientSingleton.api_collections_apis.create({
+    //     data:
+    //     {
+    //         "api_collection_entity_id": 2,
+    //         "api_entity_id": 10
+    //     }
+    // })
+    const collection = await prismaClientSingleton.api_collection_entities.findUnique({
         where: { id },
-        select: { name: true }
-    }).then(r => r?.name)
-    console.log({ categoryName })
-    const apis = await prismaClientSingleton.api_entities.findMany({
-        where: {
-            api_collections_apis: {
-                "some": {
-                    "api_collection_entity_id": id
-                }
-            },
-        },
-        take: 10,
-        skip: (page - 1) * 10
-    })
-    console.log({ apis })
-    const totalCount = await prismaClientSingleton.api_entities.aggregate({
-        _count: {
-            "id": true
-        },
-        where: {
-            api_collections_apis: {
-                "some": {
-                    api_collection_entity_id: id
+        include: {
+            "api_collections_apis": {
+                "include": {
+                    "api_entities": true
                 }
             }
         }
     })
-    console.log({ totalCount })
+    console.log({ collection })
+
+
+    // console.log({ updates })
+    const apis = collection?.api_collections_apis.map(r => ({
+        ...r.api_entities,
+        id: Number(r.api_entities.id),
+        category_id: Number(r.api_entities.category_id),
+        provider_id: Number(r.api_entities.provider_id),
+        stripe_product_id: String(r.api_entities.stripe_product_id)
+    }))
     return {
-        categoryName,
+        collectionName: collection?.name,
         data: apis,
-        pages: Math.ceil(totalCount?._count?.id / 10)
+        pages: Math.ceil((apis?.length || 0) / 10)
+
     }
 }
 
