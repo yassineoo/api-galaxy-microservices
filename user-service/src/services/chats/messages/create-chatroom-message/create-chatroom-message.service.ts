@@ -13,7 +13,6 @@ export default async function create_chatroom_messages_service(
     if (!isChatroomExist) throw new Error("Chatroom doesn't exist")
 
     const chatroomMemeberIds = await ChatroomsRepository.getChatroomMemeberIds(chatroomId)
-    console.log("Chatroom", await ChatroomsRepository.getChatroom(chatroomId))
     if (!chatroomMemeberIds.includes(userId)) throw new Error("You are not a member of this chatroom")
 
     const chatroom = await MessagesRepository.createChatroomMessage(content, userId, chatroomId)

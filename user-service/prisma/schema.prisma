@@ -260,7 +260,9 @@ model user_entities {
   message_entities              message_entities[]
   moderator_permission_entities moderator_permission_entities[]
   notification_entities         notification_entities[]
+
   payment_method_entities       payment_method_entities[]
+
   profile_entities              profile_entities[]
   review_reports_entities       review_reports_entities[]
   settings_entities             settings_entities[]
@@ -313,12 +315,10 @@ model moderator_permission_entities {
 
 model payment_method_entities {
   id                       BigInt                 @id @default(autoincrement())
-  user_id                  BigInt?
   provider                 String?                @db.VarChar(255)
   account_details          String?
   is_default               Boolean?               @default(false)
   stripe_payment_method_id String?                @db.VarChar(255)
-  user_entities            user_entities?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_payment_method_entities_user")
   transaction_entities     transaction_entities[]
 }
 

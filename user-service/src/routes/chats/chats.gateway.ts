@@ -5,6 +5,7 @@ import { disconnect_user_event_validator } from "../../validators/chats/chatroom
 import { create_chatroom_message_event_validator } from "../../validators/chats/messages/create-chatroom-message/create-chatroom-message.request";
 import { Server } from "http";
 import GrpcAuthClient from "../../grpc/grpc-auth.client";
+import create_chatroom_messages_service from "../../services/chats/messages/create-chatroom-message/create-chatroom-message.service";
 
 export default class ChatsGateway {
   private _instance: SocketServer;
@@ -52,17 +53,22 @@ export default class ChatsGateway {
 
     const io = this.io;
     io.on("connection", (socket) => {
-      socket.on("connect_user", (data) => {
+      console.log({ socket: socket.rooms })
+      socket.on("connect_user", async (data) => {
         try {
           console.log("EVENT ==> CONNECT_USER");
-          const { userId } = connect_user_event_validator.parse(data);
+          const { userId, chatroomId } = connect_user_event_validator.parse(data);
+          console.log({ userId, chatroomId })
           if (this.is_user_already_connected(userId)) {
             socket.emit("connect_user_error", {
               error: "User already connected",
             });
           }
           this.connect_user(userId, socket.id);
-          io.emit("connected_users", this.connected_users);
+          if (!socket.rooms.has(chatroomId.toString())) socket.rooms.add(chatroomId.toString())
+          await socket.join(chatroomId.toString())
+          console.log({ sockets: socket.rooms })
+          io.emit("connected_users", "SUCCESS");
         } catch (error) {
           this.handle_error(socket, "connect_user", error);
         }
@@ -87,34 +93,48 @@ export default class ChatsGateway {
       socket.on("send_message", async (data) => {
         try {
           console.log("EVENT ==> SEND_MESSAGE");
-          const { content, senderId, chatroomId, receiverId } =
+          const { content, senderId, chatroomId, receiverId, createdAt, id } =
             create_chatroom_message_event_validator.parse(data);
 
           const receiverSocketId = this.get_socket_id(receiverId);
+          console.log({ receiverSocketId })
           if (!receiverSocketId) return;
 
-          socket.to(receiverSocketId).emit("receive_message", {
-            id: Number(13),
-            userId: Number(senderId),
-            message: content,
-            createdAt: new Date().toISOString(),
-            chatroomId: Number(chatroomId),
-          });
-          socket.to(socket.id).emit("receive_message", {
-            id: Number(13),
-            userId: Number(senderId),
+          // const newMessage = await create_chatroom_messages_service(chatroomId, senderId, content);
+          // console.log({ newMessage })
+          console.log({ sockets: socket.rooms })
+          socket.to(chatroomId.toString()).emit(
+            "receive_message",
+            this.formatNewMessage({ message: content, created_at: createdAt, id }, senderId, chatroomId)
+          );
 
-            message: content,
-            createdAt: new Date().toISOString(),
-            chatroomId: Number(chatroomId),
-          });
+          // socket.to(socket.id).emit(
+          // "receive_message",
+          // this.formatNewMessage({ message: content, created_at: createdAt, id }, senderId, chatroomId)
+          // )
+
         } catch (error) {
           this.handle_error(socket, "send_message", error);
         }
       });
     });
   }
-
+  private formatNewMessage(message: {
+    id: bigint;
+    message: string;
+    created_at: string;
+  },
+    senderId: ID,
+    chatroomId: ID
+  ) {
+    return {
+      id: Number(message.id),
+      userId: Number(senderId),
+      message: message.message,
+      createdAt: message.created_at,
+      chatroomId: Number(chatroomId),
+    }
+  }
   private is_user_already_connected(userId: ID) {
     return this._connected_users.get(userId) ? true : false;
   }

@@ -58,6 +58,8 @@ export default class MessagesRepository {
         message: newMessage.message,
         created_at: newMessage.created_at,
       };
+
+
       return prettyMessage;
     });
   };

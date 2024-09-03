@@ -37,7 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/hello", (_, res: any) => res.send("Hello World!"))
+app.use("/hello", (req, res) => res.send("Hello"))
 
 app.use("/userApi", userApiRouter);
 app.use("/chatrooms", ChatroomsRouter);

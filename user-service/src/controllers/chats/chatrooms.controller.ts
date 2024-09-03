@@ -8,12 +8,29 @@ import create_chatroom_service from "../../services/chats/chatrooms/create-chatr
 import { create_chatroom_validator } from "../../validators/chats/chatrooms/create-chatroom/create-chatroom.request";
 import { delete_chatroom_validator } from "../../validators/chats/chatrooms/delete-chatroom/delete-chatroom.request";
 import delete_chatroom_service from "../../services/chats/chatrooms/delete-chatroom/delete-chatroom.service";
+import { prismaClientSingleton } from "../../utils/prisma";
 
 async function get_user_chatrooms(req: Request, res: Response) {
     return await ControllerTryCatch(res, async () => {
         const { userId } = get_user_chatrooms_validator.params.parse(req.params)
+        console.log({ userId });
+
+        // const chatroom = await prismaClientSingleton.chatroom_entities.create({
+        //     data: {
+        //         "user_chatroom_entities": {
+        //             createMany: {
+        //                 data: [
+        //                     { "user_id": 12 },
+        //                     { "user_id": 14 }
+        //                 ]
+        //             }
+        //         }
+        //     }
+        // })
+        // console.log({ chatroom })
 
         const user_chatrooms = await get_user_chatrooms_service(userId)
+        console.log({ user_chatrooms })
         return user_chatrooms
     })
 }

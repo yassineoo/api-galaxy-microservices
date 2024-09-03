@@ -18,4 +18,6 @@ export default async function create_chatroom_service(creatorId: ID, receptorId:
     const newChatroom = await ChatroomsRepository.createChatroom(creatorId, receptorId)
 
     return newChatroom
+
+
 }

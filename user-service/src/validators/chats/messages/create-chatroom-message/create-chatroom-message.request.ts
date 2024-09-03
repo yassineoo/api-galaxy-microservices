@@ -19,5 +19,7 @@ export const create_chatroom_message_event_validator = z.object({
     content: content_validator,
     senderId: id_validator,
     chatroomId: id_validator,
-    receiverId: id_validator
+    receiverId: id_validator,
+    createdAt: z.string(),
+    id: id_validator
 })
