@@ -29,10 +29,18 @@ export default class apiService {
     limit: any,
     page: any,
     search: any,
+    status: 1 | 0,
     filter?: number
   ) {
     try {
-      const res = await APIModel.getAPIS(user_id, limit, page, search, filter);
+      const res = await APIModel.getAPIS(
+        user_id,
+        limit,
+        page,
+        search,
+        status,
+        filter
+      );
       return res;
     } catch (error) {
       throw error;
@@ -89,6 +97,8 @@ export default class apiService {
       );
       return apis;
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }

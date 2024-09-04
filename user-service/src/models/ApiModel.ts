@@ -7,6 +7,7 @@ export default class APIModel {
     limit: string = "10",
     page: string = "1",
     search: string = "",
+    status?: 1 | 0,
     filter?: number
   ) {
     const pageInt = parseInt(page);
@@ -26,6 +27,8 @@ export default class APIModel {
     if (filter) {
       whereConditions.category_id = filter;
     }
+
+    whereConditions.status = status == 1 ? "active" : "inactive";
 
     try {
       const apis = await prismaClientSingleton.api_entities.findMany({
@@ -117,9 +120,12 @@ export default class APIModel {
       const jsonString = JSON.stringify(apis?.api_entities, (key, value) =>
         typeof value == "bigint" ? value.toString() : value
       );
-      //console.log(jsonString)
-      return jsonString;
+      console.log("error apis jsonString", jsonString);
+      return JSON.parse(jsonString);
     } catch (error) {
+      console.log("error apis");
+      console.log(error);
+
       throw error;
     }
   }

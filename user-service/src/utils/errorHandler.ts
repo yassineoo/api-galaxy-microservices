@@ -25,6 +25,9 @@ export const handleErrors = (
   next: NextFunction
 ) => {
   if (err instanceof UserError) {
+    console.log("user service error");
+    console.log(err);
+
     return res.status(401).json({ error: true, message: err.message });
   } else if (err instanceof SystemError) {
     return res.status(500).json({ error: true, message: err.message });

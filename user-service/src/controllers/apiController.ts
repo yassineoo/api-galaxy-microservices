@@ -46,7 +46,7 @@ export const getAllApis = async (
   next: NextFunction
 ) => {
   try {
-    const { page, limit, filter, search } = req.query;
+    const { page, limit, filter, search, status = 1 } = req.query;
     const { userId } = req.params;
     //console.log(req.query)
     // console.log(userId)
@@ -58,6 +58,8 @@ export const getAllApis = async (
       limit,
       page,
       search,
+      Number(status) == 1 ? 1 : 0,
+
       Number(filter)
     );
     //console.log(response)
@@ -144,7 +146,7 @@ export const getAPISforAdmin = async (
     );
     res.status(200).send(apis);
   } catch (error: any) {
-    console.log(error.message);
+    console.log(error);
     next(error);
   }
 };
@@ -324,11 +326,17 @@ export const updateStatusApi = async (
   next: NextFunction
 ) => {
   try {
+    console.log("update status endpoint 1");
+
     const { id } = req.params;
 
-    await apiService.updateStatusApi(Number(id));
+    const x = await apiService.updateStatusApi(Number(id));
+    console.log("update status endpoint 2", x);
+
     res.status(201).send(true);
   } catch (error) {
+    console.log("update status endpoint 3", error);
+
     next(error);
   }
 };
