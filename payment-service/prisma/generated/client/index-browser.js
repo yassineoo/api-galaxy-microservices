@@ -6,7 +6,7 @@ const {
   objectEnumValues,
   makeStrictEnum,
   Public,
-  detectRuntime,
+  getRuntime
 } = require('./runtime/index-browser.js')
 
 
@@ -16,36 +16,42 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 5.10.2
- * Query Engine version: 5a9203d0590c951969e85a7d07215503f4672eb9
+ * Prisma Client JS version: 5.19.1
+ * Query Engine version: 69d742ee20b815d88e17e54db4a2a7a3b30324e3
  */
 Prisma.prismaVersion = {
-  client: "5.10.2",
-  engine: "5a9203d0590c951969e85a7d07215503f4672eb9"
+  client: "5.19.1",
+  engine: "69d742ee20b815d88e17e54db4a2a7a3b30324e3"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
-  throw new Error(`PrismaClientKnownRequestError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )};
 Prisma.PrismaClientUnknownRequestError = () => {
-  throw new Error(`PrismaClientUnknownRequestError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.PrismaClientRustPanicError = () => {
-  throw new Error(`PrismaClientRustPanicError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.PrismaClientInitializationError = () => {
-  throw new Error(`PrismaClientInitializationError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.PrismaClientValidationError = () => {
-  throw new Error(`PrismaClientValidationError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.NotFoundError = () => {
-  throw new Error(`NotFoundError is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`NotFoundError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.Decimal = Decimal
@@ -54,19 +60,23 @@ Prisma.Decimal = Decimal
  * Re-export of sql-template-tag
  */
 Prisma.sql = () => {
-  throw new Error(`sqltag is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.empty = () => {
-  throw new Error(`empty is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.join = () => {
-  throw new Error(`join is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.raw = () => {
-  throw new Error(`raw is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.validator = Public.validator
@@ -75,11 +85,13 @@ Prisma.validator = Public.validator
 * Extensions
 */
 Prisma.getExtensionContext = () => {
-  throw new Error(`Extensions.getExtensionContext is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.defineExtension = () => {
-  throw new Error(`Extensions.defineExtension is unable to be run ${runtimeDescription}.
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 
@@ -110,7 +122,8 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.Api_collection_entitiesScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  description: 'description'
+  description: 'description',
+  image_path: 'image_path'
 };
 
 exports.Prisma.Api_collections_apisScalarFieldEnum = {
@@ -138,7 +151,9 @@ exports.Prisma.Api_entitiesScalarFieldEnum = {
   date_deleted: 'date_deleted',
   keywords: 'keywords',
   api_url: 'api_url',
-  visibility: 'visibility'
+  visibility: 'visibility',
+  rating: 'rating',
+  stripe_product_id: 'stripe_product_id'
 };
 
 exports.Prisma.Api_key_entitiesScalarFieldEnum = {
@@ -146,10 +161,20 @@ exports.Prisma.Api_key_entitiesScalarFieldEnum = {
   subscription_id: 'subscription_id',
   api_key: 'api_key',
   creation_date: 'creation_date',
-  is_active: 'is_active'
+  is_active: 'is_active',
+  user_id: 'user_id',
+  api_key_id: 'api_key_id'
 };
 
-exports.Prisma.Api_rating_entitiesScalarFieldEnum = {
+exports.Prisma.Api_report_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  api_id: 'api_id',
+  description: 'description',
+  screenshots: 'screenshots'
+};
+
+exports.Prisma.Api_review_entitiesScalarFieldEnum = {
   id: 'id',
   api_id: 'api_id',
   user_id: 'user_id',
@@ -166,6 +191,14 @@ exports.Prisma.Api_version_entitiesScalarFieldEnum = {
   whats_new: 'whats_new'
 };
 
+exports.Prisma.Billing_history_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  invoice_id: 'invoice_id',
+  payment_date: 'payment_date',
+  amount: 'amount'
+};
+
 exports.Prisma.Body_param_entitiesScalarFieldEnum = {
   id: 'id',
   endpoint_id: 'endpoint_id',
@@ -178,6 +211,10 @@ exports.Prisma.Category_entitiesScalarFieldEnum = {
   id: 'id',
   category_name: 'category_name',
   description: 'description'
+};
+
+exports.Prisma.Chatroom_entitiesScalarFieldEnum = {
+  id: 'id'
 };
 
 exports.Prisma.Cross_object_entitiesScalarFieldEnum = {
@@ -226,11 +263,12 @@ exports.Prisma.Endpoints_parameter_entitiesScalarFieldEnum = {
 exports.Prisma.Health_check_entitiesScalarFieldEnum = {
   id: 'id',
   api_id: 'api_id',
-  url: 'url',
   schedule: 'schedule',
   last_status: 'last_status',
   last_checked_at: 'last_checked_at',
-  alerts_enabled: 'alerts_enabled'
+  alerts_enabled: 'alerts_enabled',
+  endpoint_id: 'endpoint_id',
+  email: 'email'
 };
 
 exports.Prisma.Health_check_result_entitiesScalarFieldEnum = {
@@ -242,12 +280,64 @@ exports.Prisma.Health_check_result_entitiesScalarFieldEnum = {
   checked_at: 'checked_at'
 };
 
+exports.Prisma.Invoice_entitiesScalarFieldEnum = {
+  id: 'id',
+  subscription_id: 'subscription_id',
+  total_amount: 'total_amount',
+  date_issued: 'date_issued',
+  due_date: 'due_date',
+  status: 'status',
+  stripe_invoice_id: 'stripe_invoice_id'
+};
+
+exports.Prisma.Like_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  api_id: 'api_id'
+};
+
+exports.Prisma.Message_entitiesScalarFieldEnum = {
+  id: 'id',
+  chatroom_id: 'chatroom_id',
+  user_id: 'user_id',
+  message: 'message',
+  created_at: 'created_at'
+};
+
+exports.Prisma.Moderator_permission_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  permission_id: 'permission_id'
+};
+
+exports.Prisma.Notification_entitiesScalarFieldEnum = {
+  id: 'id',
+  recipient_id: 'recipient_id',
+  title: 'title',
+  message: 'message',
+  isRead: 'isRead'
+};
+
 exports.Prisma.Object_plan_entitiesScalarFieldEnum = {
   id: 'id',
   api_id: 'api_id',
   name: 'name',
   description: 'description',
   all_endpoints: 'all_endpoints'
+};
+
+exports.Prisma.Payment_method_entitiesScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  account_details: 'account_details',
+  is_default: 'is_default',
+  stripe_payment_method_id: 'stripe_payment_method_id'
+};
+
+exports.Prisma.Permission_entitiesScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description'
 };
 
 exports.Prisma.Plan_entitiesScalarFieldEnum = {
@@ -260,16 +350,54 @@ exports.Prisma.Plan_entitiesScalarFieldEnum = {
   rate: 'rate',
   rate_unite: 'rate_unite',
   recomnded_plan: 'recomnded_plan',
-  price: 'price'
+  price: 'price',
+  stripe_price_id: 'stripe_price_id'
+};
+
+exports.Prisma.Profile_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  full_name: 'full_name',
+  bio: 'bio',
+  profile_picture: 'profile_picture',
+  date_of_birth: 'date_of_birth',
+  location: 'location'
+};
+
+exports.Prisma.Review_reports_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  review_id: 'review_id',
+  description: 'description',
+  reason: 'reason'
+};
+
+exports.Prisma.Settings_entitiesScalarFieldEnum = {
+  id: 'id',
+  earning_percentage: 'earning_percentage',
+  termsAndConditions: 'termsAndConditions',
+  privacyAndPolicy: 'privacyAndPolicy',
+  updated_at: 'updated_at',
+  admin_id: 'admin_id'
 };
 
 exports.Prisma.Subscription_entitiesScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
-  api_id: 'api_id',
   plan_id: 'plan_id',
   start_date: 'start_date',
   end_date: 'end_date',
+  used_calls: 'used_calls',
+  status: 'status',
+  stripe_sub_id: 'stripe_sub_id'
+};
+
+exports.Prisma.Transaction_entitiesScalarFieldEnum = {
+  id: 'id',
+  invoice_id: 'invoice_id',
+  amount: 'amount',
+  transaction_date: 'transaction_date',
+  payment_method_id: 'payment_method_id',
   status: 'status'
 };
 
@@ -280,6 +408,35 @@ exports.Prisma.Usage_log_entitiesScalarFieldEnum = {
   endpoint_id: 'endpoint_id',
   status: 'status',
   response_time: 'response_time'
+};
+
+exports.Prisma.UserVerification_entitiesScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  otp: 'otp',
+  expired: 'expired'
+};
+
+exports.Prisma.User_chatroom_entitiesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  chatroom_id: 'chatroom_id'
+};
+
+exports.Prisma.User_entitiesScalarFieldEnum = {
+  id: 'id',
+  username: 'username',
+  email: 'email',
+  password_hash: 'password_hash',
+  date_created: 'date_created',
+  last_login: 'last_login',
+  is_active: 'is_active',
+  is_two_factor: 'is_two_factor',
+  role: 'role',
+  phone_number: 'phone_number',
+  verified: 'verified',
+  image: 'image',
+  stripe_customer_id: 'stripe_customer_id'
 };
 
 exports.Prisma.SortOrder = {
@@ -304,10 +461,13 @@ exports.Prisma.ModelName = {
   api_docs_entities: 'api_docs_entities',
   api_entities: 'api_entities',
   api_key_entities: 'api_key_entities',
-  api_rating_entities: 'api_rating_entities',
+  api_report_entities: 'api_report_entities',
+  api_review_entities: 'api_review_entities',
   api_version_entities: 'api_version_entities',
+  billing_history_entities: 'billing_history_entities',
   body_param_entities: 'body_param_entities',
   category_entities: 'category_entities',
+  chatroom_entities: 'chatroom_entities',
   cross_object_entities: 'cross_object_entities',
   endpoint_object_entities: 'endpoint_object_entities',
   endpoints_entities: 'endpoints_entities',
@@ -315,10 +475,24 @@ exports.Prisma.ModelName = {
   endpoints_parameter_entities: 'endpoints_parameter_entities',
   health_check_entities: 'health_check_entities',
   health_check_result_entities: 'health_check_result_entities',
+  invoice_entities: 'invoice_entities',
+  like_entities: 'like_entities',
+  message_entities: 'message_entities',
+  moderator_permission_entities: 'moderator_permission_entities',
+  notification_entities: 'notification_entities',
   object_plan_entities: 'object_plan_entities',
+  payment_method_entities: 'payment_method_entities',
+  permission_entities: 'permission_entities',
   plan_entities: 'plan_entities',
+  profile_entities: 'profile_entities',
+  review_reports_entities: 'review_reports_entities',
+  settings_entities: 'settings_entities',
   subscription_entities: 'subscription_entities',
-  usage_log_entities: 'usage_log_entities'
+  transaction_entities: 'transaction_entities',
+  usage_log_entities: 'usage_log_entities',
+  userVerification_entities: 'userVerification_entities',
+  user_chatroom_entities: 'user_chatroom_entities',
+  user_entities: 'user_entities'
 };
 
 /**
@@ -328,19 +502,15 @@ class PrismaClient {
   constructor() {
     return new Proxy(this, {
       get(target, prop) {
-        const runtime = detectRuntime()
-        const edgeRuntimeName = {
-          'workerd': 'Cloudflare Workers',
-          'deno': 'Deno and Deno Deploy',
-          'netlify': 'Netlify Edge Functions',
-          'edge-light': 'Vercel Edge Functions or Edge Middleware',
-        }[runtime]
-
-        let message = 'PrismaClient is unable to run in '
-        if (edgeRuntimeName !== undefined) {
-          message += edgeRuntimeName + '. As an alternative, try Accelerate: https://pris.ly/d/accelerate.'
+        let message
+        const runtime = getRuntime()
+        if (runtime.isEdge) {
+          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
+- Use Prisma Accelerate: https://pris.ly/d/accelerate
+- Use Driver Adapters: https://pris.ly/d/driver-adapters
+`;
         } else {
-          message += 'this browser environment, or has been bundled for the browser (running in `' + runtime + '`).'
+          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
         }
         
         message += `

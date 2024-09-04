@@ -43,7 +43,7 @@ type UserEntity struct {
 	Likes         []LikeEntity        `gorm:"foreignKey:UserID"`
 	ApiReports    []ApiReportEntity   `gorm:"foreignKey:UserID"`
 	ReviewReports []ReviewReportsEntity `gorm:"foreignKey:UserID"`
-
+	PaymentMethods []PaymentMethodEntity `gorm:"foreignKey:UserID"`
 	Settings          []SettingsEntity         `gorm:"foreignKey:AdminID"`
 	Notifications    []NotificationEntity `gorm:"foreignKey:RecipientID"`
 

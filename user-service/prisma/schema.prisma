@@ -261,7 +261,7 @@ model user_entities {
   moderator_permission_entities moderator_permission_entities[]
   notification_entities         notification_entities[]
 
-  payment_method_entities       payment_method_entities[]
+ // payment_method_entities       payment_method_entities[]
 
   profile_entities              profile_entities[]
   review_reports_entities       review_reports_entities[]
