@@ -15,6 +15,7 @@ import config from "./utils/config";
 import ValidateEnv, { ENV } from "./infrastructure/env";
 
 ValidateEnv()
+console.log({ ENV })
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
