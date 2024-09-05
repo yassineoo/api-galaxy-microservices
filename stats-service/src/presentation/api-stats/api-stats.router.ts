@@ -4,7 +4,7 @@ import authenticate from "../_common/middlewares/authenticate.middleware";
 
 const router = express.Router();
 
-router.use(authenticate);
+//router.use(authenticate);
 
 router.post("/", controller.get_apis_stats);
 

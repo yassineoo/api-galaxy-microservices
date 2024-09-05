@@ -208,6 +208,8 @@ export default class APIModel {
   }
 
   static async updateStatus(api_id: number) {
+    console.log("api_id", api_id);
+    
     try {
       const updatedApi = await prismaClientSingleton.api_entities.update({
         where: {

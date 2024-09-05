@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"local_packages/api/handlers"
-	"local_packages/api/middlewares"
 	"local_packages/api/services"
 
 	"github.com/gin-gonic/gin"
@@ -39,16 +38,15 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	// API routes
 	apisGroup := router.Group("/apis")
 	{
-		apisGroup.GET("/search", ApiHandler.GetSearchApis)
-		apisGroup.GET("/", ApiHandler.GetAllApis)
-		apisGroup.GET("/:id", ApiHandler.GetApi)
-		apisGroup.GET("/user-apis/:user_id", ApiHandler.GetUserAPIs)
+		apisGroup.GET("/search", ApiHandler.GetSearchApis);
+		apisGroup.GET("/", ApiHandler.GetAllApis);
+		apisGroup.GET("/:id", ApiHandler.GetApi);
+		apisGroup.GET("/user-apis/:user_id", ApiHandler.GetUserAPIs);
 
 		// Protected
-		apisGroup.Use(middlewares.AuthMiddleware()).
-			PUT("/:id", ApiHandler.UpdateApi).
-			DELETE("/:id", ApiHandler.DeleteApi).
-			POST("/", ApiHandler.CreateApi)
+		apisGroup.PUT("/:id", ApiHandler.UpdateApi);
+			apisGroup.DELETE("/:id", ApiHandler.DeleteApi);
+			apisGroup.POST("/", ApiHandler.CreateApi);
 	}
 
 	// API Docs routes
@@ -56,10 +54,10 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	{
 		apisDocsGroup.GET("/:api-id", ApiDocsHandler.GetApiDocs)
 
-		apisDocsGroup.Use(middlewares.AuthMiddleware()).
-			POST("/", ApiDocsHandler.CreateApiDocs).
-			PATCH("/:id", ApiDocsHandler.UpdateApiDocs).
-			DELETE("/:id", ApiDocsHandler.DeleteApiDocs)
+		apisDocsGroup.
+			POST("/", ApiDocsHandler.CreateApiDocs);
+			apisDocsGroup.PATCH("/:id", ApiDocsHandler.UpdateApiDocs);
+			apisDocsGroup.DELETE("/:id", ApiDocsHandler.DeleteApiDocs);
 
 	}
 	// apiLogs routes
@@ -69,9 +67,8 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 		apiLogsGroup.GET("/:api-id", ApiLogsHandler.GetApiLogs)
 
 		apiLogsGroup.
-			Use(middlewares.AuthMiddleware()).
-			POST("/statss", ApiLogsHandler.GetLast7DaysStats).
-			POST("/stats", ApiLogsHandler.GetStatisticsByTimeFilter)
+			POST("/statss", ApiLogsHandler.GetLast7DaysStats);
+			apiLogsGroup.POST("/stats", ApiLogsHandler.GetStatisticsByTimeFilter);
 
 		// categoriesGroup.POST("/", CategoryHandler.CreateCategory)
 		// categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory)
@@ -82,11 +79,10 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 	categoriesGroup := router.Group("/categoriesk")
 	{
 
-		categoriesGroup.
-			GET("/", CategoryHandler.GetAllCategories).
-			POST("/", middlewares.AuthMiddleware(), CategoryHandler.CreateCategory).
-			PATCH("/:id", middlewares.AuthMiddleware(), CategoryHandler.UpdateCategory).
-			DELETE("/:id", middlewares.AuthMiddleware(), CategoryHandler.DeleteCategory)
+		categoriesGroup.GET("/", CategoryHandler.GetAllCategories);
+			categoriesGroup.POST("/", CategoryHandler.CreateCategory);
+			categoriesGroup.PATCH("/:id", CategoryHandler.UpdateCategory);
+			categoriesGroup.DELETE("/:id", CategoryHandler.DeleteCategory);
 
 	}
 
@@ -97,12 +93,10 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 		endpointsGroup.GET("/:api-id", EndpointsHandler.GetApiEndpoints)
 
 		// Protected
-		endpointsGroup.
-			Use(middlewares.AuthMiddleware()).
-			POST("/", EndpointsHandler.CreateApiEndpoints).
-			POST("/multi", EndpointsHandler.CreateMultiApiEndpoints).
-			PATCH("/:id", EndpointsHandler.UpdateApiEndpoints).
-			DELETE("/:id", EndpointsHandler.DeleteApiEndpoints)
+		endpointsGroup.POST("/", EndpointsHandler.CreateApiEndpoints);
+		endpointsGroup.POST("/multi", EndpointsHandler.CreateMultiApiEndpoints);
+		endpointsGroup.PATCH("/:id", EndpointsHandler.UpdateApiEndpoints);
+		endpointsGroup.DELETE("/:id", EndpointsHandler.DeleteApiEndpoints);
 
 	}
 
@@ -113,11 +107,9 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 		endpointsGroupGroup.GET("/:api-id", EndpointsHandler.GetApiEndpointsGroups)
 
 		// Protected
-		endpointsGroupGroup.
-			Use(middlewares.AuthMiddleware()).
-			POST("/", EndpointsHandler.CreateEndpointsGroup).
-			PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup).
-			DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup)
+		endpointsGroupGroup.POST("/", EndpointsHandler.CreateEndpointsGroup);
+		endpointsGroupGroup.PATCH("/:id", EndpointsHandler.UpdateEndpointsGroup);
+		endpointsGroupGroup.DELETE("/:id", EndpointsHandler.DeleteEndpointsGroup);
 
 	}
 
@@ -129,7 +121,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 
 		// Protected
 		endpointsParameterGroup.
-			Use(middlewares.AuthMiddleware()).
+			
 			POST("/", EndpointsHandler.CreateEndpointsParameter).
 			PATCH("/:id", EndpointsHandler.UpdateEndpointsParameter).
 			DELETE("/:id", EndpointsHandler.DeleteEndpointsParameter)
@@ -146,7 +138,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 			GET("/:api-id/success-percentage", HealthCheckHandler.GetHealthCheckSuccessPercentage)
 		// Protected
 		healthCheckGroup.
-			Use(middlewares.AuthMiddleware()).
+	
 			POST("/", HealthCheckHandler.CreateHealthCheck).
 			PATCH("/:id", HealthCheckHandler.UpdateHealthCheck).
 			DELETE("/:id", HealthCheckHandler.DeleteHealthCheck)
@@ -161,7 +153,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 
 		// Protected
 		planGroup.
-			Use(middlewares.AuthMiddleware()).
+			
 			POST("/", PlanHandler.CreateApiPlan).
 			PATCH("/", PlanHandler.UpdateApiPlan).
 			DELETE("/:id", PlanHandler.DeleteApiPlan)
@@ -175,7 +167,7 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 		// Protected
 		// UPDATED by wadoud , it was GET but its for update api subscription
 		subscriptionsGroup.
-			Use(middlewares.AuthMiddleware()).
+		
 			POST("/", SubscriptionHandler.CreateApiSubscription).
 			PATCH("/:subscriptionId", SubscriptionHandler.UpdateApiSubscription).
 			DELETE("/:subscriptionId", SubscriptionHandler.DeleteApiSubscription)
@@ -187,11 +179,11 @@ func SetupRoutes(router *gin.Engine, service *services.Service) {
 
 		apiCollectionGroup.
 			GET("/", ApiCollectionHandler.GetCollections).
-			POST("/", middlewares.AuthMiddleware(), ApiCollectionHandler.CreateCollection).
-			PATCH("/:id", middlewares.AuthMiddleware(), ApiCollectionHandler.UpdateCollection).
-			DELETE("/:id", middlewares.AuthMiddleware(), ApiCollectionHandler.DeleteCollection).
-			POST("/:id/addApis", middlewares.AuthMiddleware(), ApiCollectionHandler.AddApisToCollection).
-			POST("/:id/removeApis", middlewares.AuthMiddleware(), ApiCollectionHandler.RemoveApisFromCollection)
+			POST("/", ApiCollectionHandler.CreateCollection).
+			PATCH("/:id", ApiCollectionHandler.UpdateCollection).
+			DELETE("/:id", ApiCollectionHandler.DeleteCollection).
+			POST("/:id/addApis", ApiCollectionHandler.AddApisToCollection).
+			POST("/:id/removeApis", ApiCollectionHandler.RemoveApisFromCollection)
 
 	}
 
