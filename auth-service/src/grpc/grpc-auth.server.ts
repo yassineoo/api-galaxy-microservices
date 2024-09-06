@@ -20,6 +20,7 @@ const authService: AuthServiceHandlers = {
         call: grpc.ServerUnaryCall<AuthenticateRequest__Output, AuthenticateResponse__Output>,
         callback: grpc.sendUnaryData<AuthenticateResponse__Output>) => {
         try {
+            console.log({ call, request: call.request, authHeader: call.request.authHeader, secret: ENV.JWT_SECRET })
             const decodeTokenResult = decodeAuthToken(call.request.authHeader, ENV.JWT_SECRET)
             console.log({ decodeTokenResult })
             return callback(null, { valid: true, userId: decodeTokenResult.userId })

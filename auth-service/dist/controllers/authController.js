@@ -78,7 +78,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log("----------------------------------");
         console.log("----------------------------------");
         console.log("----------------------------------");
-        console.log(token);
+        console.log({ token });
         console.log("----------------------------------");
         console.log("----------------------------------");
         console.log("----------------------------------");

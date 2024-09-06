@@ -36,14 +36,14 @@ const generateAuthToken = (userId, email, tokenSecret, tokenExpiry) => __awaiter
     return { token: signedToken, expiry: tokenExpiry };
 });
 exports.generateAuthToken = generateAuthToken;
-const generateEmailToken = (email, id, tokenSecret, tokenExpiry) => {
-    const authToken = (0, random_bytes_1.default)(32).toString();
+const generateEmailToken = (email, id, tokenSecret, tokenExpiry) => __awaiter(void 0, void 0, void 0, function* () {
+    const authToken = (yield (0, random_bytes_1.default)(32)).toString("hex");
     const tokenData = { email, id, authToken };
     const signedToken = jsonwebtoken_1.default.sign(tokenData, tokenSecret, {
         expiresIn: tokenExpiry,
     });
     return signedToken;
-};
+});
 exports.generateEmailToken = generateEmailToken;
 //this is the function that will decode the token
 const decodeAuthToken = (token, tokenSecret) => {

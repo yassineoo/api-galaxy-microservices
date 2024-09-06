@@ -4,10 +4,13 @@ import { config as envConfig } from "dotenv";
 import getEndpointsErrorCallsValidator from "../../contracts/endpoint-stats/get-endpoints-error-calls/get-endpoints-error-calls.request";
 import { get_stats } from "../../application/services/endpoints-stats/get-endpoints-stats/get_endpoints_stats.service";
 import get_user_id_from_request from "../_common/helpers/get-user-id-from-request.helper";
+import { AuthRequest } from "../../infrastructure/api/auth-request";
+import { decodeAuthToken } from "../../utils/token";
+import { ENV } from "../../infrastructure/env";
 envConfig();
 
 async function get_endpoints_stats(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {

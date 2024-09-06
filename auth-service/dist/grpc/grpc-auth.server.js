@@ -39,6 +39,7 @@ const AuthService = grpcObj.auth.AuthService;
 const authService = {
     Authenticate: (call, callback) => {
         try {
+            console.log({ call, request: call.request, authHeader: call.request.authHeader, secret: env_1.ENV.JWT_SECRET });
             const decodeTokenResult = (0, token_1.decodeAuthToken)(call.request.authHeader, env_1.ENV.JWT_SECRET);
             console.log({ decodeTokenResult });
             return callback(null, { valid: true, userId: decodeTokenResult.userId });
