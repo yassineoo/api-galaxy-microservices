@@ -150,9 +150,7 @@ async function get_api_calls_latency_in_period(
         },
       },
       _avg: {
-        response_time: {
-          cast: "numeric", // Or equivalent cast depending on the ORM/database
-        },
+        response_time: true,
       },
     });
     console.log("Latency query result", { latency });
