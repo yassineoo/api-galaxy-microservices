@@ -1,13 +1,26 @@
 import dotenv from "dotenv";
 import stripeTypes from "../validation/stripeTypes.mjs";
-
+import Stripe from "stripe";
+import { createAndFinalizeInvoice } from "../models/stripe/invoice.mjs";
+import {
+  createInvoice,
+  createTransaction,
+} from "../models/local-db/transactions.mjs";
+import { createSubscription } from "../models/local-db/subscriptions.mjs";
 
 dotenv.config();
 
-const stripeObject = stripe(process.env.STRIPE_SECRET_KEY, {
-
+const stripeObject = Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
 });
+
+const now = new Date();
+const nextMonth = new Date(now);
+nextMonth.setMonth(now.getMonth() + 1);
+
+// Format dates as ISO strings (optional, Prisma handles Date objects directly)
+const todayDate = now.toISOString(); // Example: "2024-09-03T12:34:56.789Z"
+const nextMonthDate = nextMonth.toISOString(); // Example: "2024-10-03T12:34:56.789Z"
 
 export const checkoutSession = async (req, res) => {
   const { sessionId } = req.query;
@@ -45,12 +58,38 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
+
       // ?session_id={CHECKOUT_SESSION_ID} means the redirect will have the session ID set as a query param
-      success_url: `${domainURL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${domainURL}/cancelled`,
+      success_url: `${domainURL}/${req.body.success_url}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${domainURL}/${req.body.cancel_url}`,
       // automatic_tax: { enabled: true }
     });
-    return res.redirect(303, session.url);
+
+    const subscription = await createSubscription({
+      user_id: req.body.userId,
+      plan_id: req.body.planId,
+      start_date: todayDate,
+      end_date: nextMonthDate,
+      status: "active",
+    });
+    console.log("subscription created", subscription);
+
+    const invoice = await createInvoice({
+      subscription_id: subscription.id,
+      total_amount: req.body.amount,
+      status: "Paid",
+      date_issued: todayDate,
+      due_date: nextMonthDate,
+    });
+    const transaction = await createTransaction({
+      amount: req.body.amount,
+      transaction_date: todayDate,
+      invoice_id: Number(invoice.id),
+      payment_method_id: req.body.paymentMethod === "card" ? 1 : 2,
+      status: "Paid",
+    });
+
+    return res.json({ url: session.url });
   } catch (e) {
     res.status(400);
     console.log(e);
@@ -122,4 +161,15 @@ export const webhook = async (req, res) => {
   }
 
   res.sendStatus(200);
+};
+
+export const createAndFinalizeInvoiceHandler = async (req, res) => {
+  try {
+    await createAndFinalizeInvoice();
+    res.status(200).send("Invoice created and finalized");
+  } catch (error) {
+    res
+      .status(500)
+      .send(`Failed to create and finalize invoice: ${error.message}`);
+  }
 };

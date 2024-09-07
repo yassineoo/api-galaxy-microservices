@@ -16,6 +16,59 @@ function convertBigIntToString(obj) {
   return obj;
 }
 
+
+
+//Create a Payment Method
+async function createPaymentMethod(data) {
+  try {
+    const newPaymentMethod = await prisma.payment_method_entities.create({
+      data,
+    });
+    return convertBigIntToString(newPaymentMethod); // Convert BigInt before returning
+  } catch (error) {
+    throw new Error(`Failed to create payment method: ${error.message}`);
+  }
+}
+
+// Read Payment Methods
+async function getPaymentMethods() {
+  try {
+    const paymentMethods = await prisma.payment_method_entities.findMany({
+      include: {
+        transaction_entities: true, // Includes related transactions
+      },
+    });
+    return paymentMethods.map(convertBigIntToString); // Convert BigInt in each item
+  } catch (error) {
+    throw new Error(`Failed to fetch payment methods: ${error.message}`);
+  }
+}
+
+// Update a Payment Method
+async function updatePaymentMethod(id, data) {
+  try {
+    const updatedPaymentMethod = await prisma.payment_method_entities.update({
+      where: { id },
+      data,
+    });
+    return convertBigIntToString(updatedPaymentMethod); // Convert BigInt before returning
+  } catch (error) {
+    throw new Error(`Failed to update payment method: ${error.message}`);
+  }
+}
+
+// Delete a Payment Method
+async function deletePaymentMethod(id) {
+  try {
+    const deletedPaymentMethod = await prisma.payment_method_entities.delete({
+      where: { id },
+    });
+    return convertBigIntToString(deletedPaymentMethod); // Convert BigInt before returning
+  } catch (error) {
+    throw new Error(`Failed to delete payment method: ${error.message}`);
+  }
+}
+
 // CRUD Operations for Invoice
 
 // Create an Invoice
@@ -70,59 +123,6 @@ async function deleteInvoice(id) {
   }
 }
 
-// CRUD Operations for Payment Method
-
-// Create a Payment Method
-async function createPaymentMethod(data) {
-  try {
-    const newPaymentMethod = await prisma.payment_method_entities.create({
-      data,
-    });
-    return convertBigIntToString(newPaymentMethod); // Convert BigInt before returning
-  } catch (error) {
-    throw new Error(`Failed to create payment method: ${error.message}`);
-  }
-}
-
-// Read Payment Methods
-async function getPaymentMethods() {
-  try {
-    const paymentMethods = await prisma.payment_method_entities.findMany({
-      include: {
-        transaction_entities: true, // Includes related transactions
-      },
-    });
-    return paymentMethods.map(convertBigIntToString); // Convert BigInt in each item
-  } catch (error) {
-    throw new Error(`Failed to fetch payment methods: ${error.message}`);
-  }
-}
-
-// Update a Payment Method
-async function updatePaymentMethod(id, data) {
-  try {
-    const updatedPaymentMethod = await prisma.payment_method_entities.update({
-      where: { id },
-      data,
-    });
-    return convertBigIntToString(updatedPaymentMethod); // Convert BigInt before returning
-  } catch (error) {
-    throw new Error(`Failed to update payment method: ${error.message}`);
-  }
-}
-
-// Delete a Payment Method
-async function deletePaymentMethod(id) {
-  try {
-    const deletedPaymentMethod = await prisma.payment_method_entities.delete({
-      where: { id },
-    });
-    return convertBigIntToString(deletedPaymentMethod); // Convert BigInt before returning
-  } catch (error) {
-    throw new Error(`Failed to delete payment method: ${error.message}`);
-  }
-}
-
 // CRUD Operations for Transaction
 
 // Create a Transaction
@@ -143,7 +143,6 @@ async function getTransactions() {
     const transactions = await prisma.transaction_entities.findMany({
       include: {
         invoice_entities: true, // Includes related invoice details
-        payment_method_entities: true, // Includes related payment method details
       },
     });
     return transactions.map(convertBigIntToString); // Convert BigInt in each item
@@ -151,20 +150,19 @@ async function getTransactions() {
     throw new Error(`Failed to fetch transactions: ${error.message}`);
   }
 }
-
 async function getUserTransactions(userId) {
   try {
-    // Fetch all transactions directly related to user's payment methods or invoices
+    // Fetch all transactions directly related to user's invoices by using user_id on invoice_entities table
     const transactions = await prisma.transaction_entities.findMany({
       where: {
-        OR: [
-          { payment_method_entities: { user_id: userId } }, // Transactions through payment methods
-          { invoice_entities: { billing_history_entities: { some: { user_id: userId } } } } // Transactions through invoices and billing history
-        ]
+        invoice_entities: {
+          subscription_entities: {
+            user_id: userId
+          }
+        }
       },
       include: {
         invoice_entities: true, // Optionally include related invoice details
-        payment_method_entities: true, // Optionally include related payment method details
       },
     });
 
@@ -173,9 +171,6 @@ async function getUserTransactions(userId) {
     throw new Error(`Failed to fetch transactions for user ${userId}: ${error.message}`);
   }
 }
-
-// Usage example:
-// getUserTransactions(123n).then(transactions => console.log(transactions)).catch(console.error);
 
 
 // Update a Transaction
@@ -205,14 +200,14 @@ async function deleteTransaction(id) {
 
 // Exporting functions
 export {
-  createInvoice,
-  getInvoices,
-  updateInvoice,
-  deleteInvoice,
   createPaymentMethod,
   getPaymentMethods,
   updatePaymentMethod,
   deletePaymentMethod,
+  createInvoice,
+  getInvoices,
+  updateInvoice,
+  deleteInvoice,
   createTransaction,
   getTransactions,
   getUserTransactions,

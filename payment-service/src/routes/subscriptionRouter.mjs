@@ -13,7 +13,7 @@ import {
   updateObjectPlanHandler,
   deleteObjectPlanHandler,
   getUserSubscriptionsHandler,
-  getAllSubscribersForProviderHandler,
+
 } from '../controllers/subscriptionController.mjs';
 
 const subscriptionRouter = express.Router();
@@ -22,7 +22,7 @@ const subscriptionRouter = express.Router();
 subscriptionRouter.post('/subscriptions', createSubscriptionHandler);
 subscriptionRouter.get('/subscriptions', getSubscriptionsHandler);
 subscriptionRouter.get('/subscriptions/:userId', getUserSubscriptionsHandler);
-subscriptionRouter.get('/providers/:providerId', getAllSubscribersForProviderHandler);
+// subscriptionRouter.get('/providers/:providerId', getAllSubscribersForProviderHandler);
 
 subscriptionRouter.put('/subscriptions/:id', updateSubscriptionHandler);
 subscriptionRouter.delete('/subscriptions/:id', deleteSubscriptionHandler);

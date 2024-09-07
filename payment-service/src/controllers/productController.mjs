@@ -1,6 +1,5 @@
-
+import { updateApiEntity } from "../models/local-db/extra.mjs";
 import { productModel } from "../models/stripe/products.mjs";
-
 
 // Get all products
 export const getProducts = async (req, res) => {
@@ -27,9 +26,14 @@ export const getProductById = async (req, res) => {
 
 // Create a new product
 export const createProduct = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, apiId } = req.body;
   try {
     const product = await productModel.createProduct(name, description);
+
+    const updatedApi = await updateApiEntity(Number(apiId), {
+      stripe_product_id: Number(product.id),
+    });
+    console.log(updatedApi);
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     console.error("Error creating product:", error);
@@ -42,7 +46,11 @@ export const updateProduct = async (req, res) => {
   const { productId } = req.params;
   const { name, description } = req.body;
   try {
-    const product = await productModel.updateProduct(productId, name, description);
+    const product = await productModel.updateProduct(
+      productId,
+      name,
+      description
+    );
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     console.error("Error updating product:", error);
@@ -66,7 +74,11 @@ export const deleteProduct = async (req, res) => {
 export const createProductWithPrice = async (req, res) => {
   const { name, description, priceNumber } = req.body;
   try {
-    const { product, price } = await productModel.createProductWithPrice(name, description, priceNumber);
+    const { product, price } = await productModel.createProductWithPrice(
+      name,
+      description,
+      priceNumber
+    );
     res.status(201).json({ success: true, data: { product, price } });
   } catch (error) {
     console.error("Error creating product with price:", error);

@@ -193,49 +193,11 @@ async function deleteObjectPlan(id) {
 }
 
 
-async function getAllSubscribersForProvider(providerId) {
-  try {
-    const subscribers = await prisma.subscription_entities.findMany({
-      where: {
-        plan_entities: {
-          api_entities: {
-            provider_id: providerId,
-          },
-        },
-      },
-      select: {
-        user_entities: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-          },
-        },
-        id: true,
-        start_date: true,
-        end_date: true,
-        status: true,
-        plan_entities: {
-          select: {
-            id: true,
-            name: true,
-            api_entities: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    });
+// async function getAllSubscribersForProvider(providerUserId) {
+//   const subscribers = await prisma.$queryRaw`SELECT * FROM `
 
-    return subscribers;
-  } catch (error) {
-    throw new Error(`Failed to fetch subscribers: ${error.message}`);
-  }
-}
-
+//   return subscribers;
+// };
 
 // Exporting functions
 export {
@@ -251,6 +213,5 @@ export {
   createObjectPlan,
   getObjectPlans,
   updateObjectPlan,
-  deleteObjectPlan,
-  getAllSubscribersForProvider
+  deleteObjectPlan
 };

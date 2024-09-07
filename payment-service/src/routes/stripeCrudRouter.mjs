@@ -5,6 +5,7 @@ import {
   updateCustomer,
   deleteCustomer,
   listCustomers,
+  getCustomerByEmail,
 
 } from '../controllers/customerController.mjs';
 
@@ -32,6 +33,7 @@ const stripeCrudRouter = express.Router();
 stripeCrudRouter.post('/customers', createCustomer); // Create a new customer
 stripeCrudRouter.get('/customers', listCustomers); // List all customers
 stripeCrudRouter.get('/customers/:customerId', getCustomerById); // Retrieve a customer by ID
+stripeCrudRouter.get('/customers/email/:email',getCustomerByEmail); // Retrieve a customer by email
 stripeCrudRouter.put('/customers/:customerId', updateCustomer); // Update a customer's information
 stripeCrudRouter.delete('/customers/:customerId', deleteCustomer); // Delete a customer by ID
 

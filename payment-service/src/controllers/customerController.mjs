@@ -61,3 +61,14 @@ export const listCustomers = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const getCustomerByEmail = async (req, res) => {
+  const email = req.params.email;
+  try {
+    const customers = await customerModel.getCustomerByEmail(email);
+    res.status(200).json({ success: true, data: customers });
+  } catch (error) {
+    console.error("Error retrieving customer:", error);
+    res.status(404).json({ success: false, error: error.message });
+  }
+}
