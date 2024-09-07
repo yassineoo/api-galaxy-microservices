@@ -175,11 +175,16 @@ const authRouter = express.Router();
  *                   type: string
  *                   description: Error message
  */
+export enum Custom_Role {
+  USER_CLIENT = "userClient",
+  API_CLIENT = "APIClient"
+}
+
 authRouter.post("/login", login);
 authRouter.post("/oauth", Oauthlogin);
 authRouter.post("/session", getUserSession);
-authRouter.post("/register", signup("userClient"));
-authRouter.post("/signup/api-client", signup("APIClient"));
+authRouter.post("/register", signup(Custom_Role.USER_CLIENT));
+authRouter.post("/signup/api-client", signup(Custom_Role.API_CLIENT));
 
 authRouter.get("/resend-email", verifyAuth, resendVerificationEmail);
 authRouter.post("/verifyEmail/:token", verifyEmail);

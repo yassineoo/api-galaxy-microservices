@@ -4,7 +4,8 @@ config()
 
 const validateEnvSchema = z.object({
     GRPC_AUTH_SERVER_PORT: z.coerce.number(),
-    GRPC_AUTH_SERVER_HOST: z.string()
+    GRPC_AUTH_SERVER_HOST: z.string(),
+    DATABASE_URL: z.string().url()
 })
 
 export default function ValidateEnv() {

@@ -128,24 +128,24 @@ import { getTimePeriods, Period } from "../../_common/get-time-periods";
 
 
 
-export async function get_stats(duration: Duration, endpoint_ids: ID[]) {
+export async function get_stats(duration: Duration, endpoint_ids: ID[], userId: ID) {
 
     const periods = getTimePeriods(duration)
 
-    const results = await Promise.all(periods.map(async period => getStatsInPeriod(period, endpoint_ids)))
+    const results = await Promise.all(periods.map(async period => getStatsInPeriod(period, endpoint_ids, userId)))
 
     console.log({ results })
     return results
 }
 
-async function getStatsInPeriod(period: Period, endpoint_ids: ID[]) {
+async function getStatsInPeriod(period: Period, endpoint_ids: ID[], userId: ID) {
 
     const stats = await Promise.all(endpoint_ids.map(
         async endpoint_id => {
             const [success, error, latency] = await Promise.all([
-                getEndpointSuccessCallsInPeriod(period, endpoint_id),
-                getEndpointErrroCallsInPeriod(period, endpoint_id),
-                getEndpointCallsLatencyInPeriod(period, endpoint_id),
+                getEndpointSuccessCallsInPeriod(period, endpoint_id, userId),
+                getEndpointErrroCallsInPeriod(period, endpoint_id, userId),
+                getEndpointCallsLatencyInPeriod(period, endpoint_id, userId),
             ])
             return ({
                 name: period.name,
@@ -165,10 +165,18 @@ async function getStatsInPeriod(period: Period, endpoint_ids: ID[]) {
 
     return prettyStats
 }
-async function getEndpointSuccessCallsInPeriod(period: Period, endpoint_id: ID): Promise<number> {
+async function getEndpointSuccessCallsInPeriod(period: Period, endpoint_id: ID, userId: ID): Promise<number> {
     const success = await DB.usage_log_entities.aggregate({
         where: {
+            "endpoints_entities": {
+                "endpoints_group_entities": {
+                    "api_entities": {
+                        "provider_id": userId
+                    }
+                }
+            },
             endpoint_id,
+
             status: {
                 in: success_status_code_range
             },
@@ -182,9 +190,16 @@ async function getEndpointSuccessCallsInPeriod(period: Period, endpoint_id: ID):
     return success._count
 }
 
-async function getEndpointErrroCallsInPeriod(period: Period, endpoint_id: ID): Promise<number> {
+async function getEndpointErrroCallsInPeriod(period: Period, endpoint_id: ID, userId: ID): Promise<number> {
     const error = await DB.usage_log_entities.aggregate({
         where: {
+            "endpoints_entities": {
+                "endpoints_group_entities": {
+                    "api_entities": {
+                        "provider_id": userId
+                    }
+                }
+            },
             endpoint_id,
             status: {
                 notIn: success_status_code_range
@@ -198,9 +213,16 @@ async function getEndpointErrroCallsInPeriod(period: Period, endpoint_id: ID): P
     })
     return error._count
 }
-async function getEndpointCallsLatencyInPeriod(period: Period, endpoint_id: ID): Promise<number> {
+async function getEndpointCallsLatencyInPeriod(period: Period, endpoint_id: ID, userId: ID): Promise<number> {
     const latency = await DB.usage_log_entities.aggregate({
         where: {
+            "endpoints_entities": {
+                "endpoints_group_entities": {
+                    "api_entities": {
+                        "provider_id": userId
+                    }
+                }
+            },
             endpoint_id,
             status: {
                 in: success_status_code_range

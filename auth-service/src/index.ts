@@ -56,11 +56,10 @@ server.on("listening", () => {
     axios
       .put(
         //  `http://localhost:3001/register/${logConfig.serviceName}/${
-        `http://service-registry:3001/register/${logConfig.serviceName}/${
-          logConfig.version
+        `http://service-registry:3001/register/${logConfig.serviceName}/${logConfig.version
         }/${
-          //  server?.address()?.port ||
-          Number(PORT)
+        //  server?.address()?.port ||
+        Number(PORT)
         }`
       )
       .catch((err: any) => console.log({ err })); //log.fatal(err));
@@ -68,11 +67,10 @@ server.on("listening", () => {
   const unregisterService = () =>
     axios
       .delete(
-        `http://service-registry:3001/register/${logConfig.serviceName}/${
-          logConfig.version
+        `http://service-registry:3001/register/${logConfig.serviceName}/${logConfig.version
         }/${
-          //  server?.address()?.port ||
-          PORT
+        //  server?.address()?.port ||
+        PORT
         }`
       )
       .catch((err: any) => console.log({ err })); //log.fatal(err));
@@ -106,8 +104,8 @@ server.on("listening", () => {
 
   log.info(
     `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
+    //  server?.address()?.port ||
+    PORT
     } in ${app.get("env")} mode.`
   );
 });

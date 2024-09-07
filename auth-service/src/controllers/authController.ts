@@ -7,13 +7,14 @@ import { sendMessage, connectProducer } from "../config/kafka";
 import { log } from "console";
 import { loginValidator, signupValidator } from "../validators/UAuthValidator";
 import formatZodErrors from "../utils/zod.validation";
+import { Custom_Role } from "../routes/authRouter";
 
 require("dotenv").config();
 
 // connect producer
 //connectProducer()
 
-export const signup = (role: string) => {
+export const signup = (role: Custom_Role) => {
   return async (req: Request, res: Response) => {
     try {
       const validation = signupValidator.safeParse(req.body);
@@ -26,7 +27,7 @@ export const signup = (role: string) => {
 
       const tokenData = await authService.register(
         validation.data,
-        role as Role
+        role as Custom_Role
       );
       console.log({ tokenData });
 
@@ -53,49 +54,6 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = await authService.login(req.body);
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log(token);
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
-    console.log("----------------------------------");
 
     return res
       .status(statusCodes.ok)

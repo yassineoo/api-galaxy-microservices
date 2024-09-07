@@ -6,11 +6,11 @@ export default async function authenticate(req: AuthRequest, res: Response, next
     console.log("AUTH_MIDDLEWARE")
 
     const authHeader = req.headers.authorization
-
+    console.log({ authHeader })
     if (!authHeader) throw new Error("Unauthorized")
 
     const token = authHeader.split(" ")[1]
-
+    console.log({ token });
     if (!token) throw new Error("Unauthorized")
 
     const authClient = AuthClient.client

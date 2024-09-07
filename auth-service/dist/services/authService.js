@@ -186,7 +186,7 @@ authService.OathUser = (data) => __awaiter(void 0, void 0, void 0, function* () 
         const tokenSecret = env_1.ENV.JWT_SECRET; // Replace with your actual secret key
         const tokenExpiry = env_1.ENV.JWT_EXPIRATION; // Replace with your desired token expiry time
         //console.log( "number is :",Number(user.id))
-        const token = yield (0, token_1.generateAuthToken)(Number(user.id), user.email, tokenSecret || "", tokenExpiry || "");
+        const token = yield (0, token_1.generateAuthToken)(Number(user.id), user.email, tokenSecret, tokenExpiry);
         yield userModel_1.default.setLastLogin(Number(user === null || user === void 0 ? void 0 : user.id));
         // send a otp to his mail
         const otp = Math.floor(1000 + Math.random() * 9000);
@@ -236,8 +236,8 @@ authService.sendVerificationEmail = (Email) => __awaiter(void 0, void 0, void 0,
     if (!user) {
         throw new Error("user doesn't exist ");
     }
-    const token = (0, token_1.generateEmailToken)(Email, Number(user.id), emailTokenSecret || "", emailTokenExpiry || "");
-    const message = (0, notifService_1.SendVerificationEmail)({
+    const token = yield (0, token_1.generateEmailToken)(Email, Number(user.id), emailTokenSecret || "", emailTokenExpiry || "");
+    const message = yield (0, notifService_1.SendVerificationEmail)({
         email: Email,
         name: user.username,
         token: token,
@@ -252,8 +252,8 @@ authService.sendPasswordResetEmail = (Email) => __awaiter(void 0, void 0, void 0
     if (!user) {
         throw new Error("Email does not exist");
     }
-    const token = (0, token_1.generateEmailToken)(Email, Number(user.id), emailTokenSecret || "", emailTokenExpiry || "");
-    const message = (0, notifService_1.sendPasswordResetEmail)({
+    const token = yield (0, token_1.generateEmailToken)(Email, Number(user.id), emailTokenSecret || "", emailTokenExpiry || "");
+    const message = yield (0, notifService_1.sendPasswordResetEmail)({
         email: Email,
         name: user.username,
         token: token,

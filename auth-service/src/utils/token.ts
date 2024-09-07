@@ -47,15 +47,15 @@ const generateAuthToken = async (
   return { token: signedToken, expiry: tokenExpiry };
 };
 
-const generateEmailToken = (
+const generateEmailToken = async (
   email: string,
   id: number,
   tokenSecret: string,
   tokenExpiry: string | number
-): string => {
-  const authToken: string = randomBytes(32).toString();
+): Promise<string> => {
+  const authToken: string = (await randomBytes(32)).toString("hex");
   const tokenData: TokenEmailData = { email, id, authToken };
-  const signedToken: string = jwt.sign(tokenData, tokenSecret, {
+  const signedToken = jwt.sign(tokenData, tokenSecret, {
     expiresIn: tokenExpiry,
   });
 

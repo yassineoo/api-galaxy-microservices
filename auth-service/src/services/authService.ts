@@ -16,6 +16,7 @@ import { sendEMail } from "../utils/email";
 import userVerification from "../models/userVerification";
 import env from "../utils/env";
 import { ENV } from "./../utils/env";
+import { Custom_Role } from "../routes/authRouter";
 require("dotenv").config();
 const emailTokenSecret = process.env.EMAIL_TOKEN_SECRET;
 const emailTokenExpiry = process.env.EMAIL_TOKEN_EXPIRY;
@@ -35,7 +36,7 @@ class ApiError extends Error {
 }
 
 export default class authService {
-  static register = async (data: IRegisterInput, role: Role) => {
+  static register = async (data: IRegisterInput, role: Custom_Role) => {
     try {
       const { email, password, username } = data;
       const userEmail = await userModel.getUserByEmail(email);
@@ -174,8 +175,8 @@ The Galaxy Team
       const token = await generateAuthToken(
         Number(user.id),
         user.email,
-        tokenSecret || "",
-        tokenExpiry || ""
+        tokenSecret,
+        tokenExpiry
       );
       await userModel.setLastLogin(Number(user?.id)!);
       // send a otp to his mail
@@ -234,13 +235,13 @@ The Galaxy Team
     if (!user) {
       throw new Error("user doesn't exist ");
     }
-    const token = generateEmailToken(
+    const token = await generateEmailToken(
       Email,
       Number(user.id),
       emailTokenSecret || "",
       emailTokenExpiry || ""
     );
-    const message = SendVerificationEmail({
+    const message = await SendVerificationEmail({
       email: Email,
       name: user.username,
       token: token,
@@ -256,13 +257,13 @@ The Galaxy Team
     if (!user) {
       throw new Error("Email does not exist");
     }
-    const token = generateEmailToken(
+    const token = await generateEmailToken(
       Email,
       Number(user.id),
       emailTokenSecret || "",
       emailTokenExpiry || ""
     );
-    const message = sendPasswordResetEmail({
+    const message = await sendPasswordResetEmail({
       email: Email,
       name: user.username,
       token: token,
