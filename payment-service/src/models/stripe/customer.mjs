@@ -1,6 +1,4 @@
-
 import stripe from "./stripeInstance.mjs";
-
 
 export class customerModel {
   // Create a new customer
@@ -16,6 +14,11 @@ export class customerModel {
   static getCustomerById = async (customerId) => {
     const customer = await stripe.customers.retrieve(customerId);
     return customer;
+  };
+
+  static getCustomerByEmail = async (email) => {
+    const customers = await stripe.customers.list({ email: email });
+    return customers.data;
   };
 
   // Update a customer's information

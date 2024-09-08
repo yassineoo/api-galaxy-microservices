@@ -183,17 +183,17 @@ export async function getUserSubscriptionsHandler(req, res) {
 }
 
 
-export async function getAllSubscribersForProviderHandler(req, res) {
-  try {
-    const providerId = BigInt(req.params.providerId); // Get providerId from request parameters
+// export async function getAllSubscribersForProviderHandler(req, res) {
+//   try {
+//     const providerId = Number(req.params.providerId); // Get providerId from request parameters
 
-    // Call the service function to get all subscribers
-    const subscribers = await getAllSubscribersForProviderHandler(providerId)
+//     // Call the service function to get all subscribers
+//     const subscribers = await getAllSubscribersForProvider(providerId)
 
-    // Respond with the subscribers data
-    res.status(200).json(subscribers);
-  } catch (error) {
-    console.error(`Error fetching subscribers for provider: ${error.message}`);
-    res.status(500).json({ error: 'Failed to fetch subscribers for provider.' });
-  }
-}
+//     // Respond with the subscribers data
+//     res.status(200).json(subscribers);
+//   } catch (error) {
+//     console.error(`Error fetching subscribers for provider: ${error.message}`);
+//     res.status(500).json({ error: 'Failed to fetch subscribers for provider.' });
+//   }
+// }

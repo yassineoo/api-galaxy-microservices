@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/client"
 }
 
 datasource db {
@@ -261,6 +260,7 @@ model notification_entities {
   title         String?
   message       String?
   isRead        Boolean?       @default(false)
+  created_at    DateTime       @default(now()) @db.Date
   user_entities user_entities? @relation(fields: [recipient_id], references: [id], onDelete: Cascade)
 }
 

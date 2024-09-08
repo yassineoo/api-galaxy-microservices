@@ -32,8 +32,8 @@ transactionRouter.delete('/payment-methods/:id', deletePaymentMethodHandler);
 // Transaction routes
 transactionRouter.post('/transactions', createTransactionHandler);
 transactionRouter.get('/transactions', getTransactionsHandler);
-transactionRouter.get('/transactions/:id', getUserTransactionsHandler);
-transactionRouter.put('/transactions/:userId', updateTransactionHandler);
+transactionRouter.get('/transactions/:userId', getUserTransactionsHandler);
+transactionRouter.put('/transactions/:id', updateTransactionHandler);
 transactionRouter.delete('/transactions/:id', deleteTransactionHandler);
 
 export default transactionRouter;
