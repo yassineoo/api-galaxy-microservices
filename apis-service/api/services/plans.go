@@ -133,6 +133,12 @@ func (s *Service) UpdateApiPlan(ctx context.Context, planDto types.PlansDto) ([]
     for _, dtoPlan := range planDto.PublicPlans {
         for i := range existingPlans {
             if existingPlans[i].ID == dtoPlan.ID {
+                if ( dtoPlan.Active  ) {
+                    existingPlans[i].Active = true
+                } else {
+                    existingPlans[i].Active = false
+
+                }
                 existingPlans[i].Name = dtoPlan.Name
                 existingPlans[i].Visibility = true
                 existingPlans[i].Type = dtoPlan.Type

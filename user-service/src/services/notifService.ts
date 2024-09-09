@@ -6,13 +6,14 @@ async function getUserNotifications(userId: number) {
       where: {
         recipient_id: userId,
       },
+      orderBy: {
+        created_at: "desc", // Sort by 'created_at' in descending order (latest first)
+      },
     });
-  //console.log("notifications listss", userId, notifications);
 
   const finalNotifications = JSON.stringify(notifications, (key, value) =>
     typeof value == "bigint" ? value.toString() : value
   );
-  //console.log("notifications listss", finalNotifications);
 
   return JSON.parse(finalNotifications);
 }
