@@ -15,10 +15,8 @@ import config from "./utils/config";
 import ValidateEnv, { ENV } from "./infrastructure/env";
 import GrpcAuthClient from "./infrastructure/grpc/grpc-auth.client";
 
-
-GrpcAuthClient.init()
-ValidateEnv()
-=======
+GrpcAuthClient.init();
+ValidateEnv();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -82,22 +80,22 @@ server.on("listening", () => {
 
   process.on("uncaughtException", async (stream) => {
     await cleanup();
-    console.log({ stream })
-    console.log("uncaughtException")
+    console.log({ stream });
+    console.log("uncaughtException");
     process.exit(0);
   });
 
   process.on("SIGINT", async (stream) => {
     await cleanup();
-    console.log({ stream })
-    console.log("SIGINT")
+    console.log({ stream });
+    console.log("SIGINT");
     process.exit(0);
   });
 
   process.on("SIGTERM", async (stream) => {
     await cleanup();
-    console.log({ stream })
-    console.log("SIGTERM")
+    console.log({ stream });
+    console.log("SIGTERM");
     process.exit(0);
   });
 

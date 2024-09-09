@@ -13,7 +13,7 @@ export async function getUserNotifications(
     }
 
     const NOTIF = await notificationsService.getUserNotifications(Number(id));
-    console.log("notifications listss 3333", NOTIF);
+    //  console.log("notifications listss 3333", NOTIF);
     res.status(200).send(NOTIF);
   } catch (error) {
     next(error);

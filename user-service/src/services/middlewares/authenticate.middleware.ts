@@ -15,6 +15,8 @@ export default async function authenticate(
   next: NextFunction
 ) {
   try {
+    console.log("authenticating");
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -40,7 +42,10 @@ export default async function authenticate(
         next();
       }
     );
+    console.log("authenticating done");
   } catch (err) {
+    console.log("error", err);
+
     next(err);
   }
 }

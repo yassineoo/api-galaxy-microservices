@@ -14,9 +14,9 @@ import ChatsGateway from "./routes/chats/chats.gateway";
 import ChatroomsRouter from "./routes/chats/chatrooms.routes";
 import GrpcAuthClient from "./grpc/grpc-auth.client";
 import ValidateEnv, { ENV } from "./utils/env";
-import CollectionsRouter from "./routes/collections.route"
+import CollectionsRouter from "./routes/collections.route";
 ValidateEnv();
-// GrpcAuthClient.init();
+GrpcAuthClient.init();
 
 app.use(express.json());
 app.use(
@@ -37,12 +37,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/hello", (req, res) => res.send("Hello"))
+app.use("/hello", (req, res) => res.send("Hello"));
 
 app.use("/userApi", userApiRouter);
 app.use("/chatrooms", ChatroomsRouter);
 app.use("/admin", adminRouter);
-app.use("/collections", CollectionsRouter)
+app.use("/collections", CollectionsRouter);
 app.use(handleErrors);
 
 const server = http.createServer(app);
@@ -71,11 +71,11 @@ server.on("listening", () => {
       axios
         .put(
           `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
           }/${
-          //  server?.address()?.port ||
-          Number(PORT)
+            //  server?.address()?.port ||
+            Number(PORT)
           }`
         )
         .catch((err: any) => log.fatal(err));
@@ -83,11 +83,11 @@ server.on("listening", () => {
       axios
         .delete(
           `http://service-registry:3001/register/${envConfig.serviceName}/${
-          //        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
+            //        `http://localhost:3001/register/${envConfig.serviceName}/${
+            envConfig.version
           }/${
-          //  server?.address()?.port ||
-          PORT
+            //  server?.address()?.port ||
+            PORT
           }`
         )
         .catch((err: any) => log.fatal(err));
@@ -115,12 +115,11 @@ server.on("listening", () => {
     });
     log.info(
       `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
+        //  server?.address()?.port ||
+        PORT
       } in ${app.get("env")} mode.`
     );
   } catch (e) {
     console.log("Kafka connection failed");
   }
 });
-

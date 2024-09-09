@@ -7,12 +7,12 @@ async function getUserNotifications(userId: number) {
         recipient_id: userId,
       },
     });
-  console.log("notifications listss", userId, notifications);
+  //console.log("notifications listss", userId, notifications);
 
   const finalNotifications = JSON.stringify(notifications, (key, value) =>
     typeof value == "bigint" ? value.toString() : value
   );
-  console.log("notifications listss", finalNotifications);
+  //console.log("notifications listss", finalNotifications);
 
   return JSON.parse(finalNotifications);
 }
