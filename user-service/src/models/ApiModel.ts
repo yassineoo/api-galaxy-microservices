@@ -209,7 +209,7 @@ export default class APIModel {
 
   static async updateStatus(api_id: number) {
     console.log("api_id", api_id);
-    
+
     try {
       const updatedApi = await prismaClientSingleton.api_entities.update({
         where: {
@@ -236,6 +236,29 @@ export default class APIModel {
       );
       return jsonString;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getAllApisIDNames() {
+    try {
+      const apis = await prismaClientSingleton.api_entities.findMany({
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      const jsonString = JSON.stringify(apis, (key, value) =>
+        typeof value == "bigint" ? value.toString() : value
+      );
+
+      return JSON.parse(jsonString);
+
+      // Return the list of APIs with only id and name
+      return apis;
+    } catch (error) {
+      console.log("Error fetching all APIs:", error);
       throw error;
     }
   }

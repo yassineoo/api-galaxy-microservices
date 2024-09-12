@@ -7,5 +7,6 @@ const router = express.Router();
 //router.use(authenticate);
 
 router.post("/", controller.get_apis_stats);
+router.post("/donut", controller.get_apis_stats_donut);
 
 export default router;

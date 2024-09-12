@@ -46,6 +46,14 @@ export default class apiService {
       throw error;
     }
   }
+  static async getAllApisIDNames() {
+    try {
+      const res = await APIModel.getAllApisIDNames();
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async getCategories() {
     try {

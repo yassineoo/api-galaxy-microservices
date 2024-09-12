@@ -340,3 +340,18 @@ export const updateStatusApi = async (
     next(error);
   }
 };
+
+export const getAllApisIDNames = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const response = await apiService.getAllApisIDNames();
+    //console.log(response)
+    return res.status(200).json(response);
+  } catch (error: any) {
+    console.log(error.message);
+    next(error);
+  }
+};

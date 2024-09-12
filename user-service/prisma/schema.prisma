@@ -200,15 +200,7 @@ model plan_entities {
   subscription_entities subscription_entities[]
 }
 
-model like_entities {
-  id      BigInt         @id @default(autoincrement())
-  user_id BigInt?
-  api_id  BigInt?
-  api     api_entities?  @relation(fields: [api_id], references: [id], onDelete: Cascade)
-  user    user_entities? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([user_id, api_id])
-}
 
 model subscription_entities {
   id                 BigInt               @id @default(autoincrement())
@@ -300,13 +292,7 @@ model invoice_entities {
   transaction_entities     transaction_entities[]
 }
 
-model moderator_permission_entities {
-  id                  BigInt               @id @default(autoincrement())
-  user_id             BigInt?
-  permission_id       BigInt?
-  user_entities       user_entities?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_moderator_permission_entities_user")
-  permission_entities permission_entities? @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permission_entities_moderator_permissions")
-}
+
 
 model payment_method_entities {
   id                       BigInt                 @id @default(autoincrement())
@@ -316,7 +302,24 @@ model payment_method_entities {
   stripe_payment_method_id String?                @db.VarChar(255)
   transaction_entities     transaction_entities[]
 }
+model transaction_entities {
+  id                      BigInt                   @id @default(autoincrement())
+  invoice_id              BigInt?
+  amount                  Decimal?                 @db.Decimal(10, 2)
+  transaction_date        DateTime?                @default(now()) @db.Timestamptz(6)
+  payment_method_id       BigInt?
+  status                  String?                  @db.VarChar(50)
+  invoice_entities        invoice_entities?        @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_transactions")
+  payment_method_entities payment_method_entities? @relation(fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_method_entities_transactions")
+}
 
+model moderator_permission_entities {
+  id                  BigInt               @id @default(autoincrement())
+  user_id             BigInt?
+  permission_id       BigInt?
+  user_entities       user_entities?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_moderator_permission_entities_user")
+  permission_entities permission_entities? @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permission_entities_moderator_permissions")
+}
 model permission_entities {
   id                            BigInt                          @id @default(autoincrement())
   name                          String?                         @db.VarChar(255)
@@ -335,16 +338,7 @@ model profile_entities {
   user_entities   user_entities? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: Restrict, map: "fk_profile_entities_user")
 }
 
-model transaction_entities {
-  id                      BigInt                   @id @default(autoincrement())
-  invoice_id              BigInt?
-  amount                  Decimal?                 @db.Decimal(10, 2)
-  transaction_date        DateTime?                @default(now()) @db.Timestamptz(6)
-  payment_method_id       BigInt?
-  status                  String?                  @db.VarChar(50)
-  invoice_entities        invoice_entities?        @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_entities_transactions")
-  payment_method_entities payment_method_entities? @relation(fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_method_entities_transactions")
-}
+
 
 model api_report_entities {
   id            Int            @id @default(autoincrement())
@@ -419,4 +413,13 @@ model userVerification_entities {
   otp           String?
   expired       DateTime?      @db.Timestamptz(6)
   user_entities user_entities? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model like_entities {
+  id      BigInt         @id @default(autoincrement())
+  user_id BigInt?
+  api_id  BigInt?
+  api     api_entities?  @relation(fields: [api_id], references: [id], onDelete: Cascade)
+  user    user_entities? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, api_id])
 }

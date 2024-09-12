@@ -19,3 +19,22 @@ export async function getUserNotifications(
     next(error);
   }
 }
+
+export async function getStatBox(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id, type } = req.params;
+    if (!id) {
+      throw new Error("Id is not valid");
+    }
+
+    const ress = await notificationsService.getStatBox(Number(id), type);
+    //  console.log("notifications listss 3333", NOTIF);
+    res.status(200).send(ress);
+  } catch (error) {
+    next(error);
+  }
+}

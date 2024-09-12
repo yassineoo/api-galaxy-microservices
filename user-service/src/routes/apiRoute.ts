@@ -4,6 +4,7 @@ import {
   deleteReportReview,
   dislikeApi,
   getAllApis,
+  getAllApisIDNames,
   getAPIRating,
   getAPIReview,
   getAPISforAdmin,
@@ -19,16 +20,22 @@ import {
   updateStatusApi,
 } from "../controllers/apiController";
 import authenticate from "../services/middlewares/authenticate.middleware";
-import { getUserNotifications } from "../controllers/notifController";
+import {
+  getStatBox,
+  getUserNotifications,
+} from "../controllers/notifController";
 
 const userApiRouter = Router();
 userApiRouter.post("/update-status/:id", updateStatusApi);
 userApiRouter.get("/notifications/:id", getUserNotifications);
+userApiRouter.get("/stat-box/:id/:type", getStatBox);
 userApiRouter.get("/categories", getCategories);
-userApiRouter.get("/:userId", getAllApis);
-userApiRouter.get("/getReviews/:apiId", getAPIReview);
+userApiRouter.get("/getAllApisIDNames", getAllApisIDNames);
 userApiRouter.get("/adminReports", getReportsForAdmin);
 userApiRouter.get("/adminReviwesReports", getReviwesReports);
+userApiRouter.get("/:userId", getAllApis);
+userApiRouter.get("/getReviews/:apiId", getAPIReview);
+
 userApiRouter.get("/myApis/:userId", getUserApis);
 userApiRouter.get("/provider/:userId", getProviderInfos);
 userApiRouter.get("/getRating/:apiId", getAPIRating);

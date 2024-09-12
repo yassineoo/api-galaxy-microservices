@@ -1,3 +1,4 @@
+import { Decimal } from "@prisma/client/runtime/library";
 import { Duration, ID } from "../../../../contracts/endpoint-stats/_common";
 import { success_status_code_range } from "../../../../infrastructure/api/http";
 import { DB } from "../../../../infrastructure/database";
@@ -9,12 +10,12 @@ export default async function get_apis_stats_service(
   userId: ID
 ) {
   const periods = getTimePeriods(duration);
-  console.log("stat-debug 1 ", { periods });
+  // console.log("stat-debug 1 ", { periods });
 
   const results = await Promise.all(
     periods.map((period) => get_apis_stats_in_period(period, api_ids, userId))
   );
-  console.log("stat-debug 2 ", { results });
+  // console.log("stat-debug 2 ", { results });
 
   return results;
 }
@@ -45,9 +46,9 @@ async function get_apis_stats_in_period(
   );
 
   const prettyStats = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  console.log("stat-debug sub 2 ", { period });
+  // console.log("stat-debug sub 2 ", { period });
 
-  console.log({ prettyStats });
+  //console.log({ prettyStats });
 
   return prettyStats;
 }
@@ -58,7 +59,7 @@ async function get_api_success_calls_in_period(
   userId: ID
 ) {
   try {
-    console.log("Fetching success calls", { period, api_id, userId });
+    //  console.log("Fetching success calls", { period, api_id, userId });
     const success = await DB.usage_log_entities.aggregate({
       where: {
         endpoints_entities: {
@@ -79,7 +80,7 @@ async function get_api_success_calls_in_period(
       },
       _count: true,
     });
-    console.log("Success query result", { success });
+    //  console.log("Success query result", { success });
     return success._count ?? 0;
   } catch (error) {
     console.error("Error fetching success calls", { error });
@@ -93,7 +94,7 @@ async function get_api_error_calls_in_period(
   userId: ID
 ) {
   try {
-    console.log("Fetching error calls", { period, api_id, userId });
+    //  console.log("Fetching error calls", { period, api_id, userId });
     const errors = await DB.usage_log_entities.aggregate({
       where: {
         endpoints_entities: {
@@ -116,10 +117,10 @@ async function get_api_error_calls_in_period(
       },
       _count: true,
     });
-    console.log("Error query result", { errors });
+    //  console.log("Error query result", { errors });
     return errors._count ?? 0;
   } catch (error) {
-    console.error("Error fetching error calls", { error });
+    //  console.error("Error fetching error calls", { error });
     return 0;
   }
 }
@@ -130,7 +131,7 @@ async function get_api_calls_latency_in_period(
   userId: ID
 ) {
   try {
-    console.log("Fetching latency", { period, api_id, userId });
+    // console.log("Fetching latency", { period, api_id, userId });
     const latency = await DB.usage_log_entities.aggregate({
       where: {
         endpoints_entities: {
@@ -153,10 +154,10 @@ async function get_api_calls_latency_in_period(
         response_time: true,
       },
     });
-    console.log("Latency query result", { latency });
+    //  console.log("Latency query result", { latency });
     return latency._avg.response_time ?? 0;
   } catch (error) {
-    console.error("Error fetching latency", { error });
+    // console.error("Error fetching latency", { error });
     return 0;
   }
 }
