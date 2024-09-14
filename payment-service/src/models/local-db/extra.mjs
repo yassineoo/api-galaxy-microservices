@@ -18,7 +18,7 @@ export async function updatePlanEntity(planEntityId, updateData) {
 export async function updateApiEntity(apiEntityId, updateData) {
   try {
     const updatedApiEntity = await prisma.api_entities.update({
-      where: { id: apiEntityId },
+      where: { id: Number(apiEntityId) },
       data: updateData,
     });
     return updatedApiEntity;

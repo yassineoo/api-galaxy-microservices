@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
 import Stripe from "stripe";
 import { priceModel } from "../models/stripe/prices.mjs";
-import { productModel } from "../models/stripe/products.mjs";
-import { updateApiEntity } from "../models/local-db/extra.mjs";
+import { updateApiEntity, updatePlanEntity } from "../models/local-db/extra.mjs";
 
 dotenv.config();
 
@@ -25,9 +24,18 @@ export const getCustomerTransactionHistory = async (req, res) => {
 };
 
 export const createPrice = async (req, res) => {
-  let { planEntityId, stripeApiId, pricenumber } = req.body;
-  const price = productModel.createPrice(stripeApiId, pricenumber);
-  updateApiEntity(planEntityId, { stripe_price_id: price.id });
+  console.log(req.body)
+  try {
+    let { planEntityId, stripeApiId, pricenumber } = req.body;
+    const price = await priceModel.createPrice(stripeApiId, pricenumber);
+    console.log(price);
+    const updatedPrice = await updatePlanEntity(planEntityId, { stripe_price_id: price.id });
+    console.log(updatedPrice);
+    res.status(200).send("Price created successfully");
+  } catch (error) {
+    console.error("Error creating price:", error);
+    res.status(500).send("Failed to create price");
+  }
 };
 
 export const getPrices = async (req, res) => {

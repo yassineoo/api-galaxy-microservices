@@ -33,7 +33,7 @@ const stripeCrudRouter = express.Router();
 stripeCrudRouter.post('/customers', createCustomer); // Create a new customer
 stripeCrudRouter.get('/customers', listCustomers); // List all customers
 stripeCrudRouter.get('/customers/:customerId', getCustomerById); // Retrieve a customer by ID
-stripeCrudRouter.get('/customers/email/:email',getCustomerByEmail); // Retrieve a customer by email
+stripeCrudRouter.get('/customers/email/:email', getCustomerByEmail); // Retrieve a customer by email
 stripeCrudRouter.put('/customers/:customerId', updateCustomer); // Update a customer's information
 stripeCrudRouter.delete('/customers/:customerId', deleteCustomer); // Delete a customer by ID
 
@@ -48,8 +48,8 @@ stripeCrudRouter.put('/products/:productId', updateProduct); // Update a product
 stripeCrudRouter.delete('/products/:productId', deleteProduct); // Delete a product by ID
 stripeCrudRouter.post('/products/with-price', createProductWithPrice); // Create a new product with a price
 
-// Price Routes
 stripeCrudRouter.post('/prices', createPrice); // Create a new price
+
 stripeCrudRouter.get('/prices/:productId', getPrices); // Get prices of a specific product by product ID
 
 export default stripeCrudRouter;

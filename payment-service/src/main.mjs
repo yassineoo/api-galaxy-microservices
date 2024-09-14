@@ -1,6 +1,4 @@
-
 import axios from "axios";
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -18,13 +16,10 @@ const server = http.createServer(app);
 const envConfig = config["development"];
 const log = envConfig.log();
 
-
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true })); 
 app.use(cors());
 app.use(
   express.json({
-    // We need the raw body to verify webhook signatures.
-    // Let's compute it only when hitting the Stripe webhook endpoint.
     verify: function (req, res, buf) {
       if (req.originalUrl.startsWith("/webhook")) {
         req.rawBody = buf.toString();
@@ -33,9 +28,8 @@ app.use(
   })
 );
 
-app.use("/stripe-subscription", stripeRouter);
-
 app.use("/stripeCRUD", stripeCrudRouter);
+app.use("/stripe-subscription", stripeRouter);
 app.use("/subscription", subscriptionRouter);
 app.use("/transcation", transactionRouter);
 
@@ -43,6 +37,10 @@ app.use("/", (req, res) => {
   res.send("payment service");
 });
 
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  res.status(500).send("Internal Server Error");
+});
 server.listen(7004);
 
 server.on("listening", () => {
@@ -51,25 +49,16 @@ server.on("listening", () => {
   const registerService = () =>
     axios
       .put(
-        //  `http://localhost:3001/register/${envConfig.serviceName}/${
-        `http://service-registry:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          Number(PORT)
-        }`
+        `http://service-registry:3001/register/${envConfig.serviceName}/${envConfig.version
+        }/${Number(PORT)}`
       )
       .catch((err) => log.fatal(err));
 
   const unregisterService = () =>
     axios
       .delete(
-        `http://localhost:3001/register/${envConfig.serviceName}/${
-          envConfig.version
-        }/${
-          //  server?.address()?.port ||
-          PORT
-        }`
+        `http://service-registry:3001/register/${envConfig.serviceName}/${envConfig.version
+        }/${PORT}`
       )
       .catch((err) => log.fatal(err));
 
@@ -85,9 +74,18 @@ server.on("listening", () => {
     }
   };
 
-  process.on("uncaughtException", async () => {
+
+  // Event handlers for uncaught exceptions and unhandled rejections
+  process.on("uncaughtException", async (err) => {
+    console.error("Uncaught Exception:", err);
     await cleanup();
-    process.exit(0);
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", async (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
+    await cleanup();
+    process.exit(1);
   });
 
   process.on("SIGINT", async () => {
@@ -100,11 +98,5 @@ server.on("listening", () => {
     process.exit(0);
   });
 
-  log.info(
-    `Hi there! I'm listening on port ${
-      //  server?.address()?.port ||
-      PORT
-    } in ${app.get("env")} mode.`
-  );
-
+  log.info(`Hi there! I'm listening on port ${PORT} in ${app.get("env")} mode.`);
 });
