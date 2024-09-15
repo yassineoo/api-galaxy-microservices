@@ -21,7 +21,14 @@ ValidateEnv();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
 app.use("/hello", (_, res: any) => res.send("Hello"));
 app.use("/stats/endpoints", EndpointsStatsRouter);
 app.use("/stats/apis", ApisStatsRouter);

@@ -14,6 +14,7 @@ import (
 	"local_packages/api/types"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type ApiHandler struct {
@@ -323,13 +324,39 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
 	}
 
 	// Access a specific header value
-	XEndpointKey, ok := headers["X-Endpoint-Key"]
-	if ok {
-		// Header found, do something with specificHeaderValue
-		log.Println("Specific header value:", XEndpointKey)
-	}
-	// Delete a specific header
-	delete(headers, "X-Endpoint-Key")
+	jwtToken := headers["Galaxy-Api-Key"];
+	log.Println("GalaxyApiKey ", jwtToken);
+	delete(headers, "Galaxy-Api-Key");
+	userID := 0;
+    
+	   // Decode and validate the JWT
+	   token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+		   // Here you should return the key used to sign the token
+		   // This could be a secret key or a public key depending on your JWT signing method
+		   return []byte("process.env.NEXTAUTH_SECRET!"), nil
+	   })
+   
+	   if err != nil {
+		   c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		   return
+	   }
+   
+	   if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		   // The token is valid, you can now access the claims
+		   // For example, if you have a claim named "user_id":
+		   if userIDFloat, ok := claims["userId"].(float64); ok {
+            userID = int(userIDFloat)
+            log.Printf("Authenticated user ID: %v", userID)
+        } else {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
+            return
+        }
+
+		   // You can add the userID or other claims to your requestData if needed
+	   } else {
+		   c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+		   return
+	   }
 
 	// Extract query parameters from the incoming request
 	params := make(map[string]string)
@@ -355,15 +382,15 @@ func (h *ApiHandler) HandleSendRequest2(c *gin.Context) {
 
 	// Create a RequestData struct with the extracted information
 
-	endpointID, _ := strconv.Atoi(XEndpointKey)
 	requestData := types.RequestData{
 		Method:     method,
 		URL:        path,
 		Headers:    headers,
 		Params:     params,
 		Data:       requestBody,
-		EndpointID: endpointID,
+		EndpointID: 00,
 		ApiID:      apiID,
+		UserID:     userID,
 	}
 
 	log.Println("result ", requestData)
