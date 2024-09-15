@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "./prisma.mjs"
 
 export async function updatePlanEntity(planEntityId, updateData) {
   try {
@@ -18,7 +16,7 @@ export async function updatePlanEntity(planEntityId, updateData) {
 export async function updateApiEntity(apiEntityId, updateData) {
   try {
     const updatedApiEntity = await prisma.api_entities.update({
-      where: { id: apiEntityId },
+      where: { id: Number(apiEntityId) },
       data: updateData,
     });
     return updatedApiEntity;

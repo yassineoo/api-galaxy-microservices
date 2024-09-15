@@ -27,13 +27,12 @@ export const getProductById = async (req, res) => {
 // Create a new product
 export const createProduct = async (req, res) => {
   const { name, description, apiId } = req.body;
+  console.log(req.body);
   try {
     const product = await productModel.createProduct(name, description);
-
     const updatedApi = await updateApiEntity(Number(apiId), {
-      stripe_product_id: Number(product.id),
+      stripe_product_id: product.id,
     });
-    console.log(updatedApi);
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     console.error("Error creating product:", error);
