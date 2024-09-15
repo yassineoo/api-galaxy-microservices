@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "./prisma.mjs"
 
-const prisma = new PrismaClient();
 
 function convertBigIntToString(obj) {
   if (typeof obj !== "object" || obj === null) return obj;
@@ -191,6 +190,8 @@ async function deleteObjectPlan(id) {
     throw new Error(`Failed to delete object plan: ${error.message}`);
   }
 }
+
+await prisma.$disconnect();
 
 
 // async function getAllSubscribersForProvider(providerUserId) {
