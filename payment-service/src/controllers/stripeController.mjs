@@ -319,7 +319,8 @@ export const webhook = async (req, res) => {
 export const createAndFinalizeInvoiceHandler = async (req, res) => {
   try {
     const { email, amount } = req.body
-    const invoiceLink = await createAndFinalizeInvoice(email, Number(amount));
+    console.log("body ", req.body)
+    const invoiceLink = await createAndFinalizeInvoice(email,amount);
     res.status(200).send({ invoiceLink });
   } catch (error) {
     res

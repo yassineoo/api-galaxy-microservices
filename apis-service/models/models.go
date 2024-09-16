@@ -57,6 +57,7 @@ type ApiEntity struct {
 	ImagePath           string
 	Description         string
 	Keywords            string
+	StripeProductId            string
 	Visibility          bool                  `gorm:"default:false"`
 	Rating              float64               `gorm:"default:0"`
 	ApiUrl              string
