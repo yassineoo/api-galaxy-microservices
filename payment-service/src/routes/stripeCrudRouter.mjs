@@ -25,6 +25,7 @@ import {
   createProductWithPrice,
 
 } from '../controllers/productController.mjs';
+import { createAccountWithIban } from '../controllers/accountController.mjs';
 
 
 const stripeCrudRouter = express.Router();
@@ -51,5 +52,7 @@ stripeCrudRouter.post('/products/with-price', createProductWithPrice); // Create
 stripeCrudRouter.post('/prices', createPrice); // Create a new price
 
 stripeCrudRouter.get('/prices/:productId', getPrices); // Get prices of a specific product by product ID
+
+stripeCrudRouter.post('/account',createAccountWithIban);
 
 export default stripeCrudRouter;

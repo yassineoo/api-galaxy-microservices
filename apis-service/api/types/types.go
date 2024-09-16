@@ -16,6 +16,7 @@ type RequestData struct {
 	Data    map[string]string 
 	EndpointID int 
 	ApiID int
+	UserID int
 }
 
 // ResponseData represents the data structure for the outgoing response

@@ -15,14 +15,14 @@ async function get_endpoints_stats(
   next: NextFunction
 ) {
   return await TryCatch(res, async () => {
-    const userId = get_user_id_from_request(req, next);
+    // const userId = get_user_id_from_request(req, next);
 
     const { duration } = getEndpointsErrorCallsValidator.query.parse(req.query);
     const { endpoint_ids } = getEndpointsErrorCallsValidator.body.parse(
       req.body
     );
     console.log({ duration });
-    const results = await get_stats(duration, endpoint_ids, userId);
+    const results = await get_stats(duration, endpoint_ids);
 
     return res.status(200).send(results);
   });

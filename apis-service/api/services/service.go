@@ -13,7 +13,6 @@ import (
 	"local_packages/typesglobale"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -368,29 +367,49 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
 
 func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*http.Response, error) {
     client := &http.Client{}
-/*
-    if err := s.checkSubscriptionAndQuota(ctx, data.EndpointID ,123, data.ApiID); err != nil {
-        return nil, err // Return appropriate error for plan/quota issues
-    }
-    */
+
+    log.Println("data.UserID ============================= ", data.UserID)
+
+    // Fetch the API
     var api models.ApiEntity
     if err := s.gormDB.Where("id = ?", data.ApiID).First(&api).Error; err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to fetch API: %w", err)
     }
 
+    // Remove leading slash from data.URL if present
+    urlToMatch := strings.TrimPrefix(data.URL, "/")
 
+    // Fetch the endpoint
+    var endpoint models.EndpointsEntity
+    if err := s.gormDB.Joins("JOIN endpoints_group_entities ON endpoints_entities.group_id = endpoints_group_entities.id").
+        Where("endpoints_entities.url = ? AND endpoints_entities.methode = ? AND endpoints_group_entities.api_id = ?",
+            urlToMatch, data.Method, data.ApiID).
+        First(&endpoint).Error; err != nil {
+        return nil, fmt.Errorf("failed to fetch endpoint: %w", err)
+    }
 
+    // Fetch the active subscription for the user and the specific API
+    var subscription models.SubscriptionEntity
+    if err := s.gormDB.Joins("JOIN plan_entities ON subscription_entities.plan_id = plan_entities.id").
+        Where("subscription_entities.user_id = ? AND subscription_entities.status = ? AND subscription_entities.end_date > ? AND plan_entities.api_id = ?",
+            data.UserID, "active", time.Now(), data.ApiID).
+        Preload("Plan").
+        First(&subscription).Error; err != nil {
+        return nil, fmt.Errorf("failed to fetch active subscription for the API: %w", err)
+    }
 
- 
-    log.Println("api.ApiUrl ============================= " ,api.ApiUrl+data.URL )
-    log.Println("api.ApiUrl ============================= " ,api.ApiUrl+data.URL )
+    // Check if the user has exceeded their plan limits
+    /*if subscription.UsedCalls >= subscription.Plan.CallLimit {
+        return nil, fmt.Errorf("call limit exceeded for the current plan")
+    }
+    */
 
-
-       
+    // Prepare the request
     req, err := http.NewRequest(data.Method, api.ApiUrl+data.URL, bytes.NewBufferString(""))
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to create request: %w", err)
     }
+
     // Set request headers
     for key, value := range data.Headers {
         req.Header.Set(key, value)
@@ -408,50 +427,46 @@ func (s *Service) SendRequest(ctx context.Context, data types.RequestData) (*htt
         req.Header.Set("Content-Type", "application/json")
         jsonData, err := json.Marshal(data.Data)
         if err != nil {
-            return nil, err
+            return nil, fmt.Errorf("failed to marshal request data: %w", err)
         }
         req.Body = ioutil.NopCloser(bytes.NewBuffer(jsonData))
     }
 
     // Send the request and get the response
-    startTime := time.Now() // Start time measurement
-
+    startTime := time.Now()
     resp, err := client.Do(req)
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to send request: %w", err)
     }
 
-      // Calculate response time based on content length and potential header information
-  endTime := time.Now()
-  contentLength, err := strconv.Atoi(resp.Header.Get("Content-Length"))
-  if err != nil {
-    // Handle error or use another method for response time estimation
-    contentLength = 0
-  }
-  responseTime := endTime.Sub(startTime) - time.Duration(contentLength) * time.Nanosecond / 1024 / 1024
+    // Calculate response time
+    endTime := time.Now()
+    responseTime := endTime.Sub(startTime)
 
-  // Create log entity with all info after receiving response
-  newLog := models.UsageLogEntity {
-    // Set fields from request data: EndpointID, SubscriptionID (if applicable)
-    EndpointID:  data.EndpointID,
-    SubscriptionID: 2,
-    Timestamp:    startTime,
-    Status:      resp.StatusCode,
-    ResponseTime: int(responseTime.Milliseconds()),
-  }
-
-  go func() {
-
-    log.Println("newLog ============================= ")
-    if err := s.gormDB.Create(&newLog).Error; err != nil {
-        return ;
+    // Create log entity
+    newLog := models.UsageLogEntity{
+        EndpointID:     endpoint.ID,
+        SubscriptionID: subscription.ID,
+        Timestamp:      startTime,
+        Status:         resp.StatusCode,
+        ResponseTime:   int(responseTime.Milliseconds()),
     }
-  }()   
-    
+
+    // Update the subscription's used calls count
+    subscription.UsedCalls++
+
+    // Use a goroutine to save the log and update the subscription asynchronously
+    go func() {
+        if err := s.gormDB.Create(&newLog).Error; err != nil {
+            log.Printf("Failed to save usage log: %v", err)
+        }
+        if err := s.gormDB.Save(&subscription).Error; err != nil {
+            log.Printf("Failed to update subscription: %v", err)
+        }
+    }()
 
     return resp, nil
 }
-
 
 
 /*

@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from "./prisma.mjs"
 
-const prisma = new PrismaClient();
 
 // Utility function to convert BigInt to String
 function convertBigIntToString(obj) {
@@ -198,7 +197,9 @@ async function deleteTransaction(id) {
   }
 }
 
-// Exporting functions
+await prisma.$disconnect();
+
+
 export {
   createPaymentMethod,
   getPaymentMethods,
